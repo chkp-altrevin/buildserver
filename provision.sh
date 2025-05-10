@@ -179,22 +179,46 @@ update_bashrc_path() {
     log_success ".bashrc updated." || log_error "FATAL: Failed to update .bashrc."
 }
 
-# ----- Create Directories ----------------------------------------------------
+# ----- Create Kube and Local Bin Directories ----------------------------------
 create_directories() {
   log_info "Creating necessary directories..."
   run_with_sudo mkdir -p "$VAGRANT_USER_PATH/.local/bin" "$VAGRANT_USER_PATH/.kube" && \
     log_success "Directories created." || log_error "FATAL: Failed to create directories."
 }
 
-# ----- Create Profile Files ---------------------------------------------------
+# ----- Create Profile Files & Apply Without Logout ----------------------------
 copy_profile_files() {
   log_info "Copying profile files..."
-  cp "$PROJECT_PATH/profile/bash_aliases" "$VAGRANT_USER_PATH/.bash_aliases" && \
+
+  local bash_aliases_path="$VAGRANT_USER_PATH/.bash_aliases"
+  local env_file_path="$VAGRANT_USER_PATH/.env"
+
+  cp "$PROJECT_PATH/profile/bash_aliases" "$bash_aliases_path" && \
     log_success "bash_aliases copied." || log_error "FATAL: Failed to copy bash_aliases."
-  cp "$PROJECT_PATH/profile/env.example" "$VAGRANT_USER_PATH/.env" && \
+
+  cp "$PROJECT_PATH/profile/env.example" "$env_file_path" && \
     log_success "env.example copied." || log_error "FATAL: Failed to copy env.example."
+
   touch "$VAGRANT_USER_PATH/.Xauthority" && \
     log_success "Xauthority created." || log_error "NON-FATAL: Failed to create Xauthority."
+
+  # Apply .bash_aliases if running in an interactive shell
+  if [[ $- == *i* && "$VAGRANT_USER_PATH" == "$HOME" ]]; then
+    log_info "Sourcing bash_aliases for current session..."
+    source "$bash_aliases_path"
+  else
+    log_info "bash_aliases will apply on next login or manually source it."
+  fi
+
+  # Export environment variables from .env (ignore comments)
+  if [[ -f "$env_file_path" ]]; then
+    log_info "Loading environment variables from .env..."
+    set -a
+    # shellcheck disable=SC1090
+    source "$env_file_path"
+    set +a
+    log_success ".env variables loaded into current session."
+  fi
 }
 
 # ----- Configure Hostname & /etc/hosts -----------------------------------------
