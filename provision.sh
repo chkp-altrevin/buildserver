@@ -530,4 +530,6 @@ echo "If errors, fix and reprovision using, vagrant up --provision. If this is a
 echo "custom install using provision.sh, you can likely ignore NON-FATAL errors."
 echo "=========================================================================="
 echo "SSH with vagrant ssh or your terminal of choice                           "
-echo "Login: vagrant:privatekey port:2222. Otherwise type: motd to see options. "
+echo "Login: vagrant:privatekey port:2222"
+echo "=========================================================================="
+echo "If you manually ran provision.sh - Logout and log back in to see changes  "
