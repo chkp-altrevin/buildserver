@@ -182,7 +182,10 @@ Use or modify and make your own.
 ```bash
 quick-setup
 ```
-Snippet Below:
+Folder Structure:
+--- Root
+---- Menu
+---- Scripts
 ```
                                         QUICK-SETUP
 ===================================================
