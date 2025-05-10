@@ -182,14 +182,14 @@ Use or modify and make your own.
 ```bash
 quick-setup
 ```
-Menu Dependancies
+### 📁 Menu Dependancy Structure
 ```
 - menu/         # System menu scripts
 - deploy/       # Workloads and apps for demos
 - profile/      # Alias, bashrc, system scripts
 - scripts/      # Simple scripts used by the demos
 ```
-Example:
+#### Menu Example:
 ```  
                                         QUICK-SETUP
 ===================================================
