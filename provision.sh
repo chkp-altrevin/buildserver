@@ -38,7 +38,7 @@ fi
 #
 check_vagrant_user() {
   if id "vagrant" &>/dev/null; then
-    echo "The server is provisioned, continue to update? [Y/n]"
+    echo "Manual provisioning, continue to update? [Y/n]"
     read -r response
     case "$response" in
       [nN][oO]|[nN])
