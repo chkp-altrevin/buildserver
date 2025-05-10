@@ -118,11 +118,6 @@ Upon SSH login, you'll be greeted with a custom MOTD and available commands to a
    ```bash
    ./provision.sh
    ```
-5. **Optional Uninstallation**:
-
-   ```bash
-   ./provision.sh --uninstall
-   ```
 
 ---
 
