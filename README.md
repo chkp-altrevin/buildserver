@@ -189,7 +189,7 @@ quick-setup
 - profile/      # Alias, bashrc, system scripts
 - scripts/      # Simple scripts used by the demos
 ```
-#### Menu Example:
+#### Menu Sample below:
 ```  
                                         QUICK-SETUP
 ===================================================
@@ -197,17 +197,6 @@ SETUP ENV VARS=====================================
 1. EDIT 2. BACKUP 3. IMPORT 4. RESET  |   x. renv
 ===================================================
 PACKAGE UPDATES-OS RELATED=========================
-x. motd         | U. Update         | t. Top
-DOCKER HEALTH/STATUS===============================
-s. Docker Stat  | i. Docker Info    | d. Docker PS
-KUBERNETES INSTALL ================================
-a. Cluster Status        | I. Install Cluster
-p. Kubectl Get All Pods  | k. Kubectl Cluster-Info
-n. Kubectl Get Nodes     | R. Remove Cluster
-===================================================
-8. INSTALL APPLICATIONS
-===================================================
-choose an option [1-9,a-z]: (x)  Exit
 ```
 
 ## 📦 Package Installations
