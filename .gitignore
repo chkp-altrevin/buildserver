@@ -1,0 +1,108 @@
+# General system files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.bak
+*.tmp
+
+# Bash
+.bash_history
+.bash_logout
+.bash_profile
+.bashrc
+.profile
+*.sh.swp
+
+# Environment variables and secrets
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+*.secret
+*.secrets
+config/secrets.yml
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+Pipfile.lock
+venv/
+.envrc
+
+# Vagrant
+.vagrant/
+
+# Docker
+docker-compose.override.yml
+.dockerignore
+Dockerfile*
+*.tar
+
+# Helm
+charts/
+*.tgz
+release.yaml
+
+# Kubectl
+.kube/config
+.kube/cache/
+.kube/http-cache/
+
+# Ubuntu/Linux specific
+/tmp/
+*.pid
+*.sock
+*.log
+*.out
+*.pid.lock
+*.pidfile
+/var/tmp/
+
+# Logs and Debug files
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pip-log.txt
+
+# Ignore IDE and editor files
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+*.iml
+*.code-workspace
+
+/assets/jsconfig.json
+hugo_stats.json
+
+# Executable may be added to repository
+hugo.exe
+hugo.darwin
+hugo.linux
+
+# Temporary lock file while building
+/.hugo_build.lock
+
+# remove vagrant files while building
+/.vagrant/
+
+# Rancher data files
+/rancher-data/k3s/
+/rancher-data/k3s.log
+/rancher-data/k3s-cluster-reset.log
+
+# container collector logs
+/scripts/collect_container_logs/*.logs

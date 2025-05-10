@@ -1,0 +1,27 @@
+# switch between multiple projects
+export PROJECT_PATH="/home/vagrant/buildserver"
+
+# demo menu required aliases
+alias quick-setup='$PROJECT_PATH/menu/quick_setup.sh'
+# alias pass-setup='$PROJECT_PATH/menu/pass_setup.sh'
+alias motd='$PROJECT_PATH/scripts/run_motd.sh'
+# source between removing and adding env vars
+alias renv='source $HOME/.env'
+alias denv='source $PROJECT_PATH/profile/env.example'
+# quick update alias
+alias upgrade='sudo apt update && sudo apt upgrade -y'
+
+# optional- helpful aliases add your own below
+#
+alias python='python3'
+alias cls='clear'
+alias tf='terraform'
+alias ll='ls -alF'
+
+# kubectl favs - add your own
+alias kgl='kubectl get logs'
+alias kcc='kubectl config current-context'
+alias clusters='kubectl config get-clusters'
+alias k='kubectl'
+alias kci='kubectl cluster-info'
+alias kg='kubectl get'
