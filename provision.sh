@@ -47,6 +47,8 @@ check_vagrant_user() {
         ;;
       *)
         echo "Continuing..."
+        echo "Detected 'vagrant' user — setting timezone to UTC..."
+        timedatectl set-timezone UTC && echo "Timezone set to UTC." || echo "Failed to set timezone."
         ;;
     esac
   fi
