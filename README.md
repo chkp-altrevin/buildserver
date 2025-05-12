@@ -23,6 +23,9 @@ Ideal for users without a pre-existing server setup. This method allows for rapi
 
 ### 🧰 Use Case 2: Bring Your Own Linux
 
+![linux-logo](https://github.com/user-attachments/assets/5d9d2a2e-c9ab-4f6c-9063-a4413d7724dd)
+
+
 For those with existing Linux servers or virtual machines, utilize the provisioning scripts directly.
 
 **Start Here - Install Option**: [Jump to Use Case 2](https://github.com/chkp-altrevin/buildserver/blob/main/README.md#-use-case-2-bring-your-own-linux-1)
