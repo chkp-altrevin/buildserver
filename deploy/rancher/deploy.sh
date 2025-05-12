@@ -25,4 +25,3 @@ if [ ! -e "$(pwd)/rancher-data/k3s" ]; then
 else
   sleep 60
 fi
-Enter file contents here
