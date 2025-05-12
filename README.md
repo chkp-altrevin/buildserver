@@ -14,9 +14,8 @@
 
 ### 🖥️ Use Case 1: Vagrant & VirtualBox Deployment
 
-![Virtualbox_logo](https://github.com/user-attachments/assets/7487ed90-8f04-4a25-b400-e98a75ebac6f)
-+
-![vagrant](https://github.com/user-attachments/assets/b0d6d079-9f2d-4047-9767-af63a1c015c1)
+![Vagrant_VirtualBox_logo_small](https://github.com/user-attachments/assets/652ef956-9d63-48bf-a902-3cfe4f9c8790)
+
 
 Ideal for users without a pre-existing server setup. This method allows for rapid deployment on local machines.
 
