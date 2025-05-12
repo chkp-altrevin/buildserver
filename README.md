@@ -88,6 +88,8 @@ Upon execution, `provision.sh` automates the installation and configuration of:
 
    ```bash
    git clone https://github.com/chkp-altrevin/buildserver.git
+   ```
+   ```bash
    cd buildserver
    ```
 5. **Start Vagrant**:
