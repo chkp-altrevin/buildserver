@@ -14,7 +14,7 @@
 
 ### 🖥️ Use Case 1: Vagrant & VirtualBox Deployment
 
-![Vagrant_VirtualBox_logo_small](https://github.com/user-attachments/assets/652ef956-9d63-48bf-a902-3cfe4f9c8790)
+![Vagrant_and VirtualBox](https://github.com/user-attachments/assets/652ef956-9d63-48bf-a902-3cfe4f9c8790)
 
 
 Ideal for users without a pre-existing server setup. This method allows for rapid deployment on local machines.
@@ -23,8 +23,7 @@ Ideal for users without a pre-existing server setup. This method allows for rapi
 
 ### 🧰 Use Case 2: Bring Your Own Linux
 
-![linux-logo](https://github.com/user-attachments/assets/5d9d2a2e-c9ab-4f6c-9063-a4413d7724dd)
-
+![Linux Installs on hypervisors or cloud compute running Linux](https://github.com/user-attachments/assets/13a454ec-e6be-40ed-9c6e-c2229ea9313a)
 
 For those with existing Linux servers or virtual machines, utilize the provisioning scripts directly.
 
