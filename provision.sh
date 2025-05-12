@@ -149,6 +149,7 @@ run_with_sudo() {
 make_scripts_executable() {
   log_info "Setting +x on sh files in scripts folder..."
   find $PROJECT_PATH/scripts -type f -name "*.sh" -exec chmod +x {} \; && \
+  find $PROJECT_PATH/menu -type f -name "*.sh" -exec chmod +x {} \; && \
     log_success "Permissions set successfully." || log_error "FATAL: Setting permissions failed."
 }
 
