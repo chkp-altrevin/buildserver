@@ -265,35 +265,34 @@ install_docker() {
 }
 
 # ----- Add User to Docker Group ----------------------------------------------
-#add_user_to_docker() {
-#  log_info "Adding user $VAGRANT_USER to the Docker group..."
-#  run_with_sudo usermod -aG docker $VAGRANT_USER | newgrp docker && \
-#    log_success "User $VAGRANT_USER added to Docker group." || log_error "FATAL: Failed to add user $VAGRANT_USER to Docker group."
-#}
-#
-# ----- Add User to Docker Group and Apply Immediately -------------------------
 add_user_to_docker() {
-  log_info "Adding $USER to the 'docker' group..."
-
-  if id -nG "$USER" | grep -qw "docker"; then
-    log_info "User $USER is already in the 'docker' group."
-  else
-    sudo usermod -aG docker "$USER" && \
-      log_success "User $USER added to 'docker' group." || \
-      log_error "FATAL: Failed to add user to 'docker' group."
-
-    log_info "Starting newgrp session to apply docker group membership immediately..."
-    newgrp docker <<EOF
-echo "[INFO] You are now in a new shell with 'docker' group applied."
-echo "[INFO] Testing Docker access..."
-docker version && echo "[SUCCESS] Docker group access confirmed." || echo "[ERROR] Docker access failed."
-
-# Exit the subshell if desired, or the user can continue from here
-exit
-EOF
-  fi
+  log_info "Adding user $VAGRANT_USER to the Docker group..."
+  run_with_sudo usermod -aG docker $VAGRANT_USER | newgrp docker && \
+    log_success "User $VAGRANT_USER added to Docker group." || log_error "FATAL: Failed to add user $VAGRANT_USER to Docker group."
 }
 
+# ----- Add User to Docker Group and Apply Immediately -------------------------
+#add_user_to_docker() {
+#  log_info "Adding $USER to the 'docker' group..."
+#
+#  if id -nG "$USER" | grep -qw "docker"; then
+#    log_info "User $USER is already in the 'docker' group."
+#  else
+#    sudo usermod -aG docker "$USER" && \
+#      log_success "User $USER added to 'docker' group." || \
+#      log_error "FATAL: Failed to add user to 'docker' group."
+#
+#    log_info "Starting newgrp session to apply docker group membership immediately..."
+#    newgrp docker <<EOF
+#echo "[INFO] You are now in a new shell with 'docker' group applied."
+#echo "[INFO] Testing Docker access..."
+#docker version && echo "[SUCCESS] Docker group access confirmed." || echo "[ERROR] Docker access failed."
+#
+# Exit the subshell if desired, or the user can continue from here
+#exit
+#EOF
+#  fi
+#}
 
 # ----- Install NVM -----------------------------------------------------------
 install_nvm() {
