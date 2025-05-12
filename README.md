@@ -16,10 +16,11 @@
 
 ![Vagrant_and VirtualBox](https://github.com/user-attachments/assets/652ef956-9d63-48bf-a902-3cfe4f9c8790)
 
-
 Ideal for users without a pre-existing server setup. This method allows for rapid deployment on local machines.
 
 **Start Here - Install Option**: [Jump to Use Case 1](https://github.com/chkp-altrevin/buildserver/blob/main/README.md#%EF%B8%8F-use-case-1-vagrant--virtualbox-deployment-1)
+
+---
 
 ### 🧰 Use Case 2: Bring Your Own Linux
 
