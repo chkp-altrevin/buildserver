@@ -4,8 +4,6 @@
 # download #the ~/.kube/config file for the local cluster from the UI.
 # moved the config folders below the repo so it isnt part of a workflow
 set -e
-# modify if you are using your own server
-# export PROJECT_PATH="/home/vagrant/buildserver"
 : ${RANCHER_VERSION=v2.10.0}
 id=$(docker run -d \
     -v $HOME/rancher-data:/var/lib/rancher \
@@ -18,7 +16,7 @@ if [ ! -e "$HOME/rancher-data/k3s" ]; then
 
   # For convenience keep default password to a file using handy docker filter script and values
   # docker logs ${id}  2>&1 | grep "Bootstrap Password:" > $HOME/initial-passwd
-  $HOME/buildserver/scripts/filter_docker.sh logs rancher-ui "Bootstrap Password:" > $HOME/initial-passwd
+  $PROJECT_PATH/scripts/filter_docker.sh logs rancher-ui "Bootstrap Password:" > $HOME/initial-passwd
 else
   sleep 60
 fi
