@@ -28,9 +28,9 @@ display_menu() {
     echo -n "choose an option [1-9,a-z]: (x)  Exit "
 }
 # Global variable to store the custom project path
-# Dont modify unless you plan to use outside of Vagrant and VirtualBox
+# No need to modify unless you plan to use outside of the provisioning.sh script
 # =============================================
-export PROJECT_PATH="/home/vagrant/buildserver"
+# export PROJECT_PATH="/home/vagrant/buildserver"
 # =============================================
 # Function to display motd
 run_motd() {
