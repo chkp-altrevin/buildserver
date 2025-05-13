@@ -145,6 +145,7 @@ run_with_sudo() {
     "$@"
   fi
 }
+
 # ---- detect os and set for windows set git autocrlf --------------------------
 set_git_autocrlf_input() {
   log_info "🔍 Detecting operating system..."
@@ -183,6 +184,13 @@ set_git_autocrlf_input() {
   log_info "📌 Confirmed: git core.autocrlf = $confirmed"
 }
 
+# ----- Install Dependancies ----------------------------------------------------
+install_dependancies() {
+  log_info "Installing dependancies..."
+  run_with_sudo apt-get install -y curl unzip apt-utils fakeroot dos2unix zip && \
+    log_success "APT Dependancies installed." || log_error "FATAL: Installing dependancies failed."
+}
+
 # --------Fix clrf and provide execute permissions for scripts -----------------
 fix_shell_scripts() {
   log_info "🔍 Scanning for shell scripts in: $PROJECT_PATH"
@@ -212,13 +220,6 @@ fix_shell_scripts() {
   if ! $found_any; then
     log_info "ℹ️  No shell scripts found in: $PROJECT_PATH"
   fi
-}
-
-# ----- Install Dependancies ----------------------------------------------------
-install_dependancies() {
-  log_info "Installing dependancies..."
-  run_with_sudo apt-get install -y curl unzip apt-utils fakeroot dos2unix zip && \
-    log_success "APT Dependancies installed." || log_error "FATAL: Installing dependancies failed."
 }
 
 # ----- Banner Display --------------------------------------------------------
