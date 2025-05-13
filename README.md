@@ -85,17 +85,21 @@ Upon execution, `provision.sh` automates the installation and configuration of:
 2. **Install Vagrant**: [Download Vagrant](https://developer.hashicorp.com/vagrant/install?product_intent=vagrant)
 3. **Install VirtualBox**: [Download VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 4. **Clone Repository**:
-**For Windows Git users** Set the following: `git config --global core.autocrlf input` **prior to cloning**.
-Example: `C:\git config --global core.autocrlf input` If you don't have git see download as zip below.
 
-This will keep your commits clean with LF only, even if editing on Windows. WSL/Linux users should be good to go.
+**Prior to cloning for Windows Git users**
+- If you use Windows non-wsl: Set the following: `git config --global core.autocrlf input`
+-  This will keep your commits clean with LF only, even if editing on Windows. 
 
-   ```bash
-   git clone https://github.com/chkp-altrevin/buildserver.git
-   ```
-   ```bash
-   cd buildserver
-   ```
+- If you use **WSL/Linux environment** proceed below and clone the repo.
+
+- No git no worries, [download as zip below](https://github.com/chkp-altrevin/buildserver/blob/main/README.md#optional-deployment--download-as-zip).
+
+```bash
+git clone https://github.com/chkp-altrevin/buildserver.git
+```
+```bash
+cd buildserver
+```
 6. **Start Vagrant**:
    ```bash
    vagrant up # this is always ran in the root of the project folder where Vagrantfile is located
