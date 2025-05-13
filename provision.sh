@@ -536,6 +536,7 @@ cleanup() {
 # Use Case 2  = Comments that start with a 2, are optional review comments below for more info
 main() {
   check_vagrant_user # 2 responsible for checking if we are a vagrant user and if so, we notify first
+  set_git_autocrlf_input # detect os set git auto crlf helpful for win setups
   fix_shell_scripts # 2 chmod .sh +x the script folder and removes clrf if any
   # make_scripts_executable # 2 chmod .sh +x the script folder, you need to do this manually if disabled
   install_dependancies  # 2 mainly to support extractions, utilities to automate and help run commands used for automation, disable for manual cycles
