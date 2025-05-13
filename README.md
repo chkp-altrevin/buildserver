@@ -167,7 +167,7 @@ Step 4. Re-run provisioning: `sudo ./provision.sh`
 
 ### Optional Deployment | Download as Zip
 - Download: [buildserver-main.zip](https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip)
-- Extract: Important: Make sure wherever you extract to that you rename to not include the branch name. Good: `C:\buildserver` or `$HOME/buildserver` Bad: `C:\buildserver-main`
+- Extract: Make sure to rename folder to not include the branch name. Example: `C:\buildserver` or `$HOME/buildserver`
 - Provision: Use Case 1: `cd C:\buildserver` --> `vagrant up`
 - Provision: Use Case 2: `cd $HOME/buildserver` --> `sudo ./provision`
 - Login: `vagrant ssh` (use case 1)
