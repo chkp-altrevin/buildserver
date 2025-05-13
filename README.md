@@ -85,6 +85,8 @@ Upon execution, `provision.sh` automates the installation and configuration of:
 2. **Install Vagrant**: [Download Vagrant](https://developer.hashicorp.com/vagrant/install?product_intent=vagrant)
 3. **Install VirtualBox**: [Download VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 4. **Clone Repository**:
+   - **For Windows Git users**: `git config --global core.autocrlf input` this will keep your commits clean with LF only, even if editing on Windows.
+   - WSL/Linux you should be good to go.
 
    ```bash
    git clone https://github.com/chkp-altrevin/buildserver.git
@@ -92,18 +94,44 @@ Upon execution, `provision.sh` automates the installation and configuration of:
    ```bash
    cd buildserver
    ```
-5. **Start Vagrant**:
-
+6. **Start Vagrant**:
    ```bash
    vagrant up
    ```
-6. **Access the VM**:
+7. **Access the VM**:
 
    ```bash
    vagrant ssh
    ```
-
 Upon SSH login, you'll be greeted with a custom MOTD and available commands to assist with further setup.
+
+**🚀 Pro Tip!**
+If you see errors similiar to:
+```
+builder: /home/vagrant/.env: line 13: $'\r': command not found
+builder: /home/vagrant/.env: line 17: $'\r': command not found
+builder: /home/vagrant/.env: line 21: $'\r': command not found
+builder: /home/vagrant/.env: line 26: $'\r': command not found
+builder: /home/vagrant/.env: line 30: $'\r': command not found
+builder: /home/vagrant/.env: line 34: $'\r': command not found
+ ```
+Above is a good indicator we are seeing crlf, did you set `git config --global core.autocrlf input` mentioned above? If you need to start over see below to reset.
+
+## 🖥️ Start Over and Reset
+Forgot a step or need to level set. No worries, follow the steps below.
+
+### Remove and Setup Git
+Step 1. Remove the repo, cd to C:\buildserver (or wherever you extracted to) --> vagrant destroy -f --> cd C:\ --> rmdir /S buildserver 
+Step 2. For Git use: `git config --global core.autocrlf input` this will keep your commits clean with LF only, even if editing on Windows.
+ - If you use an editor (e.g., VS Code, Notepad++, Sublime) configure to use LF line endings for shell scripts.
+ - In VS Code: bottom-right corner → click "CRLF" → change to "LF".
+ - If you can't get past issues with using Git, another option is to download as a zip see below.
+
+## Optional-Download as Zip:
+Step 1. Navigate to https://github.com/chkp-altrevin/buildserver
+Step 2. Instead of using with git, download as a zip --> builder-main.zip --> extract drop the branch from the folder name. --> Example: `C:\buildserver`.
+
+---
 
 ### 🧰 Use Case 2: Bring Your Own Linux
 
