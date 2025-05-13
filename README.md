@@ -169,9 +169,8 @@ Step 4. Re-run provisioning: `sudo ./provision.sh`
 ---
 
 ## Optional Deployment | Download as Zip
-
 Step 1. Navigate to https://github.com/chkp-altrevin/buildserver
-Step 2. No git? Download as a zip --> builder-main.zip --> extract drop the branch from the folder name. --> Example: `C:\buildserver`.
+Step 2. Download builder-main.zip --> extract drop the branch name from the folder --> Example: `C:\buildserver`.
 Step 3. Provision: Navigate to project --> `cd C:\buildserver` --> `vagrant up` --> `vagrant ssh`.
 
 ---
