@@ -157,7 +157,7 @@ make_scripts_executable() {
 # ----- Install Dependancies ----------------------------------------------------
 install_dependancies() {
   log_info "Installing dependancies..."
-  run_with_sudo apt-get install -y curl unzip apt-utils fakeroot && \
+  run_with_sudo apt-get install -y curl unzip apt-utils fakeroot dos2unix zip && \
     log_success "APT Dependancies installed." || log_error "FATAL: Installing dependancies failed."
 }
 
