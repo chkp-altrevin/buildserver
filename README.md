@@ -192,9 +192,7 @@ A sample `.env` file is provided at `/home/vagrant/.env` to assist with environm
 ### 📁 Folder Structure
 
 ```
-- ignores/      # Example Docker and Git ignore files
 - menu/         # System menu scripts
-- deploy/       # Workloads and apps for demos
 - profile/      # Alias, bashrc, system scripts
 - resources/    # Additional resource files and examples
 - scripts/      # Simple scripts used by the demos
