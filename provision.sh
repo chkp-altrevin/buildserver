@@ -68,6 +68,7 @@ VERSION_ID=$(generate_version_id)
 
 # Append the version
 echo "$VERSION_ID" >> "$PROJECT_PATH/version.txt"
+echo "Current commit is: $(git rev-parse --short HEAD)" >> "$PROJECT_PATH/version.txt"
 
 # --------- Function to add optional aliases ---------------------------------
 import_menu_aliases() {
