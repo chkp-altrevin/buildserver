@@ -88,7 +88,7 @@ Upon execution, `provision.sh` automates the installation and configuration of:
 
 **Prior to cloning for Windows Git users**
 - If you use Windows non-wsl: Set the following: `git config --global core.autocrlf input`
--  This will keep your commits clean with LF only, even if editing on Windows. 
+  This will keep your commits clean with LF only, even if editing on Windows. 
 
 - If you use **WSL/Linux environment** proceed below and clone the repo.
 
