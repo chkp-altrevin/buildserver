@@ -47,8 +47,9 @@ check_vagrant_user() {
         ;;
       *)
         echo "Continuing..."
-        echo "removing git references.."
-        rm -rf $PROJECT_PATH/.git/refs $PROJECT_PATH/.git/logs $PROJECT_PATH/.git/objects
+        echo "removing git upstream reference.."
+        cd "$PROJECT_PATH"
+        git remote remove origin
         echo "Detected 'vagrant' user — setting timezone to UTC..."
         timedatectl set-timezone UTC && echo "Timezone set to UTC." || echo "Failed to set timezone."
         ;;
@@ -592,6 +593,7 @@ echo "Summarizing ERRORs if any"
 echo ""
 grep ERROR "$PROJECT_PATH/provisioning.log"
 echo "=========================================================================="
+echo "✅ Success entries:"
 grep SUCCESS "$PROJECT_PATH/provisioning.log"
 echo ""
 echo "If errors, fix and reprovision using, vagrant up --provision. If this is a"
