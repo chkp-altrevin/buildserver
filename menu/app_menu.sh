@@ -26,12 +26,12 @@ display_menu() {
     echo -n "choose an option [1-9,a-z]: (x)  Exit "
 }
 # Global variable to store the custom script path
-# CUSTOM_SCRIPT_PATH="$HOME/buildserver/scripts"
+# CUSTOM_SCRIPT_PATH="$PROJECT_PATH/scripts"
 #
 
 # Function to install Nginx Proxy Manager
 npm_install() {
-    local script_path="$HOME/buildserver/scripts/npm_install.sh"
+    local script_path="$PROJECT_PATH/scripts/npm_install.sh"
     if [ -f "$script_path" ]; then
         echo "Installing Nginx Proxy Manager using $script_path"
         bash "$script_path"
@@ -42,7 +42,7 @@ npm_install() {
 }
 # Function to show Nginx Proxy Manager status
 npm_status() {
-    local script_path="$HOME/buildserver/scripts/npm_status.sh"
+    local script_path="$PROJECT_PATH/scripts/npm_status.sh"
     if [ -f "$script_path" ]; then
         echo "Nginx Proxy Manager status using $script_path"
         bash "$script_path"
@@ -53,7 +53,7 @@ npm_status() {
 }
 # Function to remove Nginx Proxy Manager
 npm_remove() {
-    local script_path="$HOME/buildserver/scripts/npm_remove.sh"
+    local script_path="$PROJECT_PATH/scripts/npm_remove.sh"
     if [ -f "$script_path" ]; then
         echo "Removing Nginx Proxy Manager using $script_path"
         sudo bash "$script_path"
@@ -66,7 +66,7 @@ npm_remove() {
 
 # Function to call virtualbox provisioning menu
 virtualbox_menu() {
-    local script_path="$HOME/buildserver/menu/virtualbox_menu.sh"
+    local script_path="$PROJECT_PATH/menu/virtualbox_menu.sh"
     if [ -f "$script_path" ]; then
         echo "VirtualBox Provisioning using $script_path"
         bash "$script_path"
@@ -77,7 +77,7 @@ virtualbox_menu() {
 }
 # Function to call pass menu
 pass_menu() {
-    local script_path="$HOME/buildserver/menu/pass_setup.sh"
+    local script_path="$PROJECT_PATH/menu/pass_setup.sh"
     if [ -f "$script_path" ]; then
         echo "Pass Setup using $script_path"
         bash "$script_path"
@@ -88,7 +88,7 @@ pass_menu() {
 }
 # Function to deploy openappsec join the waf cause
 deploy_open_appsec() {
-    local script_path="$HOME/buildserver/scripts/deploy_open_appsec.sh"
+    local script_path="$PROJECT_PATH/scripts/deploy_open_appsec.sh"
     if [ -f "$script_path" ]; then
         echo "Deploying OpenAppsec using $script_path"
         bash "$script_path"
@@ -99,7 +99,7 @@ deploy_open_appsec() {
 }
 # Function to remove dokploy
 dokploy_remove() {
-    local script_path="$HOME/buildserver/scripts/dokploy_remove.sh"
+    local script_path="$PROJECT_PATH/scripts/dokploy_remove.sh"
     if [ -f "$script_path" ]; then
         echo "Removing Dokploy using $script_path"
         bash "$script_path"
@@ -110,7 +110,7 @@ dokploy_remove() {
 }
 # Function to show dokploy status
 dokploy_status() {
-    local script_path="$HOME/buildserver/scripts/dokploy_status.sh"
+    local script_path="$PROJECT_PATH/scripts/dokploy_status.sh"
     if [ -f "$script_path" ]; then
         echo "Dokploy status using $script_path"
         bash "$script_path"
@@ -121,7 +121,7 @@ dokploy_status() {
 }
 # Function to install dokploy
 dokploy_custom_install() {
-    local script_path="$HOME/buildserver/scripts/dokploy_custom_install.sh"
+    local script_path="$PROJECT_PATH/scripts/dokploy_custom_install.sh"
     if [ -f "$script_path" ]; then
         echo "Deploying Dokploy using $script_path"
         sudo bash "$script_path"
@@ -132,7 +132,7 @@ dokploy_custom_install() {
 }
 # Function to restart rancher
 restart_rancher() {
-    local script_path="$HOME/buildserver/scripts/restart_rancher.sh"
+    local script_path="$PROJECT_PATH/scripts/restart_rancher.sh"
     if [ -f "$script_path" ]; then
         echo "Restarting Rancher using $script_path"
         bash "$script_path"
@@ -143,7 +143,7 @@ restart_rancher() {
 }
 # Function to remove Harbor
 remove_harbor() {
-    local script_path="$HOME/buildserver/scripts/remove_harbor.sh"
+    local script_path="$PROJECT_PATH/scripts/remove_harbor.sh"
     if [ -f "$script_path" ]; then
         echo "Removing Harbor using $script_path"
         bash "$script_path"
@@ -154,7 +154,7 @@ remove_harbor() {
 }
 # Function to deploy Harbor
 deploy_harbor() {
-    local script_path="$HOME/buildserver/scripts/deploy_harbor.sh"
+    local script_path="$PROJECT_PATH/scripts/deploy_harbor.sh"
     if [ -f "$script_path" ]; then
         echo "Deploying Harbor using $script_path"
         bash "$script_path"
@@ -165,7 +165,7 @@ deploy_harbor() {
 }
 # Function to deploy Rancher
 deploy_rancher() {
-    local script_path="$HOME/buildserver/scripts/deploy_rancher2.sh"
+    local script_path="$PROJECT_PATH/scripts/deploy_rancher2.sh"
     if [ -f "$script_path" ]; then
         echo "Deploying Rancher using $script_path"
         bash "$script_path"
@@ -176,7 +176,7 @@ deploy_rancher() {
 }
 # Function to grab rancher otp token
 rancher_initial() {
-    local script_path="$HOME/buildserver/scripts/rancher_initial.sh"
+    local script_path="$PROJECT_PATH/scripts/rancher_initial.sh"
     if [ -f "$script_path" ]; then
         echo "OTP presented using $script_path"
         bash "$script_path"
@@ -187,7 +187,7 @@ rancher_initial() {
 }
 # Function to remove Rancher remove Data
 remove_rancher() {
-    local script_path="$HOME/buildserver/scripts/remove_rancher.sh"
+    local script_path="$PROJECT_PATH/scripts/remove_rancher.sh"
     if [ -f "$script_path" ]; then
         echo "Removing Rancher using $script_path"
         bash "$script_path"
@@ -198,7 +198,7 @@ remove_rancher() {
 }
 # Function to verify Rancher is running
 rancher_status() {
-    local script_path="$HOME/buildserver/scripts/rancher_status.sh"
+    local script_path="$PROJECT_PATH/scripts/rancher_status.sh"
     if [ -f "$script_path" ]; then
         echo "Rancher Status using $script_path"
         bash "$script_path"
@@ -209,7 +209,7 @@ rancher_status() {
 }
 # Function to restart Rancher no harm to data
 restart_rancher() {
-    local script_path="$HOME/buildserver/scripts/deploy_rancher2.sh"
+    local script_path="$PROJECT_PATH/scripts/deploy_rancher2.sh"
     if [ -f "$script_path" ]; then
         echo "Deploying Rancher using $script_path"
         bash "$script_path"
@@ -222,7 +222,7 @@ restart_rancher() {
 #
 # Function to check docker status
 docker_status() {
-    local script_path="$HOME/buildserver/scripts/docker_status.sh"
+    local script_path="$PROJECT_PATH/scripts/docker_status.sh"
     if [ -f "$script_path" ]; then
         echo "Docker Status using $script_path"
         bash "$script_path"
@@ -233,7 +233,7 @@ docker_status() {
 }
 # docker ps
 docker_ps() {
-    local script_path="$HOME/buildserver/scripts/docker_ps.sh"
+    local script_path="$PROJECT_PATH/scripts/docker_ps.sh"
     if [ -f "$script_path" ]; then
         echo "Docker Running Containers using $script_path"
         bash "$script_path"
@@ -245,7 +245,7 @@ docker_ps() {
 #
 # Function to run top
 top_run() {
-    local script_path="$HOME/buildserver/scripts/top_run.sh"
+    local script_path="$PROJECT_PATH/scripts/top_run.sh"
     if [ -f "$script_path" ]; then
         echo "Top using $script_path"
         bash "$script_path"
@@ -256,7 +256,7 @@ top_run() {
 }
 # Function to check docker info
 docker_info() {
-    local script_path="$HOME/buildserver/scripts/docker_info.sh"
+    local script_path="$PROJECT_PATH/scripts/docker_info.sh"
     if [ -f "$script_path" ]; then
         echo "Docker info using $script_path"
         bash "$script_path"
@@ -268,7 +268,7 @@ docker_info() {
 
 # Function to check rancher status
 rancher_status() {
-    local script_path="$HOME/buildserver/scripts/rancher_status.sh"
+    local script_path="$PROJECT_PATH/scripts/rancher_status.sh"
     if [ -f "$script_path" ]; then
         echo "Rancher Status using $script_path"
         bash "$script_path"
@@ -279,7 +279,7 @@ rancher_status() {
 }
 # Function to update packages
 package_updates() {
-    local script_path="$HOME/buildserver/scripts/package_updates.sh"
+    local script_path="$PROJECT_PATH/scripts/package_updates.sh"
     if [ -f "$script_path" ]; then
         echo "Package updates using $script_path"
         bash "$script_path"
@@ -290,7 +290,7 @@ package_updates() {
 }
 # Function to setup env vars
 setup_env_vars() {
-    local script_path="$HOME/buildserver/scripts/setup_env_vars.sh"
+    local script_path="$PROJECT_PATH/scripts/setup_env_vars.sh"
     if [ -f "$script_path" ]; then
         echo "Edit using $script_path"
         bash "$script_path"
@@ -301,7 +301,7 @@ setup_env_vars() {
 }
 # Function to apply env vars
 export_env() {
-    local script_path="$HOME/buildserver/scripts/export_env.sh"
+    local script_path="$PROJECT_PATH/scripts/export_env.sh"
     if [ -f "$script_path" ]; then
         echo "Backuping up ENV VARS using $script_path"
         echo "location c:\buildserver\profile\backup.env"
