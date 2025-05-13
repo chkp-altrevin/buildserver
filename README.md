@@ -231,7 +231,6 @@ quick-setup
 ### 📁 Menu Dependancy Structure
 ```
 - menu/         # System menu scripts
-- deploy/       # Workloads and apps for demos
 - profile/      # Alias, bashrc, system scripts
 - scripts/      # Simple scripts used by the demos
 ```
