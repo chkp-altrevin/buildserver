@@ -47,9 +47,6 @@ check_vagrant_user() {
         ;;
       *)
         echo "Continuing..."
-        echo "removing git upstream reference.."
-        cd "$PROJECT_PATH"
-        git remote remove origin
         echo "Detected 'vagrant' user — setting timezone to UTC..."
         timedatectl set-timezone UTC && echo "Timezone set to UTC." || echo "Failed to set timezone."
         ;;
