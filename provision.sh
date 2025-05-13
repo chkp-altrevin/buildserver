@@ -590,9 +590,9 @@ echo "==========================================================================
 sleep 6
 echo "Summarizing ERRORs if any"
 echo ""
-cat "$PROJECT_PATH/provisioning.log | grep ERROR"
+grep ERROR "$PROJECT_PATH/provisioning.log"
 echo "=========================================================================="
-cat "$PROJECT_PATH/provisioning.log | grep SUCCESS"
+grep SUCCESS "$PROJECT_PATH/provisioning.log"
 echo ""
 echo "If errors, fix and reprovision using, vagrant up --provision. If this is a"
 echo "custom install using provision.sh, you can likely ignore NON-FATAL errors."
