@@ -22,7 +22,7 @@ display_menu() {
     echo "p. Kubectl Get All Pods  | k. Kubectl Cluster-Info "
     echo "n. Kubectl Get Nodes     | R. Remove Cluster       "
     echo "==================================================="
-    echo "Buildserver Env Vars =============================="
+    echo "Buildserver Info =================================="
     echo "Path: $PROJECT_PATH | User: $USER"
     echo "Current commit is: $(git rev-parse --short HEAD)" 
     echo "8. INSTALL APPLICATIONS"
