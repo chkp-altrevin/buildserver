@@ -22,8 +22,8 @@ display_menu() {
     echo "p. Kubectl Get All Pods  | k. Kubectl Cluster-Info "
     echo "n. Kubectl Get Nodes     | R. Remove Cluster       "
     echo "==================================================="
-    echo "Q. Update Buildserver=============================="
-    echo "CAREFUL $PROJECT_PATH Folder will be overwritten"
+    echo "Q. Refresh Buildserver Repo CAREFUL ==============="
+    echo "$PROJECT_PATH will be overwritten"
     echo ""
     echo "8. INSTALL APPLICATIONS"
     echo "==================================================="
@@ -36,16 +36,42 @@ display_menu() {
 # =============================================
 
 # Function to update repo
-update_repo() {
-    local script_path="$PROJECT_PATH/scripts/update_repo.sh"
-    if [ -f "$script_path" ]; then
-        echo "Updating repo using $script_path"
-        bash "$script_path"
-    else
-        echo "Deployment script does not exist at $script_path."
-    fi
-    pause
+
+refresh_buildserver_repo() {
+  local REPO_URL="https://github.com/chkp-altrevin/buildserver.git"
+  local TIMESTAMP
+  TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+
+  log_info "Starting repository refresh for buildserver..."
+
+  if [[ -d "$PROJECT_PATH" ]]; then
+    log_info "Existing project directory found at $PROJECT_PATH. Archiving..."
+    
+    local ZIP_NAME="${PROJECT_PATH}_backup_${TIMESTAMP}.zip"
+    zip -r "$ZIP_NAME" "$PROJECT_PATH" &>/dev/null && \
+      log_success "Archived current project to $ZIP_NAME" || \
+      log_error "Failed to archive $PROJECT_PATH."
+
+    rm -rf "$PROJECT_PATH" && \
+      log_info "Removed old $PROJECT_PATH" || \
+      log_error "Failed to remove $PROJECT_PATH."
+  fi
+
+  git clone "$REPO_URL" "$PROJECT_PATH" && \
+    log_success "Cloned repository into $PROJECT_PATH" || \
+    log_error "Git clone failed."
+
+  # Remove the remote origin to avoid pushing
+  if [[ -d "$PROJECT_PATH/.git" ]]; then
+    (
+      cd "$PROJECT_PATH" || exit 1
+      git remote remove origin && \
+        log_info "Removed 'origin' remote to prevent accidental push." || \
+        log_error "Failed to remove origin."
+    )
+  fi
 }
+
 # Function to display motd
 run_motd() {
     local script_path="$PROJECT_PATH/menu/run_motd.sh"
@@ -342,7 +368,7 @@ while true; do
         L) ;;
         N) ;;
         P) ;;
-        Q) update_repo ;;
+        Q) refresh_buildserver_repo ;;
         R) remove_kubernetes_cluster ;;
         S) ;;
         T) ;;
