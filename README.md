@@ -163,10 +163,14 @@ Step 2. Change into our directory: `cd /home/user/buildserver`
 Step 3. Set execute permissions: `chmod +x provision.sh`
 Step 4. Re-run provisioning: `sudo ./provision.sh`
 
+---
+
 ### Optional Deployment | Download as Zip
-Step 1. Navigate to https://github.com/chkp-altrevin/buildserver
-Step 2. Download builder-main.zip --> extract drop the branch name from the folder --> Example: `C:\buildserver`.
-Step 3. Provision: Navigate to project --> `cd C:\buildserver` --> `vagrant up` --> `vagrant ssh`.
+- Visit: https://github.com/chkp-altrevin/buildserver
+- Download: builder-main.zip --> extract drop the branch name from the folder --> Example: `C:\buildserver` or `$HOME/buildserver`
+- Provision Use Case 1: `cd C:\buildserver` --> `vagrant up`
+- Provision Use Case 2: `cd $HOME/buildserver` --> `sudo ./provision`
+- Login: --> `vagrant ssh` (use case 1)
 
 ---
 
