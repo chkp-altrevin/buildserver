@@ -107,8 +107,8 @@ import_menu_aliases() {
 }
 #
 touch $PROJECT_PATH/provisioning.log
-touch $PROJECT_PATH/success.log
-touch $PROJECT_PATH/error.log
+# touch $PROJECT_PATH/success.log
+# touch $PROJECT_PATH/error.log
 #
 # --------- Logging Functions -------------------------------------------------
 
@@ -120,21 +120,21 @@ log_info() {
 log_success() {
   local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
   echo "[$timestamp] [SUCCESS] $1" >> $PROJECT_PATH/provisioning.log
-  echo "[$timestamp] [SUCCESS] $1" >> $PROJECT_PATH/success.log
+  # echo "[$timestamp] [SUCCESS] $1" >> $PROJECT_PATH/success.log
 }
 
 log_error() {
   local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
   echo "[$timestamp] [ERROR] $1" >> $PROJECT_PATH/provisioning.log
-  echo "[$timestamp] [ERROR] $1" >> $PROJECT_PATH/error.log
+  # echo "[$timestamp] [ERROR] $1" >> $PROJECT_PATH/error.log
 }
 
 # used to clear out error.logs when using vagrant up --provision
-touch $PROJECT_PATH/error.log
-> "$PROJECT_PATH/error.log"
+# touch $PROJECT_PATH/error.log
+# > "$PROJECT_PATH/error.log"
 # used to clear out success.logs when using vagrant up --provision
-touch $PROJECT_PATH/success.log
-> "$PROJECT_PATH/success.log"
+# touch $PROJECT_PATH/success.log
+# > "$PROJECT_PATH/success.log"
 
 # ------ Helper Function for Sudo ----------------------------------------------
 # run_with_sudo: Executes a command with sudo if not already running as root.
