@@ -70,7 +70,7 @@ VERSION_ID=$(generate_version_id)
 echo "$VERSION_ID" >> "$PROJECT_PATH/version.txt"
 echo "Current commit is: $(git rev-parse --short HEAD)" >> "$PROJECT_PATH/version.txt"
 
-# --------- Function to add optional aliases ---------------------------------
+# ---- Function to add optional aliases checks in place for no override ------
 import_menu_aliases() {
   local aliases_file="$HOME/.bash_aliases"
   local -A menu_aliases=(
@@ -146,12 +146,35 @@ run_with_sudo() {
   fi
 }
 
-# ----------Function to set execute permissions to scripts folder ------------
-make_scripts_executable() {
-  log_info "Setting +x on sh files in scripts folder..."
-  find $PROJECT_PATH/scripts -type f -name "*.sh" -exec chmod +x {} \; && \
-  find $PROJECT_PATH/menu -type f -name "*.sh" -exec chmod +x {} \; && \
-    log_success "Permissions set successfully." || log_error "FATAL: Setting permissions failed."
+# --------Fix clrf and provide execute permissions for scripts -----------------
+fix_shell_scripts() {
+  log_info "🔍 Scanning for shell scripts in: $PROJECT_PATH"
+
+  local found_any=false
+
+  while IFS= read -r -d '' script; do
+    found_any=true
+    log_info "🧪 Processing: $script"
+
+    # Convert CRLF to LF if needed
+    if file "$script" | grep -q "CRLF"; then
+      sed -i 's/\r$//' "$script"
+      log_success "✅ Line endings fixed: $script"
+    else
+      log_info "✔️  Line endings clean: $script"
+    fi
+
+    # Ensure script is executable
+    if [ ! -x "$script" ]; then
+      chmod +x "$script" && log_success "🔓 Made executable: $script"
+    else
+      log_info "🔐 Already executable: $script"
+    fi
+  done < <(find "$PROJECT_PATH" -type f -name "*.sh" -print0)
+
+  if ! $found_any; then
+    log_info "ℹ️  No shell scripts found in: $PROJECT_PATH"
+  fi
 }
 
 # ----- Install Dependancies ----------------------------------------------------
@@ -214,7 +237,7 @@ copy_profile_files() {
     log_info "bash_aliases will apply on next login or manually source it."
   fi
 
-  # Export environment variables from .env (ignore comments)
+  # Sanity check export environment variables from .env if any (ignore comments)
   if [[ -f "$env_file_path" ]]; then
     log_info "Loading environment variables from .env..."
     set -a
@@ -476,7 +499,8 @@ cleanup() {
 # Use Case 2  = Comments that start with a 2, are optional review comments below for more info
 main() {
   check_vagrant_user # 2 responsible for checking if we are a vagrant user and if so, we notify first
-  make_scripts_executable # 2 chmod .sh +x the script folder, you need to do this manually if disabled
+  fix_shell_scripts # 2 chmod .sh +x the script folder and removes clrf if any
+  # make_scripts_executable # 2 chmod .sh +x the script folder, you need to do this manually if disabled
   install_dependancies  # 2 mainly to support extractions, utilities to automate and help run commands used for automation, disable for manual cycles
   display_banner # 2 fun stuff
   add_custom_motd # 2 more fun stuff but also the motd
