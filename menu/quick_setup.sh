@@ -24,7 +24,7 @@ display_menu() {
     echo "==================================================="
     echo "Buildserver Env Vars =============================="
     echo "Path: $PROJECT_PATH | User: $USER"
-    echo "Version: commit $PROJECT_VERSION" 
+    echo "Current commit is: $(git rev-parse --short HEAD)" 
     echo "8. INSTALL APPLICATIONS"
     echo "==================================================="
     echo -n "choose an option [1-9,a-z]: (x)  Exit "
