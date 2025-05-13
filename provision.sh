@@ -70,7 +70,7 @@ VERSION_ID=$(generate_version_id)
 echo "$VERSION_ID" >> "$PROJECT_PATH/version.txt"
 echo "Current commit is: $(git rev-parse --short HEAD)" >> "$PROJECT_PATH/version.txt"
 
-# ---- Function to add optional aliases checks in place for no override ------
+# ---- Function to add optional aliases checks in place for no override -------
 import_menu_aliases() {
   local aliases_file="$HOME/.bash_aliases"
   local -A menu_aliases=(
@@ -110,7 +110,7 @@ touch $PROJECT_PATH/provisioning.log
 touch $PROJECT_PATH/success.log
 touch $PROJECT_PATH/error.log
 #
-# --------- Logging Functions ------------------------------------------------
+# --------- Logging Functions -------------------------------------------------
 
 log_info() {
   local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
@@ -144,6 +144,43 @@ run_with_sudo() {
   else
     "$@"
   fi
+}
+# ---- detect os and set for windows set git autocrlf --------------------------
+set_git_autocrlf_input() {
+  log_info "🔍 Detecting operating system..."
+
+  local os_type
+  os_type="$(uname -s)"
+
+  case "$os_type" in
+    Linux*)
+      log_info "🧬 OS Detected: Linux"
+      ;;
+    Darwin*)
+      log_info "🍎 OS Detected: macOS"
+      ;;
+    CYGWIN*|MINGW*|MSYS*)
+      log_info "🪟 OS Detected: Windows-like (Git Bash, WSL, Cygwin, etc.)"
+      ;;
+    *)
+      log_error "❓ Unknown OS type: $os_type. Proceeding cautiously..."
+      ;;
+  esac
+
+  log_info "⚙️  Checking current Git autocrlf setting..."
+  local current_setting
+  current_setting=$(git config --global core.autocrlf || echo "unset")
+
+  if [[ "$current_setting" == "input" ]]; then
+    log_info "✅ Git core.autocrlf is already set to 'input'. No changes made."
+  else
+    git config --global core.autocrlf input && \
+    log_success "🔧 Git global config updated: core.autocrlf = input"
+  fi
+
+  local confirmed
+  confirmed=$(git config --global core.autocrlf)
+  log_info "📌 Confirmed: git core.autocrlf = $confirmed"
 }
 
 # --------Fix clrf and provide execute permissions for scripts -----------------
