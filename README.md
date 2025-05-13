@@ -85,7 +85,11 @@ Upon execution, `provision.sh` automates the installation and configuration of:
 2. **Install Vagrant**: [Download Vagrant](https://developer.hashicorp.com/vagrant/install?product_intent=vagrant)
 3. **Install VirtualBox**: [Download VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 4. **Clone Repository**:
-**For Windows Git users**: `git config --global core.autocrlf input` this will keep your commits clean with LF only, even if editing on Windows. WSL/Linux users should be good to go.
+**For Windows Git users** Set the following: `git config --global core.autocrlf input` **prior to cloning**.
+Example: `C:\git config --global core.autocrlf input` If you don't have git see download as zip below.
+
+This will keep your commits clean with LF only, even if editing on Windows. WSL/Linux users should be good to go.
+
    ```bash
    git clone https://github.com/chkp-altrevin/buildserver.git
    ```
