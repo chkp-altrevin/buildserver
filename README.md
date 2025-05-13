@@ -166,7 +166,7 @@ Step 4. Re-run provisioning: `sudo ./provision.sh`
 ---
 
 ### Optional Deployment | Download as Zip
-- Visit: https://github.com/chkp-altrevin/buildserver
+- Visit: https://github.com/chkp-altrevin/buildserver --> click on **CODE**
 - Download: builder-main.zip --> extract drop the branch name from the folder --> Example: `C:\buildserver` or `$HOME/buildserver`
 - Provision Use Case 1: `cd C:\buildserver` --> `vagrant up`
 - Provision Use Case 2: `cd $HOME/buildserver` --> `sudo ./provision`
