@@ -94,7 +94,7 @@ Upon execution, `provision.sh` automates the installation and configuration of:
    ```
 6. **Start Vagrant**:
    ```bash
-   vagrant up # this is always ran in the root of the project folder where Vagrantfile is required
+   vagrant up # this is always ran in the root of the project folder where Vagrantfile is located
    ```
    Example: C:\buildserver\vagrant up
 7. **Access the VM**:
@@ -116,20 +116,6 @@ builder: /home/vagrant/.env: line 30: $'\r': command not found
 builder: /home/vagrant/.env: line 34: $'\r': command not found
  ```
 Above is a good indicator we are seeing crlf, did you set `git config --global core.autocrlf input` mentioned above? If you need to start over see below to reset.
-
-## 🖥️ Start Over and Reset
-Forgot a step or need to level set. No worries, follow the steps below.
-
-### Remove and Setup Git
-Step 1. Remove the repo, cd to C:\buildserver (or wherever you extracted to) --> vagrant destroy -f --> cd C:\ --> rmdir /S buildserver 
-Step 2. For Git use: `git config --global core.autocrlf input` this will keep your commits clean with LF only, even if editing on Windows.
- - If you use an editor (e.g., VS Code, Notepad++, Sublime) configure to use LF line endings for shell scripts.
- - In VS Code: bottom-right corner → click "CRLF" → change to "LF".
- - If you can't get past issues with using Git, another option is to download as a zip see below.
-
-## Optional-Download as Zip:
-Step 1. Navigate to https://github.com/chkp-altrevin/buildserver
-Step 2. Instead of using with git, download as a zip --> builder-main.zip --> extract drop the branch from the folder name. --> Example: `C:\buildserver`.
 
 ---
 
@@ -154,6 +140,31 @@ Step 2. Instead of using with git, download as a zip --> builder-main.zip --> ex
    ```bash
    ./provision.sh
    ```
+---
+
+## 🖥️ Troubleshooting
+Forgot a step or need to level set. No worries, follow the steps below.
+
+### Start Over | Use Case 1
+Step 1. Remove the repo it it exists, cd to C:\buildserver (or wherever you extracted to) --> vagrant destroy -f --> cd C:\ --> rmdir /S buildserver 
+Step 2. Setup Git: `git config --global core.autocrlf input` this will keep your commits clean with LF only, even if editing on Windows.
+ - If you use an editor (e.g., VS Code, Notepad++, Sublime) configure to use LF line endings for shell scripts.
+ - In VS Code: bottom-right corner → click "CRLF" → change to "LF".
+ - If you can't get past issues with using Git, another option is to download as a zip see below.
+
+### Start Over | Use Case 2
+Step 1. Remove the repo, example: `rm -rf /home/vagrant/buildserver --> `cd /home/vagrant` Clone again `git clone https://github.com/chkp-altrevin/buildserver.git`
+Step 2. Change into our directory: `cd /home/user/buildserver`
+Step 3. Set execute permissions: `chmod +x provision.sh`
+Step 4. Re-run provisioning: `sudo ./provision.sh`
+
+---
+
+## Optional Deployment | Download as Zip
+
+Step 1. Navigate to https://github.com/chkp-altrevin/buildserver
+Step 2. No git? Download as a zip --> builder-main.zip --> extract drop the branch from the folder name. --> Example: `C:\buildserver`.
+Step 3. Provision: Navigate to project --> `cd C:\buildserver` --> `vagrant up` --> `vagrant ssh`.
 
 ---
 
