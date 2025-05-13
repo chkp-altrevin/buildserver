@@ -1,3 +1,0 @@
-## Traefik Add On
-
-Placeholder
