@@ -13,10 +13,9 @@ id=$(docker run -d \
 if [ ! -e "$HOME/rancher-data/k3s" ]; then
   # Give sometime to bootstrap
   sleep 90
-
   # For convenience keep default password to a file using handy docker filter script and values
-  # docker logs ${id}  2>&1 | grep "Bootstrap Password:" > $HOME/initial-passwd
-  $PROJECT_PATH/scripts/filter_docker.sh logs rancher-ui "Bootstrap Password:" > $HOME/initial-passwd
+  docker logs ${id}  2>&1 | grep "Bootstrap Password:" > $HOME/initial-passwd
+  # $PROJECT_PATH/scripts/filter_docker.sh logs rancher-ui "Bootstrap Password:" > $HOME/initial-passwd
 else
   sleep 60
 fi
