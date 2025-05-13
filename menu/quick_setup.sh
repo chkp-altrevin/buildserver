@@ -22,9 +22,9 @@ display_menu() {
     echo "p. Kubectl Get All Pods  | k. Kubectl Cluster-Info "
     echo "n. Kubectl Get Nodes     | R. Remove Cluster       "
     echo "==================================================="
-    echo "Q. Refresh Buildserver Repo CAREFUL ==============="
-    echo "$PROJECT_PATH will be overwritten"
-    echo ""
+    echo "Buildserver Env Vars =============================="
+    echo "Path: $PROJECT_PATH | User: $USER"
+    echo "Version: commit $PROJECT_VERSION" 
     echo "8. INSTALL APPLICATIONS"
     echo "==================================================="
     echo -n "choose an option [1-9,a-z]: (x)  Exit "
@@ -34,43 +34,6 @@ display_menu() {
 # =============================================
 # export PROJECT_PATH="/home/vagrant/buildserver"
 # =============================================
-
-# Function to update repo
-
-refresh_buildserver_repo() {
-  local REPO_URL="https://github.com/chkp-altrevin/buildserver.git"
-  local TIMESTAMP
-  TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-
-  log_info "Starting repository refresh for buildserver..."
-
-  if [[ -d "$PROJECT_PATH" ]]; then
-    log_info "Existing project directory found at $PROJECT_PATH. Archiving..."
-    
-    local ZIP_NAME="${PROJECT_PATH}_backup_${TIMESTAMP}.zip"
-    zip -r "$ZIP_NAME" "$PROJECT_PATH" &>/dev/null && \
-      log_success "Archived current project to $ZIP_NAME" || \
-      log_error "Failed to archive $PROJECT_PATH."
-
-    rm -rf "$PROJECT_PATH" && \
-      log_info "Removed old $PROJECT_PATH" || \
-      log_error "Failed to remove $PROJECT_PATH."
-  fi
-
-  git clone "$REPO_URL" "$PROJECT_PATH" && \
-    log_success "Cloned repository into $PROJECT_PATH" || \
-    log_error "Git clone failed."
-
-  # Remove the remote origin to avoid pushing
-  if [[ -d "$PROJECT_PATH/.git" ]]; then
-    (
-      cd "$PROJECT_PATH" || exit 1
-      git remote remove origin && \
-        log_info "Removed 'origin' remote to prevent accidental push." || \
-        log_error "Failed to remove origin."
-    )
-  fi
-}
 
 # Function to display motd
 run_motd() {
