@@ -119,9 +119,6 @@ If you see errors similiar to:
 builder: /home/vagrant/.env: line 13: $'\r': command not found
 builder: /home/vagrant/.env: line 17: $'\r': command not found
 builder: /home/vagrant/.env: line 21: $'\r': command not found
-builder: /home/vagrant/.env: line 26: $'\r': command not found
-builder: /home/vagrant/.env: line 30: $'\r': command not found
-builder: /home/vagrant/.env: line 34: $'\r': command not found
  ```
 Above is a good indicator we are seeing crlf, did you set `git config --global core.autocrlf input` mentioned above? If you need to start over see below to reset.
 
@@ -166,9 +163,7 @@ Step 2. Change into our directory: `cd /home/user/buildserver`
 Step 3. Set execute permissions: `chmod +x provision.sh`
 Step 4. Re-run provisioning: `sudo ./provision.sh`
 
----
-
-## Optional Deployment | Download as Zip
+### Optional Deployment | Download as Zip
 Step 1. Navigate to https://github.com/chkp-altrevin/buildserver
 Step 2. Download builder-main.zip --> extract drop the branch name from the folder --> Example: `C:\buildserver`.
 Step 3. Provision: Navigate to project --> `cd C:\buildserver` --> `vagrant up` --> `vagrant ssh`.
