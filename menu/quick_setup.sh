@@ -22,6 +22,8 @@ display_menu() {
     echo "p. Kubectl Get All Pods  | k. Kubectl Cluster-Info "
     echo "n. Kubectl Get Nodes     | R. Remove Cluster       "
     echo "==================================================="
+    echo "Q. Update Buildserver=============================="
+    echo "CAREFUL $PROJECT_PATH Folder will be overwritten"
     echo ""
     echo "8. INSTALL APPLICATIONS"
     echo "==================================================="
@@ -32,6 +34,18 @@ display_menu() {
 # =============================================
 # export PROJECT_PATH="/home/vagrant/buildserver"
 # =============================================
+
+# Function to update repo
+update_repo() {
+    local script_path="$PROJECT_PATH/scripts/update_repo.sh"
+    if [ -f "$script_path" ]; then
+        echo "Updating repo using $script_path"
+        bash "$script_path"
+    else
+        echo "Deployment script does not exist at $script_path."
+    fi
+    pause
+}
 # Function to display motd
 run_motd() {
     local script_path="$PROJECT_PATH/menu/run_motd.sh"
@@ -43,6 +57,7 @@ run_motd() {
     fi
     pause
 }
+
 cgns_menu() {
     local script_path="$PROJECT_PATH/menu/cgns_menu.sh"
     if [ -f "$script_path" ]; then
@@ -327,7 +342,7 @@ while true; do
         L) ;;
         N) ;;
         P) ;;
-        Q) ;;
+        Q) update_repo ;;
         R) remove_kubernetes_cluster ;;
         S) ;;
         T) ;;
