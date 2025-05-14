@@ -4,9 +4,8 @@
 display_menu() {
     clear
     echo "=== Use "x" to go back =========== APPLICATION MENU"
+    echo ""
     echo "d. Running Containers |   k. Cluster Status        "
-    echo "                                                   "
-    echo "V. Provision | x. Verify | x. License | x. Reset   "
     echo "==================================================="
     echo ""
     echo "RANCHER============================================"
