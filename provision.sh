@@ -192,7 +192,6 @@ install_dependancies() {
     log_success "APT Dependancies installed." || log_error "FATAL: Installing dependancies failed."
 }
 
-# --------Fix clrf and provide execute permissions for scripts -----------------
 fix_shell_scripts() {
   log_info "🔍 Scanning for shell scripts in: $PROJECT_PATH"
 
@@ -200,28 +199,39 @@ fix_shell_scripts() {
 
   while IFS= read -r -d '' script; do
     found_any=true
+    local modified=false
+    local msg=""
+
     log_info "🧪 Processing: $script"
 
-    # Convert CRLF to LF if needed
+    # Fix line endings if CRLF
     if file "$script" | grep -q "CRLF"; then
       sed -i 's/\r$//' "$script"
-      log_success "✅ Line endings fixed: $script"
-    else
-      log_info "✔️  Line endings clean: $script"
+      modified=true
+      msg+="line endings fixed"
     fi
 
-    # Ensure script is executable
+    # Make script executable if not already
     if [ ! -x "$script" ]; then
-      chmod +x "$script" && log_success "🔓 Made executable: $script"
-    else
-      log_info "🔐 Already executable: $script"
+      chmod +x "$script"
+      modified=true
+      msg+="${msg:+, }made executable"
     fi
+
+    # Log result
+    if $modified; then
+      log_success "✅ $script: $msg"
+    else
+      log_info "✔️  $script: already clean and executable"
+    fi
+
   done < <(find "$PROJECT_PATH" -type f -name "*.sh" -print0)
 
   if ! $found_any; then
     log_info "ℹ️  No shell scripts found in: $PROJECT_PATH"
   fi
 }
+
 
 # ----- Banner Display --------------------------------------------------------
 display_banner() {
