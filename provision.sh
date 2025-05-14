@@ -38,7 +38,7 @@ fi
 #
 check_vagrant_user() {
   if id "vagrant" &>/dev/null; then
-    echo "The server is already provisioned, if you continue content in $PROJECT_PATH folder will be updated [Y/n]"
+    echo "The server is already provisioned, content in $PROJECT_PATH folder may be overridden. Proceed with update? [Y/n]"
     read -r response
     case "$response" in
       [nN][oO]|[nN])
@@ -51,8 +51,6 @@ check_vagrant_user() {
     esac
   fi
 }
-
-
 
 # ----------Function to generate a version ID with date and time -------------
 #
