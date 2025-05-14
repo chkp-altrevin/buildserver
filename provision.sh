@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# set -e
+set -e
 # ==============================================================================
 # DIY Buildserver Lab Environment Setup Script
 #
@@ -49,6 +49,149 @@ check_vagrant_user() {
         echo "Continuing..."
         ;;
     esac
+  fi
+}
+
+
+
+# ----------Function to generate a version ID with date and time -------------
+#
+generate_version_id() {
+    echo "v$(date '+%Y%m%d_%H%M%S')"
+}
+# Store the generated version ID
+VERSION_ID=$(generate_version_id)
+# Save to a file (overwrite each run)
+#
+# Ensure the file exists
+[ -f "$PROJECT_PATH/version.txt" ] || touch "$PROJECT_PATH/version.txt"
+
+# Append the version
+echo "$VERSION_ID" >> "$PROJECT_PATH/version.txt"
+# echo "Current commit is: $(git rev-parse --short HEAD)" >> "$PROJECT_PATH/version.txt"
+
+# ---- Function to add optional aliases checks in place for no override -------
+import_menu_aliases() {
+  local aliases_file="$HOME/.bash_aliases"
+  local -A menu_aliases=(
+    ["cls"]="clear"
+    ["dps"]="docker ps"
+    ["motd"]="/etc/update-motd.d/99-custom-motd"
+    ["kci"]="kubernetes cluster-info"
+  )
+
+  # Create the file if it doesn't exist
+  touch "$aliases_file"
+
+  local added_any=false
+
+  # Append aliases only if they aren't already present
+  for alias in "${!menu_aliases[@]}"; do
+    if ! grep -qE "^alias $alias=" "$aliases_file"; then
+      echo "alias $alias='${menu_aliases[$alias]}'" >> "$aliases_file"
+      echo "Added alias: $alias -> ${menu_aliases[$alias]}"
+      added_any=true
+    else
+      echo "Alias '$alias' already exists, skipping."
+    fi
+  done
+
+  # Source the aliases to apply them immediately
+  if [[ "$added_any" == true ]]; then
+    echo "Loading new aliases into current shell..."
+    # shellcheck disable=SC1090
+    source "$aliases_file"
+  else
+    echo "No new aliases added. Nothing to load."
+  fi
+}
+#
+touch $PROJECT_PATH/provisioning.log
+# touch $PROJECT_PATH/success.log
+# touch $PROJECT_PATH/error.log
+#
+# --------- Logging Functions -------------------------------------------------
+
+log_info() {
+  local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
+  echo "[$timestamp] [INFO] $1" >> $PROJECT_PATH/provisioning.log
+}
+
+log_success() {
+  local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
+  echo "[$timestamp] [SUCCESS] $1" >> $PROJECT_PATH/provisioning.log
+  # echo "[$timestamp] [SUCCESS] $1" >> $PROJECT_PATH/success.log
+}
+
+log_error() {
+  local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
+  echo "[$timestamp] [ERROR] $1" >> $PROJECT_PATH/provisioning.log
+  # echo "[$timestamp] [ERROR] $1" >> $PROJECT_PATH/error.log
+}
+
+# used to clear out error.logs when using vagrant up --provision
+# touch $PROJECT_PATH/error.log
+# > "$PROJECT_PATH/error.log"
+# used to clear out success.logs when using vagrant up --provision
+# touch $PROJECT_PATH/success.log
+# > "$PROJECT_PATH/success.log"
+
+# ------ Helper Function for Sudo ----------------------------------------------
+# run_with_sudo: Executes a command with sudo if not already running as root.
+run_with_sudo() {
+  if [ "$EUID" -ne 0 ]; then
+    sudo "$@"
+  else
+    "$@"
+  fi
+}
+
+# ----- Install Dependancies ----------------------------------------------------
+install_dependancies() {
+  log_info "Installing dependancies..."
+  run_with_sudo apt-get install -y curl unzip apt-utils fakeroot dos2unix zip && \
+  # fix_shell_scripts && \
+    log_success "APT Dependancies installed." || log_error "FATAL: Installing dependancies failed."
+}
+
+# ------ Script Maintenance -----------------------------------------------------
+fix_shell_scripts() {
+  log_info "🔍 Scanning for shell scripts in: $PROJECT_PATH"
+
+  local found_any=false
+
+  while IFS= read -r -d '' script; do
+    found_any=true
+    local modified=false
+    local msg=""
+
+    log_info "🧪 Processing: $script"
+
+    # Fix line endings if CRLF
+    if file "$script" | grep -q "CRLF"; then
+      sed -i 's/\r$//' "$script"
+      modified=true
+      msg+="line endings fixed"
+    fi
+
+    # Make script executable if not already
+    if [ ! -x "$script" ]; then
+      chmod +x "$script"
+      modified=true
+      msg+="${msg:+, }made executable"
+    fi
+
+    # Log result
+    if $modified; then
+      log_success "✅ $script: $msg"
+    else
+      log_info "✔️  $script: already clean and executable"
+    fi
+
+  done < <(find "$PROJECT_PATH" -type f -name "*.sh" -print0)
+
+  if ! $found_any; then
+    log_info "ℹ️  No shell scripts found in: $PROJECT_PATH"
   fi
 }
 
@@ -155,185 +298,6 @@ download_and_extract_repo() {
   rm -rf "$TEMP_DIR"
   log_info "Provision complete and cleaned up."
 }
-
-# ----------Function to generate a version ID with date and time -------------
-#
-generate_version_id() {
-    echo "v$(date '+%Y%m%d_%H%M%S')"
-}
-# Store the generated version ID
-VERSION_ID=$(generate_version_id)
-# Save to a file (overwrite each run)
-#
-# Ensure the file exists
-[ -f "$PROJECT_PATH/version.txt" ] || touch "$PROJECT_PATH/version.txt"
-
-# Append the version
-echo "$VERSION_ID" >> "$PROJECT_PATH/version.txt"
-echo "Current commit is: $(git rev-parse --short HEAD)" >> "$PROJECT_PATH/version.txt"
-
-# ---- Function to add optional aliases checks in place for no override -------
-import_menu_aliases() {
-  local aliases_file="$HOME/.bash_aliases"
-  local -A menu_aliases=(
-    ["cls"]="clear"
-    ["dps"]="docker ps"
-    ["motd"]="/etc/update-motd.d/99-custom-motd"
-    ["kci"]="kubernetes cluster-info"
-  )
-
-  # Create the file if it doesn't exist
-  touch "$aliases_file"
-
-  local added_any=false
-
-  # Append aliases only if they aren't already present
-  for alias in "${!menu_aliases[@]}"; do
-    if ! grep -qE "^alias $alias=" "$aliases_file"; then
-      echo "alias $alias='${menu_aliases[$alias]}'" >> "$aliases_file"
-      echo "Added alias: $alias -> ${menu_aliases[$alias]}"
-      added_any=true
-    else
-      echo "Alias '$alias' already exists, skipping."
-    fi
-  done
-
-  # Source the aliases to apply them immediately
-  if [[ "$added_any" == true ]]; then
-    echo "Loading new aliases into current shell..."
-    # shellcheck disable=SC1090
-    source "$aliases_file"
-  else
-    echo "No new aliases added. Nothing to load."
-  fi
-}
-#
-touch $PROJECT_PATH/provisioning.log
-# touch $PROJECT_PATH/success.log
-# touch $PROJECT_PATH/error.log
-#
-# --------- Logging Functions -------------------------------------------------
-
-log_info() {
-  local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
-  echo "[$timestamp] [INFO] $1" >> $PROJECT_PATH/provisioning.log
-}
-
-log_success() {
-  local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
-  echo "[$timestamp] [SUCCESS] $1" >> $PROJECT_PATH/provisioning.log
-  # echo "[$timestamp] [SUCCESS] $1" >> $PROJECT_PATH/success.log
-}
-
-log_error() {
-  local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
-  echo "[$timestamp] [ERROR] $1" >> $PROJECT_PATH/provisioning.log
-  # echo "[$timestamp] [ERROR] $1" >> $PROJECT_PATH/error.log
-}
-
-# used to clear out error.logs when using vagrant up --provision
-# touch $PROJECT_PATH/error.log
-# > "$PROJECT_PATH/error.log"
-# used to clear out success.logs when using vagrant up --provision
-# touch $PROJECT_PATH/success.log
-# > "$PROJECT_PATH/success.log"
-
-# ------ Helper Function for Sudo ----------------------------------------------
-# run_with_sudo: Executes a command with sudo if not already running as root.
-run_with_sudo() {
-  if [ "$EUID" -ne 0 ]; then
-    sudo "$@"
-  else
-    "$@"
-  fi
-}
-
-# ---- detect os and set for windows set git autocrlf --------------------------
-set_git_autocrlf_input() {
-  log_info "🔍 Detecting operating system..."
-
-  local os_type
-  os_type="$(uname -s)"
-
-  case "$os_type" in
-    Linux*)
-      log_info "🧬 OS Detected: Linux"
-      ;;
-    Darwin*)
-      log_info "🍎 OS Detected: macOS"
-      ;;
-    CYGWIN*|MINGW*|MSYS*)
-      log_info "🪟 OS Detected: Windows-like (Git Bash, WSL, Cygwin, etc.)"
-      ;;
-    *)
-      log_error "❓ Unknown OS type: $os_type. Proceeding cautiously..."
-      ;;
-  esac
-
-  log_info "⚙️  Checking current Git autocrlf setting..."
-  local current_setting
-  current_setting=$(git config --global core.autocrlf || echo "unset")
-
-  if [[ "$current_setting" == "input" ]]; then
-    log_info "✅ Git core.autocrlf is already set to 'input'. No changes made."
-  else
-    git config --global core.autocrlf input && \
-    log_success "🔧 Git global config updated: core.autocrlf = input"
-  fi
-
-  local confirmed
-  confirmed=$(git config --global core.autocrlf)
-  log_info "📌 Confirmed: git core.autocrlf = $confirmed"
-}
-
-# ----- Install Dependancies ----------------------------------------------------
-install_dependancies() {
-  log_info "Installing dependancies..."
-  run_with_sudo apt-get install -y curl unzip apt-utils fakeroot dos2unix zip && \
-  fix_shell_scripts && \
-    log_success "APT Dependancies installed." || log_error "FATAL: Installing dependancies failed."
-}
-
-fix_shell_scripts() {
-  log_info "🔍 Scanning for shell scripts in: $PROJECT_PATH"
-
-  local found_any=false
-
-  while IFS= read -r -d '' script; do
-    found_any=true
-    local modified=false
-    local msg=""
-
-    log_info "🧪 Processing: $script"
-
-    # Fix line endings if CRLF
-    if file "$script" | grep -q "CRLF"; then
-      sed -i 's/\r$//' "$script"
-      modified=true
-      msg+="line endings fixed"
-    fi
-
-    # Make script executable if not already
-    if [ ! -x "$script" ]; then
-      chmod +x "$script"
-      modified=true
-      msg+="${msg:+, }made executable"
-    fi
-
-    # Log result
-    if $modified; then
-      log_success "✅ $script: $msg"
-    else
-      log_info "✔️  $script: already clean and executable"
-    fi
-
-  done < <(find "$PROJECT_PATH" -type f -name "*.sh" -print0)
-
-  if ! $found_any; then
-    log_info "ℹ️  No shell scripts found in: $PROJECT_PATH"
-  fi
-}
-
 
 # ----- Banner Display --------------------------------------------------------
 display_banner() {
@@ -445,29 +409,6 @@ add_user_to_docker() {
   run_with_sudo usermod -aG docker $VAGRANT_USER | newgrp docker && \
     log_success "User $VAGRANT_USER added to Docker group." || log_error "FATAL: Failed to add user $VAGRANT_USER to Docker group."
 }
-
-# ----- Add User to Docker Group and Apply Immediately -------------------------
-#add_user_to_docker() {
-#  log_info "Adding $USER to the 'docker' group..."
-#
-#  if id -nG "$USER" | grep -qw "docker"; then
-#    log_info "User $USER is already in the 'docker' group."
-#  else
-#    sudo usermod -aG docker "$USER" && \
-#      log_success "User $USER added to 'docker' group." || \
-#      log_error "FATAL: Failed to add user to 'docker' group."
-#
-#    log_info "Starting newgrp session to apply docker group membership immediately..."
-#    newgrp docker <<EOF
-#echo "[INFO] You are now in a new shell with 'docker' group applied."
-#echo "[INFO] Testing Docker access..."
-#docker version && echo "[SUCCESS] Docker group access confirmed." || echo "[ERROR] Docker access failed."
-#
-# Exit the subshell if desired, or the user can continue from here
-#exit
-#EOF
-#  fi
-#}
 
 # ----- Install NVM -----------------------------------------------------------
 install_nvm() {
@@ -615,7 +556,7 @@ clone_repositories() {
 install_packages() {
   log_info "Installing selected packages..."
   run_with_sudo apt-get install -y jq kubectl dos2unix build-essential git python3-pip python3 pkg-config \
-    shellcheck net-tools apt-transport-https unzip gnupg software-properties-common docker-compose-plugin \
+    shellcheck net-tools apt-transport-https gnupg software-properties-common docker-compose-plugin \
     terraform google-cloud-cli pass gpg gnupg2 xclip pinentry-tty powershell azure-cli && \
     log_success "APT Additional packages installed." || log_error "FATAL: APT Additional packages failed install."
 }
@@ -650,19 +591,14 @@ cleanup() {
 # Use Case 2  = Comments that start with a 2, are optional review comments below for more info
 main() {
   check_vagrant_user # 2 responsible for checking if we are a vagrant user and if so, we notify first
-  # set_git_autocrlf_input # detect os set git auto crlf helpful for win setups
-  # fix_shell_scripts # 2 chmod .sh +x the script folder and removes clrf if any
-  # make_scripts_executable # 2 chmod .sh +x the script folder, you need to do this manually if disabled
   install_dependancies  # 2 mainly to support extractions, utilities to automate and help run commands used for automation, disable for manual cycles
   display_banner # 2 fun stuff
   add_custom_motd # 2 more fun stuff but also the motd
   import_menu_aliases # if you plan to use cli menu and automation these are required
-  # update_bashrc_path to be determined
   create_directories # 2 create custom directories needed for use case 1
   copy_profile_files # 2 alias and bash stuff needed for use case 1
   configure_hostname_hosts # 2 create hostname and records needed for use case 1
   install_preflight  # 2 used to precheck our external facing scripts such as docker, remove or not your call used for use case 1
-  # install_spectral # 2 installs spectral code scanner not required
   install_docker  # 2 install script with preflight dont leave to chance used for use case 1
   add_user_to_docker  # 2 add our user to docker group use for use case 1
   install_nvm  # 2 installs node version mgr, not required but a personal fav
