@@ -84,23 +84,10 @@ Upon execution, `provision.sh` automates the installation and configuration of:
 1. **Internet Connection**: Required for downloading packages during provisioning.
 2. **Install Vagrant**: [Download Vagrant](https://developer.hashicorp.com/vagrant/install?product_intent=vagrant)
 3. **Install VirtualBox**: [Download VirtualBox](https://www.virtualbox.org/wiki/Downloads)
-4. **Clone Repository**:
+4. **Download Latest Release**: [buildserver-main.zip](https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip)
+5. **Extract**: buildserver-main.zip rename to folder **buildserver** Example Structure: **C:\buildserver\Vagrantfile**
+6. **Start Vagrant/VirtualBox Provisioning**:
 
-**Prior to cloning for Windows Git users**
-- If you use Windows non-wsl: Set the following: `git config --global core.autocrlf input`
-  This will keep your commits clean with LF only, even if editing on Windows. 
-
-- If you use **WSL/Linux environment** proceed below and clone the repo.
-
-- No git no worries, [download as zip below](https://github.com/chkp-altrevin/buildserver/blob/main/README.md#optional-deployment--download-as-zip).
-
-```bash
-git clone https://github.com/chkp-altrevin/buildserver.git
-```
-```bash
-cd buildserver
-```
-6. **Start Vagrant**:
    ```bash
    vagrant up # this is always ran in the root of the project folder where Vagrantfile is located
    ```
@@ -203,7 +190,7 @@ A sample `.env` file is provided at `/home/vagrant/.env` to assist with environm
 
 ### 🖥️ DNS and Hostname Configuration
 
-During provisioning, the Vagrant host is configured to use `buildserver.local`. Modify as needed:
+During provisioning, the Vagrant host is configured to use `buildserver.local`. Plan on using long-term, modify as needed:
 
 ```bash
 sudo hostnamectl set-hostname buildserver.local
@@ -265,8 +252,7 @@ An SBOM is generated post-provisioning and located in the root path. Installed p
 * `openssh-server`
 * `python3`
 * `terraform`
-* `unzip`
-* ...and many more.
+* ...and more.
 
 ---
 
@@ -279,6 +265,12 @@ An SBOM is generated post-provisioning and located in the root path. Installed p
 ## 🤝 Contributing
 
 Contributions are welcome! To contribute:
+
+**Prior to cloning for Windows Git users**
+- If you use Windows non-wsl: Set the following: `git config --global core.autocrlf input`
+  This will keep your commits clean with LF only, even if editing on Windows. 
+
+- If you use **WSL/Linux environment** proceed below and clone the repo.
 
 1. Fork the repository.
 2. Create a new branch:
