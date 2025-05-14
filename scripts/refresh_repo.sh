@@ -42,5 +42,4 @@ refresh_buildserver_repo() {
   log_info "Executing provision.sh as root..."
   (cd "$PROJECT_PATH" && sudo ./provision.sh) && log_success "Provisioning complete." || log_error "Provisioning failed."
 }
-check_vagrant_user
 refresh_buildserver_repo
