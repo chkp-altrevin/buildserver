@@ -32,11 +32,8 @@ refresh_buildserver_repo() {
   log_info "Pruning old backups in $BACKUP_DIR (keeping latest 3)..."
   ls -t "$BACKUP_DIR/${REPO_NAME}_backup_"*.zip 2>/dev/null | tail -n +4 | xargs -r rm -f &&     log_success "Old backups pruned." || log_info "No old backups to prune."
 
-  log_info "Removing existing project directory at $PROJECT_PATH..."
-  rm -rf "$PROJECT_PATH" && log_success "Old project directory removed." || log_error "Failed to remove existing project."
-
-  log_info "Cloning repository from $REPO_URL..."
-  git clone "$REPO_URL" "$PROJECT_PATH" && log_success "Repository cloned." || { log_error "Git clone failed."; return 1; }
+  log_info "Updating repository from $REPO_URL..."
+  cd $PROJECT_PATH && git pull origin --autostash && log_success "Repository Updated." || { log_error "Git Update failed."; return 1; }
 
   log_info "Setting executable permission on provision.sh..."
   chmod +x "$PROJECT_PATH/provision.sh" && log_success "provision.sh is now executable." || log_error "Failed to chmod provision.sh."
