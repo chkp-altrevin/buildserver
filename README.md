@@ -100,6 +100,20 @@ Upon execution, `provision.sh` automates the installation and configuration of:
    Example: C:\buildserver\vagrant ssh
 Upon SSH login, you'll be greeted with a custom MOTD and available commands to assist with further setup.
 
+---
+
+### 🧰 Use Case 2: Bring Your Own Linux
+
+---
+
+## 🛠️ Clone and Make it Yours!
+
+**Prior to cloning**
+
+**For Windows Vagrant and VirtualBox users**
+- If you use Windows (non-wsl): Set the following: `git config --global core.autocrlf input`
+  This will keep your commits clean with LF only, even if editing on Windows. 
+
 **🚀 Pro Tip!**
 If you see errors similiar to:
 ```
@@ -109,10 +123,7 @@ builder: /home/vagrant/.env: line 21: $'\r': command not found
  ```
 Above is a good indicator we are seeing crlf, did you set `git config --global core.autocrlf input` mentioned above? If you need to start over see below to reset.
 
----
-
-### 🧰 Use Case 2: Bring Your Own Linux
-
+- All others and **WSL/Linux environment** proceed below and clone the repo.
 1. **Clone Repository**:
 
    ```bash
@@ -134,30 +145,13 @@ Above is a good indicator we are seeing crlf, did you set `git config --global c
    ```
 ---
 
-## 🖥️ Troubleshooting
-Forgot a step or need to level set. No worries, follow the steps below.
+## 🖥️ Forgot a step or need to level set?
 
 ### Start Over | Use Case 1
-Step 1. Remove the repo it it exists, cd to C:\buildserver (or wherever you extracted to) --> vagrant destroy -f --> cd C:\ --> rmdir /S buildserver 
-Step 2. Setup Git: `git config --global core.autocrlf input` this will keep your commits clean with LF only, even if editing on Windows.
- - If you use an editor (e.g., VS Code, Notepad++, Sublime) configure to use LF line endings for shell scripts.
- - In VS Code: bottom-right corner → click "CRLF" → change to "LF".
- - If you can't get past issues with using Git, another option is to download as a zip see below.
+**Download Latest Release**: [buildserver-main.zip](https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip)
 
 ### Start Over | Use Case 2
-Step 1. Remove the repo, example: `rm -rf /home/vagrant/buildserver --> `cd /home/vagrant` Clone again `git clone https://github.com/chkp-altrevin/buildserver.git`
-Step 2. Change into our directory: `cd /home/user/buildserver`
-Step 3. Set execute permissions: `chmod +x provision.sh`
-Step 4. Re-run provisioning: `sudo ./provision.sh`
-
----
-
-### Optional Deployment | Download as Zip
-- Download: [buildserver-main.zip](https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip)
-- Extract: Make sure to rename folder to not include the branch name. Example: `C:\buildserver` or `$HOME/buildserver`
-- Provision: Use Case 1: `cd C:\buildserver` --> `vagrant up`
-- Provision: Use Case 2: `cd $HOME/buildserver` --> `sudo ./provision`
-- Login: `vagrant ssh` (use case 1)
+**Download Latest Release**: [buildserver-main.zip](https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip)
 
 ---
 
@@ -265,12 +259,6 @@ An SBOM is generated post-provisioning and located in the root path. Installed p
 ## 🤝 Contributing
 
 Contributions are welcome! To contribute:
-
-**Prior to cloning for Windows Git users**
-- If you use Windows non-wsl: Set the following: `git config --global core.autocrlf input`
-  This will keep your commits clean with LF only, even if editing on Windows. 
-
-- If you use **WSL/Linux environment** proceed below and clone the repo.
 
 1. Fork the repository.
 2. Create a new branch:
