@@ -5,7 +5,6 @@ display_menu() {
     clear
     echo "                                        QUICK-SETUP"
     echo "==================================================="
-    echo "This menu is here for quick deploy and convienence."
     echo ""
     echo "SETUP ENV VARS====================================="
     echo "1. EDIT 2. BACKUP 3. IMPORT 4. RESET  |   x. renv  "
@@ -21,7 +20,7 @@ display_menu() {
     echo "a. Cluster Status        | I. Install Cluster      "
     echo "p. Kubectl Get All Pods  | k. Kubectl Cluster-Info "
     echo "n. Kubectl Get Nodes     | R. Remove Cluster       "
-    echo "==================================================="
+    echo ""
     echo "Buildserver Info =================================="
     echo "Path: $PROJECT_PATH | User: $USER"
     echo "Current commit is: $(cd "$PROJECT_PATH" && git rev-parse --short HEAD) | Q. Update Project"
