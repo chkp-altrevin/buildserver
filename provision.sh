@@ -38,6 +38,13 @@ fi
 #
 check_vagrant_user() {
   if id "vagrant" &>/dev/null; then
+    if [[ "${FORCE_YES:-false}" == "true" ]]; then
+      echo "Forced yes. Continuing..."
+      echo "Detected 'vagrant' user — setting timezone to UTC..."
+      timedatectl set-timezone UTC && echo "Timezone set to UTC." || echo "Failed to set timezone."
+      return
+    fi
+
     echo "Manual provisioning, continue to update? [Y/n]"
     read -r response
     case "$response" in
