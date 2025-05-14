@@ -339,7 +339,7 @@ install_docker() {
     log_info "Docker is already installed. Skipping installation."
   else
     log_info "Installing Docker via Preflight..."
-    curl -fsSL https://get.docker.com | preflight run sha256=0158433a384a7ef6d60b6d58e556f4587dc9e1ee9768dae8958266ffb4f84f6f && \
+    curl -fsSL https://get.docker.com | preflight run sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 && \
       log_success "Docker installed." || log_error "FATAL: Docker installation failed. Check Preflight sha"
   fi
 }
@@ -567,7 +567,7 @@ main() {
   copy_profile_files # 2 alias and bash stuff needed for use case 1
   configure_hostname_hosts # 2 create hostname and records needed for use case 1
   install_preflight  # 2 used to precheck our external facing scripts such as docker, remove or not your call used for use case 1
-  install_spectral # 2 installs spectral code scanner not required
+  # install_spectral # 2 installs spectral code scanner not required
   install_docker  # 2 install script with preflight dont leave to chance used for use case 1
   add_user_to_docker  # 2 add our user to docker group use for use case 1
   install_nvm  # 2 installs node version mgr, not required but a personal fav
