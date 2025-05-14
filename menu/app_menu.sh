@@ -56,7 +56,7 @@ npm_remove() {
     local script_path="$PROJECT_PATH/scripts/npm_remove.sh"
     if [ -f "$script_path" ]; then
         echo "Removing Nginx Proxy Manager using $script_path"
-        sudo bash "$script_path"
+        bash "$script_path"
     else
         echo "Deployment script does not exist at $script_path."
     fi
