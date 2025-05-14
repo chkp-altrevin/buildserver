@@ -339,7 +339,7 @@ install_docker() {
     log_info "Docker is already installed. Skipping installation."
   else
     log_info "Installing Docker via Preflight..."
-    curl -fsSL https://get.docker.com | preflight run sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 && \
+    curl -fsSL https://get.docker.com | preflight run sha256=0158433a384a7ef6d60b6d58e556f4587dc9e1ee9768dae8958266ffb4f84f6f && \
       log_success "Docker installed." || log_error "FATAL: Docker installation failed. Check Preflight sha"
   fi
 }
