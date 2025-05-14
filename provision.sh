@@ -105,8 +105,6 @@ import_menu_aliases() {
 }
 #
 touch $PROJECT_PATH/provisioning.log
-# touch $PROJECT_PATH/success.log
-# touch $PROJECT_PATH/error.log
 #
 # --------- Logging Functions -------------------------------------------------
 
@@ -118,13 +116,11 @@ log_info() {
 log_success() {
   local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
   echo "[$timestamp] [SUCCESS] $1" >> $PROJECT_PATH/provisioning.log
-  # echo "[$timestamp] [SUCCESS] $1" >> $PROJECT_PATH/success.log
 }
 
 log_error() {
   local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
   echo "[$timestamp] [ERROR] $1" >> $PROJECT_PATH/provisioning.log
-  # echo "[$timestamp] [ERROR] $1" >> $PROJECT_PATH/error.log
 }
 
 # used to clear out error.logs when using vagrant up --provision
@@ -144,19 +140,17 @@ run_with_sudo() {
   fi
 }
 
-# ----- Install Dependancies ----------------------------------------------------
+# ----- Dependancy stuff --------------------------------------------------------
 install_dependancies() {
-  log_info "Installing dependancies..."
+  log_info "Installing dependencies..."
   run_with_sudo apt-get install -y curl unzip apt-utils fakeroot dos2unix zip && \
-    log_success "APT Dependancies installed." || log_error "FATAL: Installing dependancies failed."
-}
+    log_success "APT dependencies installed." || { log_error "FATAL: Installing dependencies failed."; return 1; }
 
-# ----- Add Permissions to scripts ----------------------------------------------
-fix_script_permissions() {
-  log_info "Searching for .sh files in $PROJECT_PATH to fix permissions..."
+  # Fix permissions on .sh files in $PROJECT_PATH
+  log_info "Searching for .sh files in $PROJECT_PATH to set executable permission..."
 
   if [[ ! -d "$PROJECT_PATH" ]]; then
-    log_error "Target directory $PROJECT_PATH does not exist. Aborting chmod operation."
+    log_error "Directory $PROJECT_PATH not found. Skipping chmod operation."
     return 1
   fi
 
@@ -165,18 +159,16 @@ fix_script_permissions() {
 
   if [[ -z "$sh_files" ]]; then
     log_info "No .sh files found in $PROJECT_PATH"
-    return 0
+  else
+    while IFS= read -r script; do
+      if chmod +x "$script"; then
+        log_success "Set executable: $script"
+      else
+        log_error "Failed to chmod: $script"
+      fi
+    done <<< "$sh_files"
+    log_info "chmod +x applied to all .sh files in $PROJECT_PATH"
   fi
-
-  while IFS= read -r script; do
-    if chmod +x "$script"; then
-      log_success "Set executable permission: $script"
-    else
-      log_error "Failed to chmod: $script"
-    fi
-  done <<< "$sh_files"
-
-  log_info "Completed chmod operation on .sh files."
 }
 
 # ----- Banner Display --------------------------------------------------------
