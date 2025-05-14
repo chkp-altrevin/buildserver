@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+FORCE_YES=true
 LOG_FILE="$HOME/refresh_repo.log"
 
 log_info()    { echo -e "\033[1;34m[INFO]\033[0m    $(date '+%F %T') $*" | tee -a "$LOG_FILE"; }
@@ -41,5 +42,5 @@ refresh_buildserver_repo() {
   log_info "Executing provision.sh as root..."
   (cd "$PROJECT_PATH" && sudo ./provision.sh) && log_success "Provisioning complete." || log_error "Provisioning failed."
 }
-
+check_vagrant_user
 refresh_buildserver_repo
