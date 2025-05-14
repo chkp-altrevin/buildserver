@@ -9,7 +9,7 @@ log_error()   { echo -e "\033[1;31m[ERROR]\033[0m   $(date '+%F %T') $*" | tee -
 refresh_buildserver_repo() {
   local REPO_URL="https://github.com/chkp-altrevin/buildserver.git"
   local REPO_NAME="buildserver"
-  local PROJECT_PATH="$HOME/$REPO_NAME"
+  # local PROJECT_PATH="$HOME/$REPO_NAME"
   local BACKUP_DIR="$HOME/backups"
   local BACKUP_NAME="${REPO_NAME}_backup_$(date +%Y%m%d_%H%M%S).zip"
   local BACKUP_PATH="$BACKUP_DIR/$BACKUP_NAME"
