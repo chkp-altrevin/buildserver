@@ -1,45 +1,93 @@
 #!/usr/bin/env bash
 
-FORCE_YES=true
-LOG_FILE="$HOME/refresh_repo.log"
+install_buildserver_repo() {
+  local REPO_URL="https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip"
+  local ZIP_NAME="buildserver-main.zip"
+  local DEST_DIR="$HOME"
+  local EXTRACTED_FOLDER="buildserver-main"
+  local TARGET_FOLDER="buildserver"
+  local TARGET_PATH="$DEST_DIR/$TARGET_FOLDER"
+  local BACKUP_PATH="$DEST_DIR/${TARGET_FOLDER}_backup_$(date '+%Y%m%d_%H%M%S').zip"
+  local TEMP_DIR="$HOME/temp_download"
+  local LOG_FILE="$HOME/buildserver_download.log"
 
-log_info()    { echo -e "\033[1;34m[INFO]\033[0m    $(date '+%F %T') $*" | tee -a "$LOG_FILE"; }
-log_success() { echo -e "\033[1;32m[SUCCESS]\033[0m $(date '+%F %T') $*" | tee -a "$LOG_FILE"; }
-log_error()   { echo -e "\033[1;31m[ERROR]\033[0m   $(date '+%F %T') $*" | tee -a "$LOG_FILE" >&2; }
+  # Logging functions
+  log_info()    { echo -e "$(date '+%F %T') [INFO]    $*" | tee -a "$LOG_FILE"; }
+  log_success() { echo -e "$(date '+%F %T') [SUCCESS] $*" | tee -a "$LOG_FILE"; }
+  log_error()   { echo -e "$(date '+%F %T') [ERROR]   $*" | tee -a "$LOG_FILE" >&2; }
 
-refresh_buildserver_repo() {
-  local REPO_URL="https://github.com/chkp-altrevin/buildserver.git"
-  local REPO_NAME="buildserver"
-  # local PROJECT_PATH="$HOME/$REPO_NAME"
-  local BACKUP_DIR="$HOME/backups"
-  local BACKUP_NAME="${REPO_NAME}_backup_$(date +%Y%m%d_%H%M%S).zip"
-  local BACKUP_PATH="$BACKUP_DIR/$BACKUP_NAME"
+  log_info "Starting installation of buildserver repo..."
 
-  # Ensure 'zip' is installed
-  command -v zip &>/dev/null || {
-    log_info "Installing zip package..."
-    sudo apt-get update -y && sudo apt-get install -y zip && log_success "zip installed." || log_error "Failed to install zip."
-  }
-
-  mkdir -p "$BACKUP_DIR"
-
-  if [ -d "$PROJECT_PATH/.git" ]; then
-    log_info "Creating backup of existing repo at $BACKUP_PATH..."
-    (cd "$PROJECT_PATH" && zip -r "$BACKUP_PATH" . > /dev/null) &&       log_success "Backup created: $BACKUP_PATH" ||       log_error "Failed to create backup archive."
-  else
-    log_info "No existing repo found to backup."
+  # Check if directory exists
+  if [[ -d "$TARGET_PATH" ]]; then
+    echo "⚠️  '$TARGET_PATH' already exists."
+    echo -n "Do you want to overwrite it and back up the existing folder? [y/N]: "
+    read -r response
+    case "$response" in
+      [yY][eE][sS]|[yY])
+        log_info "Backing up current folder to: $BACKUP_PATH"
+        if zip -r -q "$BACKUP_PATH" "$TARGET_PATH"; then
+          log_success "Backup successful."
+        else
+          log_error "Failed to create backup. Exiting."
+          return 1
+        fi
+        rm -rf "$TARGET_PATH"
+        log_info "Old folder removed."
+        ;;
+      *)
+        log_info "User chose not to proceed. Exiting."
+        return 0
+        ;;
+    esac
   fi
 
-  log_info "Pruning old backups in $BACKUP_DIR (keeping latest 3)..."
-  ls -t "$BACKUP_DIR/${REPO_NAME}_backup_"*.zip 2>/dev/null | tail -n +4 | xargs -r rm -f &&     log_success "Old backups pruned." || log_info "No old backups to prune."
+  # Create temp directory
+  mkdir -p "$TEMP_DIR"
+  cd "$TEMP_DIR" || { log_error "Could not access temp dir."; return 1; }
 
-  log_info "Updating repository from $REPO_URL..."
-  cd $PROJECT_PATH && git pull origin --autostash && log_success "Repository Updated." || { log_error "Git Update failed."; return 1; }
+  # Download zip file
+  log_info "Downloading repository from $REPO_URL..."
+  if curl -L -o "$ZIP_NAME" "$REPO_URL"; then
+    log_success "Downloaded $ZIP_NAME"
+  else
+    log_error "Download failed."
+    return 1
+  fi
 
-  log_info "Setting executable permission on provision.sh..."
-  chmod +x "$PROJECT_PATH/provision.sh" && log_success "provision.sh is now executable." || log_error "Failed to chmod provision.sh."
+  # Unzip into $HOME
+  log_info "Unzipping into $DEST_DIR..."
+  if unzip -q "$ZIP_NAME" -d "$DEST_DIR"; then
+    log_success "Unzipped successfully."
+  else
+    log_error "Unzip failed."
+    return 1
+  fi
 
-  log_info "Executing provision.sh as root..."
-  (cd "$PROJECT_PATH" && sudo ./provision.sh) && log_success "Provisioning complete." || log_error "Provisioning failed."
+  # Rename folder
+  if mv "$DEST_DIR/$EXTRACTED_FOLDER" "$TARGET_PATH"; then
+    log_success "Renamed '$EXTRACTED_FOLDER' to '$TARGET_FOLDER'"
+  else
+    log_error "Failed to rename extracted folder."
+    return 1
+  fi
+
+  # chmod +x all .sh files
+  log_info "Applying chmod +x to all .sh files..."
+  local sh_files
+  sh_files=$(find "$TARGET_PATH" -type f -name "*.sh")
+  if [[ -n "$sh_files" ]]; then
+    while IFS= read -r file; do
+      chmod +x "$file" && log_info "chmod +x applied to $file" || log_error "Failed to chmod $file"
+    done <<< "$sh_files"
+    log_success "All shell scripts are now executable."
+  else
+    log_info "No .sh files found to chmod."
+  fi
+
+  # Cleanup
+  rm -rf "$TEMP_DIR"
+  log_info "Installation complete. Temporary files cleaned."
 }
-refresh_buildserver_repo
+
+install_buildserver_repo
