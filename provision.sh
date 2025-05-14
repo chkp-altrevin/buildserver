@@ -140,34 +140,43 @@ run_with_sudo() {
   fi
 }
 
-# ----- Dependancy stuff --------------------------------------------------------
-install_dependancies() {
+# ----- Dependency stuff --------------------------------------------------------
+install_dependencies() {
   log_info "Installing dependencies..."
-  run_with_sudo apt-get install -y curl unzip apt-utils fakeroot dos2unix zip && \
-    log_success "APT dependencies installed." || { log_error "FATAL: Installing dependencies failed."; return 1; }
 
-  # Fix permissions on .sh files in $PROJECT_PATH
-  log_info "Searching for .sh files in $PROJECT_PATH to set executable permission..."
+  run_with_sudo apt-get update -y || {
+    log_error "FATAL: apt-get update failed."
+    return 1
+  }
+
+  run_with_sudo apt-get install -y curl unzip apt-utils fakeroot dos2unix zip || {
+    log_error "FATAL: Installing dependencies failed."
+    return 1
+  }
+
+  log_success "APT dependencies installed."
 
   if [[ ! -d "$PROJECT_PATH" ]]; then
     log_error "Directory $PROJECT_PATH not found. Skipping chmod operation."
     return 1
   fi
 
-  local sh_files
-  sh_files=$(find "$PROJECT_PATH" -type f -name "*.sh")
+  log_info "Searching for .sh files in $PROJECT_PATH to set executable permission..."
 
-  if [[ -z "$sh_files" ]]; then
+  local count=0
+  while IFS= read -r -d '' script; do
+    if chmod +x "$script"; then
+      log_success "Set executable: $script"
+      ((count++))
+    else
+      log_error "Failed to chmod: $script"
+    fi
+  done < <(find "$PROJECT_PATH" -type f -name "*.sh" -print0)
+
+  if [[ $count -eq 0 ]]; then
     log_info "No .sh files found in $PROJECT_PATH"
   else
-    while IFS= read -r script; do
-      if chmod +x "$script"; then
-        log_success "Set executable: $script"
-      else
-        log_error "Failed to chmod: $script"
-      fi
-    done <<< "$sh_files"
-    log_info "chmod +x applied to all .sh files in $PROJECT_PATH"
+    log_info "chmod +x applied to $count .sh files in $PROJECT_PATH"
   fi
 }
 
