@@ -282,6 +282,34 @@ Please ensure your code adheres to the existing style and includes relevant test
 
 ---
 
+## 🆕 What’s Included:
+
+### 🔁 Script Reference:
+* One-liners and script logic now dynamically point to:
+
+  ```
+  https://raw.githubusercontent.com/${YOUR_USERNAME:-chkp-altrevin}/buildserver/main/provision.sh
+  ```
+
+---
+
+### 🚀 GitHub Release Workflow:
+
+* **File**: `.github/workflows/release.yml`
+* Automatically zips and uploads `buildserver-release.zip` when you push a tag like `v1.0.0`
+
+---
+
+### 📦 Next Steps – Precompiled `.exe` Installer
+
+* Installs `provision.ps1` and shortcut to Desktop
+* Optional checkbox to run the script after install
+
+
+
+
+---
+
 ## 📄 License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
