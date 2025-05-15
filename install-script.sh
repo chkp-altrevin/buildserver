@@ -5,7 +5,7 @@ set -euo pipefail
 DEFAULT_PROJECT_PATH="${HOME}/buildserver"
 BACKUP_DIR="${HOME}/backup"
 MAX_BACKUPS=3
-REPO_URL="https://github.com/${YOUR_USERNAME:-chkp-altrevin}/buildserver/archive/refs/heads/main.zip"
+REPO_URL="https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip"
 INSTALL=false
 AUTO_CONFIRM=false
 SUDO=""
@@ -179,6 +179,12 @@ main() {
     FORCE=true
     backup_existing_project
     install_project
+  if [ -x "$HOME/buildserver/provision.sh" ]; then
+    echo "🚀 Running post-install: provision.sh..."
+    "$HOME/buildserver/provision.sh"
+  else
+    echo "⚠️  provision.sh not found or not executable at $HOME/buildserver/provision.sh"
+  fi
     exit 0
   fi
 
