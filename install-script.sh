@@ -46,6 +46,7 @@ parse_args() {
   RESTORE=""
   DRY_RUN=false
   INSTALL=false
+  AUTO_CONFIRM=false
 
   for arg in "$@"; do
     case "$arg" in
@@ -64,6 +65,9 @@ parse_args() {
       --install)
         INSTALL=true
         ;;
+      --auto-confirm)
+        AUTO_CONFIRM=true
+        ;;
       --help)
         usage
         ;;
@@ -76,8 +80,10 @@ parse_args() {
 }
 
 check_dependencies() {
+  REQUIRED_CMDS=(curl zip unzip)
   MISSING=()
-  for cmd in curl unzip zip; do
+
+  for cmd in "${REQUIRED_CMDS[@]}"; do
     if ! command -v "$cmd" >/dev/null 2>&1; then
       MISSING+=("$cmd")
     fi
@@ -87,25 +93,24 @@ check_dependencies() {
     return
   fi
 
-  echo "Missing required dependencies: ${MISSING[*]}"
-  read -rp "Would you like to attempt to install them now? (yes/no): " CONFIRM
+  echo "❌ Missing required dependencies: ${MISSING[*]}"
+  if [ "$AUTO_CONFIRM" = true ]; then CONFIRM=yes; else read -rp "Would you like to attempt to install them now? (yes/no): " CONFIRM; fi
   case "$CONFIRM" in
     yes|y|Y)
-      echo "Attempting to install: ${MISSING[*]}"
       if command -v apt-get >/dev/null; then
-        sudo apt-get update && sudo apt-get install -y "${MISSING[@]}"
+        $SUDO apt-get update && $SUDO apt-get install -y "${MISSING[@]}"
       elif command -v dnf >/dev/null; then
-        sudo dnf install -y "${MISSING[@]}"
+        $SUDO dnf install -y "${MISSING[@]}"
       elif command -v yum >/dev/null; then
-        sudo yum install -y "${MISSING[@]}"
+        $SUDO yum install -y "${MISSING[@]}"
       elif command -v apk >/dev/null; then
-        sudo apk add --no-cache "${MISSING[@]}"
+        $SUDO apk add --no-cache "${MISSING[@]}"
       elif command -v pacman >/dev/null; then
-        sudo pacman -Sy --noconfirm "${MISSING[@]}"
+        $SUDO pacman -Sy --noconfirm "${MISSING[@]}"
       elif command -v brew >/dev/null; then
         brew install "${MISSING[@]}"
       else
-        echo "Unsupported package manager. Please install manually: ${MISSING[*]}"
+        echo "⚠️  Unsupported package manager. Please install manually: ${MISSING[*]}"
         exit 1
       fi
       ;;
