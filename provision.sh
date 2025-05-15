@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+# set -e
 # ==============================================================================
 # DIY Buildserver Lab Environment Setup Script
 #
@@ -38,7 +38,7 @@ fi
 #
 check_vagrant_user() {
   if id "vagrant" &>/dev/null; then
-    echo "The server is already provisioned, content in $PROJECT_PATH folder may be overridden. Proceed with update? [Y/n]"
+    echo "Manual provisioning, continue to update? [Y/n]"
     read -r response
     case "$response" in
       [nN][oO]|[nN])
@@ -66,9 +66,8 @@ VERSION_ID=$(generate_version_id)
 
 # Append the version
 echo "$VERSION_ID" >> "$PROJECT_PATH/version.txt"
-# echo "Current commit is: $(git rev-parse --short HEAD)" >> "$PROJECT_PATH/version.txt"
 
-# ---- Function to add optional aliases checks in place for no override -------
+# --------- Function to add optional aliases ---------------------------------
 import_menu_aliases() {
   local aliases_file="$HOME/.bash_aliases"
   local -A menu_aliases=(
@@ -105,8 +104,10 @@ import_menu_aliases() {
 }
 #
 touch $PROJECT_PATH/provisioning.log
+touch $PROJECT_PATH/success.log
+touch $PROJECT_PATH/error.log
 #
-# --------- Logging Functions -------------------------------------------------
+# --------- Logging Functions ------------------------------------------------
 
 log_info() {
   local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
@@ -116,19 +117,21 @@ log_info() {
 log_success() {
   local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
   echo "[$timestamp] [SUCCESS] $1" >> $PROJECT_PATH/provisioning.log
+  echo "[$timestamp] [SUCCESS] $1" >> $PROJECT_PATH/success.log
 }
 
 log_error() {
   local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
   echo "[$timestamp] [ERROR] $1" >> $PROJECT_PATH/provisioning.log
+  echo "[$timestamp] [ERROR] $1" >> $PROJECT_PATH/error.log
 }
 
 # used to clear out error.logs when using vagrant up --provision
-# touch $PROJECT_PATH/error.log
-# > "$PROJECT_PATH/error.log"
+touch $PROJECT_PATH/error.log
+> "$PROJECT_PATH/error.log"
 # used to clear out success.logs when using vagrant up --provision
-# touch $PROJECT_PATH/success.log
-# > "$PROJECT_PATH/success.log"
+touch $PROJECT_PATH/success.log
+> "$PROJECT_PATH/success.log"
 
 # ------ Helper Function for Sudo ----------------------------------------------
 # run_with_sudo: Executes a command with sudo if not already running as root.
@@ -140,58 +143,19 @@ run_with_sudo() {
   fi
 }
 
-install_dependencies() {
-  log_info "Installing dependencies..."
-
-  if [[ -z "$PROJECT_PATH" ]]; then
-    log_error "PROJECT_PATH is not set. Aborting."
-    return 1
-  fi
-
-  ping -c 1 1.1.1.1 >/dev/null 2>&1 || {
-    log_error "No internet connection. Cannot install packages."
-    return 1
-  }
-
-  run_with_sudo apt-get update -y || {
-    log_error "FATAL: apt-get update failed."
-    return 1
-  }
-
-  log_info "Installing: curl unzip apt-utils fakeroot dos2unix zip"
-  run_with_sudo apt-get install -y curl unzip apt-utils fakeroot dos2unix zip || {
-    log_error "FATAL: Installing dependencies failed."
-    return 1
-  }
-
-  log_success "APT dependencies installed."
-
-  if [[ ! -d "$PROJECT_PATH" ]]; then
-    log_error "Directory $PROJECT_PATH not found. Skipping chmod operation."
-    return 1
-  fi
-
-  log_info "Searching for .sh files in $PROJECT_PATH to set executable permission..."
-
-  local count=0
-  while IFS= read -r -d '' script; do
-    if chmod +x "$script"; then
-      log_success "Set executable: $script"
-      ((count++))
-    else
-      log_error "Failed to chmod: $script"
-    fi
-  done < <(find "$PROJECT_PATH" -type f -name "*.sh" -print0)
-
-  if [[ $count -eq 0 ]]; then
-    log_info "No .sh files found in $PROJECT_PATH"
-  else
-    log_info "chmod +x applied to $count .sh files in $PROJECT_PATH"
-  fi
-
-  return 0
+# ----------Function to set execute permissions to scripts folder ------------
+make_scripts_executable() {
+  log_info "Setting +x on sh files in scripts folder..."
+  find $PROJECT_PATH/scripts -type f -name "*.sh" -exec chmod +x {} \; && \
+    log_success "Permissions set successfully." || log_error "FATAL: Setting permissions failed."
 }
 
+# ----- Install Dependancies ----------------------------------------------------
+install_dependancies() {
+  log_info "Installing dependancies..."
+  run_with_sudo apt-get install -y curl unzip apt-utils fakeroot && \
+    log_success "APT Dependancies installed." || log_error "FATAL: Installing dependancies failed."
+}
 
 # ----- Banner Display --------------------------------------------------------
 display_banner() {
@@ -246,7 +210,7 @@ copy_profile_files() {
     log_info "bash_aliases will apply on next login or manually source it."
   fi
 
-  # Sanity check export environment variables from .env if any (ignore comments)
+  # Export environment variables from .env (ignore comments)
   if [[ -f "$env_file_path" ]]; then
     log_info "Loading environment variables from .env..."
     set -a
@@ -298,11 +262,35 @@ install_docker() {
 }
 
 # ----- Add User to Docker Group ----------------------------------------------
+#add_user_to_docker() {
+#  log_info "Adding user $VAGRANT_USER to the Docker group..."
+#  run_with_sudo usermod -aG docker $VAGRANT_USER | newgrp docker && \
+#    log_success "User $VAGRANT_USER added to Docker group." || log_error "FATAL: Failed to add user $VAGRANT_USER to Docker group."
+#}
+#
+# ----- Add User to Docker Group and Apply Immediately -------------------------
 add_user_to_docker() {
-  log_info "Adding user $VAGRANT_USER to the Docker group..."
-  run_with_sudo usermod -aG docker $VAGRANT_USER | newgrp docker && \
-    log_success "User $VAGRANT_USER added to Docker group." || log_error "FATAL: Failed to add user $VAGRANT_USER to Docker group."
+  log_info "Adding $USER to the 'docker' group..."
+
+  if id -nG "$USER" | grep -qw "docker"; then
+    log_info "User $USER is already in the 'docker' group."
+  else
+    sudo usermod -aG docker "$USER" && \
+      log_success "User $USER added to 'docker' group." || \
+      log_error "FATAL: Failed to add user to 'docker' group."
+
+    log_info "Starting newgrp session to apply docker group membership immediately..."
+    newgrp docker <<EOF
+echo "[INFO] You are now in a new shell with 'docker' group applied."
+echo "[INFO] Testing Docker access..."
+docker version && echo "[SUCCESS] Docker group access confirmed." || echo "[ERROR] Docker access failed."
+
+# Exit the subshell if desired, or the user can continue from here
+exit
+EOF
+  fi
 }
+
 
 # ----- Install NVM -----------------------------------------------------------
 install_nvm() {
@@ -450,7 +438,7 @@ clone_repositories() {
 install_packages() {
   log_info "Installing selected packages..."
   run_with_sudo apt-get install -y jq kubectl dos2unix build-essential git python3-pip python3 pkg-config \
-    shellcheck net-tools apt-transport-https gnupg software-properties-common docker-compose-plugin \
+    shellcheck net-tools apt-transport-https unzip gnupg software-properties-common docker-compose-plugin \
     terraform google-cloud-cli pass gpg gnupg2 xclip pinentry-tty powershell azure-cli && \
     log_success "APT Additional packages installed." || log_error "FATAL: APT Additional packages failed install."
 }
@@ -485,14 +473,17 @@ cleanup() {
 # Use Case 2  = Comments that start with a 2, are optional review comments below for more info
 main() {
   check_vagrant_user # 2 responsible for checking if we are a vagrant user and if so, we notify first
-  install_dependencies  # 2 mainly to support extractions, utilities to automate and help run commands used for automation, disable for manual cycles
+  make_scripts_executable # 2 chmod .sh +x the script folder, you need to do this manually if disabled
+  install_dependancies  # 2 mainly to support extractions, utilities to automate and help run commands used for automation, disable for manual cycles
   display_banner # 2 fun stuff
   add_custom_motd # 2 more fun stuff but also the motd
   import_menu_aliases # if you plan to use cli menu and automation these are required
+  # update_bashrc_path to be determined
   create_directories # 2 create custom directories needed for use case 1
   copy_profile_files # 2 alias and bash stuff needed for use case 1
   configure_hostname_hosts # 2 create hostname and records needed for use case 1
   install_preflight  # 2 used to precheck our external facing scripts such as docker, remove or not your call used for use case 1
+  install_spectral # 2 installs spectral code scanner not required
   install_docker  # 2 install script with preflight dont leave to chance used for use case 1
   add_user_to_docker  # 2 add our user to docker group use for use case 1
   install_nvm  # 2 installs node version mgr, not required but a personal fav
@@ -526,14 +517,14 @@ echo "==========================================================================
 echo "========================================================================= "
 echo "| Provisioning Log     | saved to $PROJECT_PATH/provisioning.log          "
 echo "| Software Packages    | exported to $PROJECT_PATH/initial_sbom           "
+echo "| Provision Error Logs | exported to $PROJECT_PATH/error.log              "
 echo "=========================================================================="
 sleep 6
-echo "Summarizing ERRORs if any"
+echo "Summarizing errors if any"
 echo ""
-grep ERROR "$PROJECT_PATH/provisioning.log"
+cat "$PROJECT_PATH/success.log"
 echo "=========================================================================="
-echo "✅ Success entries:"
-grep SUCCESS "$PROJECT_PATH/provisioning.log"
+cat "$PROJECT_PATH/error.log"
 echo ""
 echo "If errors, fix and reprovision using, vagrant up --provision. If this is a"
 echo "custom install using provision.sh, you can likely ignore NON-FATAL errors."
