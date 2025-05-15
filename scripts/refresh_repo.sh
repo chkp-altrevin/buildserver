@@ -21,7 +21,7 @@ install_buildserver_repo() {
   # Check if directory exists
   if [[ -d "$TARGET_PATH" ]]; then
     echo "⚠️  '$TARGET_PATH' already exists."
-    echo -n "Do you want to overwrite it and back up the existing folder? [y/N]: "
+    echo -n "This will Backup and Update the Project: $PROJECT_PATH. Proceed? [y/N]: "
     read -r response
     case "$response" in
       [yY][eE][sS]|[yY])
@@ -32,8 +32,19 @@ install_buildserver_repo() {
           log_error "Failed to create backup. Exiting."
           return 1
         fi
-        rm -rf "$TARGET_PATH"
-        log_info "Old folder removed."
+  
+        log_info "Unzipping update over existing folder..."
+        if unzip -o -q "$ZIP_PATH" -d "$HOME"; then
+          log_success "Update unzipped successfully to $HOME"
+          # Optional: rename if needed
+          if [[ -d "$HOME/buildserver-main" ]]; then
+            mv -f "$HOME/buildserver-main" "$TARGET_PATH"
+            log_success "Renamed 'buildserver-main' to 'buildserver'"
+          fi
+        else
+          log_error "Failed to unzip update. Exiting."
+          return 1
+        fi
         ;;
       *)
         log_info "User chose not to proceed. Exiting."
