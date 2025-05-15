@@ -140,15 +140,25 @@ run_with_sudo() {
   fi
 }
 
-# ----- Dependency stuff --------------------------------------------------------
 install_dependencies() {
   log_info "Installing dependencies..."
+
+  if [[ -z "$PROJECT_PATH" ]]; then
+    log_error "PROJECT_PATH is not set. Aborting."
+    return 1
+  fi
+
+  ping -c 1 1.1.1.1 >/dev/null 2>&1 || {
+    log_error "No internet connection. Cannot install packages."
+    return 1
+  }
 
   run_with_sudo apt-get update -y || {
     log_error "FATAL: apt-get update failed."
     return 1
   }
 
+  log_info "Installing: curl unzip apt-utils fakeroot dos2unix zip"
   run_with_sudo apt-get install -y curl unzip apt-utils fakeroot dos2unix zip || {
     log_error "FATAL: Installing dependencies failed."
     return 1
@@ -178,7 +188,10 @@ install_dependencies() {
   else
     log_info "chmod +x applied to $count .sh files in $PROJECT_PATH"
   fi
+
+  return 0
 }
+
 
 # ----- Banner Display --------------------------------------------------------
 display_banner() {
