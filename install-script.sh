@@ -143,6 +143,12 @@ restore_backup() {
       rm -rf "$PROJECT_PATH"
       unzip -q "$BACKUP_FILE" -d "$(dirname "$PROJECT_PATH")"
       echo "✅ Project restored from backup."
+
+  echo "🔧 Setting execute permissions on all .sh files in $PROJECT_PATH..."
+  find "$PROJECT_PATH" -type f -name "*.sh" -exec chmod +x {} \;
+
+  echo "🔐 Setting executable permissions on .sh files in $PROJECT_PATH..."
+  find "$PROJECT_PATH" -type f -name "*.sh" -exec chmod +x {} \;
       exit 0
       ;;
     *)
@@ -162,6 +168,12 @@ install_project() {
   rm -rf "$PROJECT_PATH"
   mv "$EXTRACTED_DIR" "$PROJECT_PATH"
   echo "✅ Project installed at '$PROJECT_PATH'"
+
+  echo "🔧 Setting execute permissions on all .sh files in $PROJECT_PATH..."
+  find "$PROJECT_PATH" -type f -name "*.sh" -exec chmod +x {} \;
+
+  echo "🔐 Setting executable permissions on .sh files in $PROJECT_PATH..."
+  find "$PROJECT_PATH" -type f -name "*.sh" -exec chmod +x {} \;
   rm -rf "$TMP_DIR"
 }
 
