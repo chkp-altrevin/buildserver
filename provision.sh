@@ -241,15 +241,6 @@ install_preflight() {
     log_success "Preflight installed." || log_error "FATAL: Preflight installation failed. If this was a --provision you can likely ignore"
 }
 
-# ----- Install Spectral ------------------------------------------------------
-install_spectral() {
-  log_info "Installing Spectral..."
-  curl -L 'https://spectral-us.dome9.com/latest/x/sh' | sh && \
-    log_success "Spectral installed." || log_error "FATAL: Spectral installation failed."
-  run_with_sudo cp /root/.spectral/spectral /usr/local/bin && \
-    log_success "Spectral copied to /usr/local/bin." || log_error "FATAL: Failed to copy Spectral to /usr/local/bin."
-}
-
 # ----- Install Docker Using Preflight ----------------------------------------
 install_docker() {
   if command -v docker >/dev/null 2>&1; then
@@ -262,36 +253,11 @@ install_docker() {
 }
 
 # ----- Add User to Docker Group ----------------------------------------------
-#add_user_to_docker() {
-#  log_info "Adding user $VAGRANT_USER to the Docker group..."
-#  run_with_sudo usermod -aG docker $VAGRANT_USER | newgrp docker && \
-#    log_success "User $VAGRANT_USER added to Docker group." || log_error "FATAL: Failed to add user $VAGRANT_USER to Docker group."
-#}
-#
-# ----- Add User to Docker Group and Apply Immediately -------------------------
 add_user_to_docker() {
-  log_info "Adding $USER to the 'docker' group..."
-
-  if id -nG "$USER" | grep -qw "docker"; then
-    log_info "User $USER is already in the 'docker' group."
-  else
-    sudo usermod -aG docker "$USER" && \
-      log_success "User $USER added to 'docker' group." || \
-      log_error "FATAL: Failed to add user to 'docker' group."
-
-    log_info "Starting newgrp session to apply docker group membership immediately..."
-    newgrp docker <<EOF
-echo "[INFO] You are now in a new shell with 'docker' group applied."
-echo "[INFO] Testing Docker access..."
-docker version && echo "[SUCCESS] Docker group access confirmed." || echo "[ERROR] Docker access failed."
-
-# Exit the subshell if desired, or the user can continue from here
-exit
-EOF
-  fi
+  log_info "Adding user $VAGRANT_USER to the Docker group..."
+  run_with_sudo usermod -aG docker $VAGRANT_USER | newgrp docker && \
+    log_success "User $VAGRANT_USER added to Docker group." || log_error "FATAL: Failed to add user $VAGRANT_USER to Docker group."
 }
-
-
 # ----- Install NVM -----------------------------------------------------------
 install_nvm() {
   log_info "Installing NVM..."
@@ -474,16 +440,14 @@ cleanup() {
 main() {
   check_vagrant_user # 2 responsible for checking if we are a vagrant user and if so, we notify first
   make_scripts_executable # 2 chmod .sh +x the script folder, you need to do this manually if disabled
-  install_dependancies  # 2 mainly to support extractions, utilities to automate and help run commands used for automation, disable for manual cycles
+  install_dependencies  # 2 mainly to support extractions, utilities to automate and help run commands used for automation, disable for manual cycles
   display_banner # 2 fun stuff
   add_custom_motd # 2 more fun stuff but also the motd
   import_menu_aliases # if you plan to use cli menu and automation these are required
-  # update_bashrc_path to be determined
   create_directories # 2 create custom directories needed for use case 1
   copy_profile_files # 2 alias and bash stuff needed for use case 1
   configure_hostname_hosts # 2 create hostname and records needed for use case 1
   install_preflight  # 2 used to precheck our external facing scripts such as docker, remove or not your call used for use case 1
-  install_spectral # 2 installs spectral code scanner not required
   install_docker  # 2 install script with preflight dont leave to chance used for use case 1
   add_user_to_docker  # 2 add our user to docker group use for use case 1
   install_nvm  # 2 installs node version mgr, not required but a personal fav
