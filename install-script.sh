@@ -1,3 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# === Constants ===
+DEFAULT_PROJECT_PATH="${HOME}/buildserver"
+BACKUP_DIR="${HOME}/backup"
+MAX_BACKUPS=3
+REPO_URL="https://github.com/${YOUR_USERNAME:-chkp-altrevin}/buildserver/archive/refs/heads/main.zip"
+INSTALL=false
+AUTO_CONFIRM=false
+SUDO=""
+
 usage() {
   cat <<EOF
 Usage: $0 [OPTIONS]
@@ -8,36 +20,10 @@ Options:
   --restore=FILE        Restore from a previous backup zip
   --force               Overwrite without confirmation
   --dry-run             Simulate actions without changes
+  --auto-confirm        Automatically install missing dependencies
   --help                Show this help message
 EOF
   exit 0
-}
-
-require_root_or_sudo() {
-  if [ "$(id -u)" -ne 0 ]; then
-    echo "⚠️  This script may require root privileges. Re-run with sudo if needed."
-    SUDO="sudo"
-  else
-    SUDO=""
-  fi
-}
-
-#!/usr/bin/env bash
-set -euo pipefail
-
-# === Constants ===
-DEFAULT_PROJECT_PATH="${HOME}/buildserver"
-BACKUP_DIR="${HOME}/backup"
-MAX_BACKUPS=3
-REPO_URL="https://github.com/${YOUR_USERNAME:-chkp-altrevin}/buildserver/archive/refs/heads/main.zip"
-INSTALL=false
-SUDO=""
-
-# === Functions ===
-
-usage() {
-  echo "Usage: $0 [--project-path=PATH] [--force] [--restore=FILE] [--dry-run]"
-  exit 1
 }
 
 parse_args() {
@@ -45,8 +31,6 @@ parse_args() {
   FORCE=false
   RESTORE=""
   DRY_RUN=false
-  INSTALL=false
-  AUTO_CONFIRM=false
 
   for arg in "$@"; do
     case "$arg" in
@@ -79,6 +63,13 @@ parse_args() {
   done
 }
 
+require_root_or_sudo() {
+  if [ "$(id -u)" -ne 0 ]; then
+    echo "⚠️  This script may require root privileges. Re-run with sudo if needed."
+    SUDO="sudo"
+  fi
+}
+
 check_dependencies() {
   REQUIRED_CMDS=(curl zip unzip)
   MISSING=()
@@ -94,15 +85,20 @@ check_dependencies() {
   fi
 
   echo "❌ Missing required dependencies: ${MISSING[*]}"
-  if [ "$AUTO_CONFIRM" = true ]; then CONFIRM=yes; else read -rp "Would you like to attempt to install them now? (yes/no): " CONFIRM; fi
+  if [ "$AUTO_CONFIRM" = true ]; then
+    CONFIRM=yes
+  else
+    read -rp "Would you like to attempt to install them now? (yes/no): " CONFIRM
+  fi
+
   case "$CONFIRM" in
     yes|y|Y)
       if command -v apt-get >/dev/null; then
         $SUDO apt-get update && $SUDO apt-get install -y "${MISSING[@]}"
-      elif command -v dnf >/dev/null; then
-        $SUDO dnf install -y "${MISSING[@]}"
       elif command -v yum >/dev/null; then
         $SUDO yum install -y "${MISSING[@]}"
+      elif command -v dnf >/dev/null; then
+        $SUDO dnf install -y "${MISSING[@]}"
       elif command -v apk >/dev/null; then
         $SUDO apk add --no-cache "${MISSING[@]}"
       elif command -v pacman >/dev/null; then
@@ -120,13 +116,6 @@ check_dependencies() {
       ;;
   esac
 }
-  for cmd in curl unzip zip; do
-    if ! command -v "$cmd" >/dev/null 2>&1; then
-      echo "Error: '$cmd' is required but not installed."
-      exit 1
-    fi
-  done
-}
 
 backup_existing_project() {
   if [ -d "$PROJECT_PATH" ]; then
@@ -136,17 +125,11 @@ backup_existing_project() {
     zip -r "$BACKUP_FILE" "$PROJECT_PATH" >/dev/null
     echo "📦 Existing project backed up to $BACKUP_FILE"
 
-    # Cleanup old backups
     ls -1t "${BACKUP_DIR}"/buildserver_*.zip | tail -n +$((MAX_BACKUPS + 1)) | xargs -r rm --
   fi
 }
 
 restore_backup() {
-  if [ -z "$RESTORE" ]; then
-    echo "Error: --restore flag requires a filename."
-    exit 1
-  fi
-
   BACKUP_FILE="${BACKUP_DIR}/${RESTORE}"
   if [ ! -f "$BACKUP_FILE" ]; then
     echo "Error: Backup file '$BACKUP_FILE' not found."
@@ -182,10 +165,10 @@ install_project() {
   rm -rf "$TMP_DIR"
 }
 
-
 main() {
   parse_args "$@"
   require_root_or_sudo
+  check_dependencies
 
   if [ "$#" -eq 0 ]; then
     usage
@@ -198,40 +181,6 @@ main() {
     install_project
     exit 0
   fi
-
-  check_dependencies
-
-  if [ "$DRY_RUN" = true ]; then
-    echo "⚙️  Dry run mode enabled. No changes will be made."
-    echo "Would install to: $PROJECT_PATH"
-    exit 0
-  fi
-
-  if [ -n "$RESTORE" ]; then
-    restore_backup
-  fi
-
-  if [ -d "$PROJECT_PATH" ] && [ "$FORCE" = false ]; then
-    echo "⚠️  Project directory '$PROJECT_PATH' already exists."
-    read -rp "Do you want to overwrite it? (yes/no): " CONFIRM
-    case $CONFIRM in
-      yes|y|Y)
-        backup_existing_project
-        ;;
-      *)
-        echo "❌ Installation aborted."
-        exit 0
-        ;;
-    esac
-  else
-    backup_existing_project
-  fi
-
-  install_project
-}
-
-  parse_args "$@"
-  check_dependencies
 
   if [ "$DRY_RUN" = true ]; then
     echo "⚙️  Dry run mode enabled. No changes will be made."
