@@ -472,7 +472,7 @@ cleanup() {
 # Use Case 2  = Comments that start with a 2, are optional review comments below for more info
 main() {
   check_vagrant_user # 2 responsible for checking if we are a vagrant user and if so, we notify first
-  install_dependancies  # 2 mainly to support extractions, utilities to automate and help run commands used for automation, disable for manual cycles
+  install_dependencies  # 2 mainly to support extractions, utilities to automate and help run commands used for automation, disable for manual cycles
   display_banner # 2 fun stuff
   add_custom_motd # 2 more fun stuff but also the motd
   import_menu_aliases # if you plan to use cli menu and automation these are required
