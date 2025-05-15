@@ -43,6 +43,45 @@ parse_args() {
 }
 
 check_dependencies() {
+  MISSING=()
+  for cmd in curl unzip zip; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+      MISSING+=("$cmd")
+    fi
+  done
+
+  if [ ${#MISSING[@]} -eq 0 ]; then
+    return
+  fi
+
+  echo "Missing required dependencies: ${MISSING[*]}"
+  read -rp "Would you like to attempt to install them now? (yes/no): " CONFIRM
+  case "$CONFIRM" in
+    yes|y|Y)
+      echo "Attempting to install: ${MISSING[*]}"
+      if command -v apt-get >/dev/null; then
+        sudo apt-get update && sudo apt-get install -y "${MISSING[@]}"
+      elif command -v dnf >/dev/null; then
+        sudo dnf install -y "${MISSING[@]}"
+      elif command -v yum >/dev/null; then
+        sudo yum install -y "${MISSING[@]}"
+      elif command -v apk >/dev/null; then
+        sudo apk add --no-cache "${MISSING[@]}"
+      elif command -v pacman >/dev/null; then
+        sudo pacman -Sy --noconfirm "${MISSING[@]}"
+      elif command -v brew >/dev/null; then
+        brew install "${MISSING[@]}"
+      else
+        echo "Unsupported package manager. Please install manually: ${MISSING[*]}"
+        exit 1
+      fi
+      ;;
+    *)
+      echo "âŒ Dependencies not installed. Exiting."
+      exit 1
+      ;;
+  esac
+}
   for cmd in curl unzip zip; do
     if ! command -v "$cmd" >/dev/null 2>&1; then
       echo "Error: '$cmd' is required but not installed."
@@ -57,7 +96,7 @@ backup_existing_project() {
     BACKUP_FILE="${BACKUP_DIR}/buildserver_${TIMESTAMP}.zip"
     mkdir -p "$BACKUP_DIR"
     zip -r "$BACKUP_FILE" "$PROJECT_PATH" >/dev/null
-    echo "📦 Existing project backed up to $BACKUP_FILE"
+    echo "ðŸ“¦ Existing project backed up to $BACKUP_FILE"
 
     # Cleanup old backups
     ls -1t "${BACKUP_DIR}"/buildserver_*.zip | tail -n +$((MAX_BACKUPS + 1)) | xargs -r rm --
@@ -82,11 +121,11 @@ restore_backup() {
     yes|y|Y)
       rm -rf "$PROJECT_PATH"
       unzip -q "$BACKUP_FILE" -d "$(dirname "$PROJECT_PATH")"
-      echo "✅ Project restored from backup."
+      echo "âœ… Project restored from backup."
       exit 0
       ;;
     *)
-      echo "❌ Restore aborted."
+      echo "âŒ Restore aborted."
       exit 0
       ;;
   esac
@@ -94,14 +133,14 @@ restore_backup() {
 
 install_project() {
   TMP_DIR=$(mktemp -d)
-  echo "⬇️  Downloading project archive..."
+  echo "â¬‡ï¸  Downloading project archive..."
   curl -fsSL "$REPO_URL" -o "$TMP_DIR/project.zip"
-  echo "📂 Extracting project..."
+  echo "ðŸ“‚ Extracting project..."
   unzip -q "$TMP_DIR/project.zip" -d "$TMP_DIR"
   EXTRACTED_DIR=$(find "$TMP_DIR" -mindepth 1 -maxdepth 1 -type d)
   rm -rf "$PROJECT_PATH"
   mv "$EXTRACTED_DIR" "$PROJECT_PATH"
-  echo "✅ Project installed at '$PROJECT_PATH'"
+  echo "âœ… Project installed at '$PROJECT_PATH'"
   rm -rf "$TMP_DIR"
 }
 
@@ -110,7 +149,7 @@ main() {
   check_dependencies
 
   if [ "$DRY_RUN" = true ]; then
-    echo "⚙️  Dry run mode enabled. No changes will be made."
+    echo "âš™ï¸  Dry run mode enabled. No changes will be made."
     echo "Would install to: $PROJECT_PATH"
     exit 0
   fi
@@ -120,14 +159,14 @@ main() {
   fi
 
   if [ -d "$PROJECT_PATH" ] && [ "$FORCE" = false ]; then
-    echo "⚠️  Project directory '$PROJECT_PATH' already exists."
+    echo "âš ï¸  Project directory '$PROJECT_PATH' already exists."
     read -rp "Do you want to overwrite it? (yes/no): " CONFIRM
     case $CONFIRM in
       yes|y|Y)
         backup_existing_project
         ;;
       *)
-        echo "❌ Installation aborted."
+        echo "âŒ Installation aborted."
         exit 0
         ;;
     esac
