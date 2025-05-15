@@ -1,3 +1,27 @@
+usage() {
+  cat <<EOF
+Usage: $0 [OPTIONS]
+
+Options:
+  --install             Run default install with overwrite
+  --project-path=PATH   Custom install location (default: \$HOME/buildserver)
+  --restore=FILE        Restore from a previous backup zip
+  --force               Overwrite without confirmation
+  --dry-run             Simulate actions without changes
+  --help                Show this help message
+EOF
+  exit 0
+}
+
+require_root_or_sudo() {
+  if [ "$(id -u)" -ne 0 ]; then
+    echo "⚠️  This script may require root privileges. Re-run with sudo if needed."
+    SUDO="sudo"
+  else
+    SUDO=""
+  fi
+}
+
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -6,6 +30,8 @@ DEFAULT_PROJECT_PATH="${HOME}/buildserver"
 BACKUP_DIR="${HOME}/backup"
 MAX_BACKUPS=3
 REPO_URL="https://github.com/${YOUR_USERNAME:-chkp-altrevin}/buildserver/archive/refs/heads/main.zip"
+INSTALL=false
+SUDO=""
 
 # === Functions ===
 
@@ -15,6 +41,13 @@ usage() {
 }
 
 parse_args() {
+      --install)
+        INSTALL=true
+        ;;
+      --help)
+        usage
+        ;;
+
   PROJECT_PATH="$DEFAULT_PROJECT_PATH"
   FORCE=false
   RESTORE=""
@@ -77,7 +110,7 @@ check_dependencies() {
       fi
       ;;
     *)
-      echo "âŒ Dependencies not installed. Exiting."
+      echo "❌ Dependencies not installed. Exiting."
       exit 1
       ;;
   esac
@@ -96,7 +129,7 @@ backup_existing_project() {
     BACKUP_FILE="${BACKUP_DIR}/buildserver_${TIMESTAMP}.zip"
     mkdir -p "$BACKUP_DIR"
     zip -r "$BACKUP_FILE" "$PROJECT_PATH" >/dev/null
-    echo "ðŸ“¦ Existing project backed up to $BACKUP_FILE"
+    echo "📦 Existing project backed up to $BACKUP_FILE"
 
     # Cleanup old backups
     ls -1t "${BACKUP_DIR}"/buildserver_*.zip | tail -n +$((MAX_BACKUPS + 1)) | xargs -r rm --
@@ -121,11 +154,11 @@ restore_backup() {
     yes|y|Y)
       rm -rf "$PROJECT_PATH"
       unzip -q "$BACKUP_FILE" -d "$(dirname "$PROJECT_PATH")"
-      echo "âœ… Project restored from backup."
+      echo "✅ Project restored from backup."
       exit 0
       ;;
     *)
-      echo "âŒ Restore aborted."
+      echo "❌ Restore aborted."
       exit 0
       ;;
   esac
@@ -133,23 +166,38 @@ restore_backup() {
 
 install_project() {
   TMP_DIR=$(mktemp -d)
-  echo "â¬‡ï¸  Downloading project archive..."
+  echo "⬇️  Downloading project archive..."
   curl -fsSL "$REPO_URL" -o "$TMP_DIR/project.zip"
-  echo "ðŸ“‚ Extracting project..."
+  echo "📂 Extracting project..."
   unzip -q "$TMP_DIR/project.zip" -d "$TMP_DIR"
   EXTRACTED_DIR=$(find "$TMP_DIR" -mindepth 1 -maxdepth 1 -type d)
   rm -rf "$PROJECT_PATH"
   mv "$EXTRACTED_DIR" "$PROJECT_PATH"
-  echo "âœ… Project installed at '$PROJECT_PATH'"
+  echo "✅ Project installed at '$PROJECT_PATH'"
   rm -rf "$TMP_DIR"
 }
 
+
 main() {
   parse_args "$@"
+  require_root_or_sudo
+
+  if [ "$#" -eq 0 ]; then
+    usage
+  fi
+
+  if [ "$INSTALL" = true ]; then
+    echo "🚀 Starting default install using path: $PROJECT_PATH"
+    FORCE=true
+    backup_existing_project
+    install_project
+    exit 0
+  fi
+
   check_dependencies
 
   if [ "$DRY_RUN" = true ]; then
-    echo "âš™ï¸  Dry run mode enabled. No changes will be made."
+    echo "⚙️  Dry run mode enabled. No changes will be made."
     echo "Would install to: $PROJECT_PATH"
     exit 0
   fi
@@ -159,14 +207,46 @@ main() {
   fi
 
   if [ -d "$PROJECT_PATH" ] && [ "$FORCE" = false ]; then
-    echo "âš ï¸  Project directory '$PROJECT_PATH' already exists."
+    echo "⚠️  Project directory '$PROJECT_PATH' already exists."
     read -rp "Do you want to overwrite it? (yes/no): " CONFIRM
     case $CONFIRM in
       yes|y|Y)
         backup_existing_project
         ;;
       *)
-        echo "âŒ Installation aborted."
+        echo "❌ Installation aborted."
+        exit 0
+        ;;
+    esac
+  else
+    backup_existing_project
+  fi
+
+  install_project
+}
+
+  parse_args "$@"
+  check_dependencies
+
+  if [ "$DRY_RUN" = true ]; then
+    echo "⚙️  Dry run mode enabled. No changes will be made."
+    echo "Would install to: $PROJECT_PATH"
+    exit 0
+  fi
+
+  if [ -n "$RESTORE" ]; then
+    restore_backup
+  fi
+
+  if [ -d "$PROJECT_PATH" ] && [ "$FORCE" = false ]; then
+    echo "⚠️  Project directory '$PROJECT_PATH' already exists."
+    read -rp "Do you want to overwrite it? (yes/no): " CONFIRM
+    case $CONFIRM in
+      yes|y|Y)
+        backup_existing_project
+        ;;
+      *)
+        echo "❌ Installation aborted."
         exit 0
         ;;
     esac
