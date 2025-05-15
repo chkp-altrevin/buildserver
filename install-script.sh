@@ -41,34 +41,34 @@ usage() {
 }
 
 parse_args() {
-      --install)
-        INSTALL=true
-        ;;
-      --help)
-        usage
-        ;;
-
   PROJECT_PATH="$DEFAULT_PROJECT_PATH"
   FORCE=false
   RESTORE=""
   DRY_RUN=false
+  INSTALL=false
 
   for arg in "$@"; do
     case "$arg" in
       --project-path=*)
         PROJECT_PATH="${arg#*=}"
         ;;
-      --force)
-        FORCE=true
-        ;;
       --restore=*)
         RESTORE="${arg#*=}"
+        ;;
+      --force)
+        FORCE=true
         ;;
       --dry-run)
         DRY_RUN=true
         ;;
+      --install)
+        INSTALL=true
+        ;;
+      --help)
+        usage
+        ;;
       *)
-        echo "Unknown option: $arg"
+        echo "❌ Unknown flag: $arg"
         usage
         ;;
     esac
