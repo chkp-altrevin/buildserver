@@ -103,9 +103,12 @@ Upon SSH login, you'll be greeted with a custom MOTD and available commands to a
 ---
 
 ### 🧰 Use Case 2: Bring Your Own Linux
+Install using a script or download and extract your self.
+
+**Download and Extract, chmod**
+
 1. **Download Latest Release**: [buildserver-main.zip](https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip)
 2. **Extract**: buildserver-main.zip rename to folder **buildserver** Example Structure: **/home/$USER/buildserver**
-
    ```bash
    chdmod +x ./provision.sh
    ```
@@ -113,9 +116,27 @@ Upon SSH login, you'll be greeted with a custom MOTD and available commands to a
    ```bash
    sudo ./provision.sh
    ```
+
+**Install Script**
+
+- Install Script - Downloads repo, extract and backup if exists and installs dependencies (all-in-one):
+```bash
+curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh && chmod +x install-script.sh && ./install-script.sh --install
+```
+- Downloads repo, extract and backup if exists: (manual install ./provision)
+```bash
+curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh && chmod +x install-script.sh && ./install-script.sh --repo-download
+```
+- Displays Help Menu:
+```bash
+curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh && chmod +x install-script.sh && ./install-script.sh --help
+```
+
 After provisioning is complete logut/login. You will be greeted with a custom MOTD and available commands to assist with further setup.
 
-## 🆕 What’s New?
+
+
+## 🆕 Optional Windows Powershell Install
 
 ### 🔁 Automated Download and Install Script:
 
@@ -159,21 +180,6 @@ if (Get-Command "wsl.exe" -ErrorAction SilentlyContinue) {
 Write-Host "❌ ERROR: Neither Git Bash nor WSL found."
 Write-Host "Please install Git for Windows (https://gitforwindows.org/) or WSL."
 exit 1
-```
-
-**Linux Install Script Examples**
-
-Install - Downloads repo, extract and backup if exists and installs dependencies (all-in-one):
-```bash
-curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh && chmod +x install-script.sh && ./install-script.sh --install
-```
-Downloads repo, extract and backup if exists: (manual install ./provision)
-```bash
-curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh && chmod +x install-script.sh && ./install-script.sh --repo-download
-```
-Displays Help Menu:
-```bash
-curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh && chmod +x install-script.sh && ./install-script.sh --help
 ```
 ---
 
