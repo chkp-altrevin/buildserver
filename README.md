@@ -115,13 +115,13 @@ Upon SSH login, you'll be greeted with a custom MOTD and available commands to a
    ```
 After provisioning is complete logut/login. You will be greeted with a custom MOTD and available commands to assist with further setup.
 
-**Install Script | Dev Only**
+**All-in-One Install Script**
 
-Downloads repo only:
+Download repo, backup if exists:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh | bash -s -- --download-repo
 ```
-Downloads Repo and Foce Installs:
+Downloads repo, backup if exists and force install dependencies:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh | bash -s -- --download-install
 ```
