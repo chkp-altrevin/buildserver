@@ -115,15 +115,15 @@ Upon SSH login, you'll be greeted with a custom MOTD and available commands to a
    ```
 After provisioning is complete logut/login. You will be greeted with a custom MOTD and available commands to assist with further setup.
 
-## 🆕 What’s Included:
+## 🆕 What’s New?
 
-### 🔁 Script Reference:
-* One-liners and script logic now dynamically point to help shows optional flags:
+### 🔁 Automated Download and Install Script:
+* One-liners and script logic now dynamically point to help shows optional flags, try it out:
   ```
   https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh
   ```
 
-**Install Script with flags**
+**Install Script Examples**
 
 Download repo, backup if exists:
 ```bash
