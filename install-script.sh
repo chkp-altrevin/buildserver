@@ -42,7 +42,6 @@ Options:
   --repo-download       Download project only, no execution
   --project-path=PATH   Custom install location (default: $HOME/buildserver)
   --restore=FILE        Restore from a previous backup zip
-  --upgrade             Overwrite without confirmation
   --help                Show this help message
   
 Example: ./install-script.sh --repo-download
@@ -63,8 +62,8 @@ parse_args() {
       --restore=*)
         RESTORE="${arg#*=}"
         ;;
-      --upgrade)
-        UPGRADE=true
+      
+        
         ;;
       --install)
         INSTALL=true
@@ -208,7 +207,7 @@ main() {
 
   if [ "$REPO_DOWNLOAD" = true ]; then
     log_info "Download-only mode to: $PROJECT_PATH"
-    UPGRADE=true
+    
     backup_existing_project
 
     TMP_DIR=$(mktemp -d)
@@ -227,7 +226,7 @@ main() {
 
   if [ "$INSTALL" = true ]; then
     log_info "Running full install to: $PROJECT_PATH"
-    UPGRADE=true
+    
     backup_existing_project
     install_project
     exit 0
@@ -237,7 +236,7 @@ main() {
     restore_backup
   fi
 
-  if [ -d "$PROJECT_PATH" ] && [ "$UPGRADE" = false ]; then
+  if [ -d "$PROJECT_PATH" ]; then
     read -rp "Project exists at '$PROJECT_PATH'. Overwrite? (yes/no): " CONFIRM
     case $CONFIRM in
       yes|y|Y)
