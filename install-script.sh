@@ -6,7 +6,8 @@ DEFAULT_PROJECT_PATH="${HOME}/buildserver"
 BACKUP_DIR="${HOME}/backup"
 MAX_BACKUPS=3
 REPO_URL="https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip"
-INSTALL=false
+DOWNLOAD_INSTALL=false
+DOWNLOAD_REPO=false
 AUTO_CONFIRM=false
 SUDO=""
 
@@ -15,7 +16,7 @@ usage() {
 Usage: $0 [OPTIONS]
 
 Options:
-  --install             Run default install with overwrite
+  --download-install    Run default install with overwrite
   --project-path=PATH   Custom install location (default: \$HOME/buildserver)
   --restore=FILE        Restore from a previous backup zip
   --force               Overwrite without confirmation
@@ -46,8 +47,12 @@ parse_args() {
       --dry-run)
         DRY_RUN=true
         ;;
-      --install)
-        INSTALL=true
+      --download-install)
+        DOWNLOAD_INSTALL=true
+        ;;
+      --download-repo)
+        DOWNLOAD_REPO=true
+        DOWNLOAD_INSTALL=true
         ;;
       --auto-confirm)
         AUTO_CONFIRM=true
@@ -143,12 +148,8 @@ restore_backup() {
       rm -rf "$PROJECT_PATH"
       unzip -q "$BACKUP_FILE" -d "$(dirname "$PROJECT_PATH")"
       echo "✅ Project restored from backup."
-
-  echo "🔧 Setting execute permissions on all .sh files in $PROJECT_PATH..."
-  find "$PROJECT_PATH" -type f -name "*.sh" -exec chmod +x {} \;
-
-  echo "🔐 Setting executable permissions on .sh files in $PROJECT_PATH..."
-  find "$PROJECT_PATH" -type f -name "*.sh" -exec chmod +x {} \;
+      echo "🔧 Setting execute permissions on all .sh files in $PROJECT_PATH..."
+      find "$PROJECT_PATH" -type f -name "*.sh" -exec chmod +x {} \;
       exit 0
       ;;
     *)
@@ -168,13 +169,16 @@ install_project() {
   rm -rf "$PROJECT_PATH"
   mv "$EXTRACTED_DIR" "$PROJECT_PATH"
   echo "✅ Project installed at '$PROJECT_PATH'"
-
   echo "🔧 Setting execute permissions on all .sh files in $PROJECT_PATH..."
   find "$PROJECT_PATH" -type f -name "*.sh" -exec chmod +x {} \;
-
-  echo "🔐 Setting executable permissions on .sh files in $PROJECT_PATH..."
-  find "$PROJECT_PATH" -type f -name "*.sh" -exec chmod +x {} \;
   rm -rf "$TMP_DIR"
+
+  if [ -x "$PROJECT_PATH/provision.sh" ]; then
+    echo "🚀 Running post-install: provision.sh..."
+    "$PROJECT_PATH/provision.sh"
+  else
+    echo "⚠️  provision.sh not found or not executable at $PROJECT_PATH/provision.sh"
+  fi
 }
 
 main() {
@@ -186,17 +190,32 @@ main() {
     usage
   fi
 
-  if [ "$INSTALL" = true ]; then
+  
+  if [ "$DOWNLOAD_REPO" = true ]; then
+    echo "📥 Downloading project to path: $PROJECT_PATH"
+    FORCE=true
+    backup_existing_project
+    TMP_DIR=$(mktemp -d)
+    echo "⬇️  Downloading project archive..."
+    curl -fsSL "$REPO_URL" -o "$TMP_DIR/project.zip"
+    echo "📂 Extracting project..."
+    unzip -q "$TMP_DIR/project.zip" -d "$TMP_DIR"
+    EXTRACTED_DIR=$(find "$TMP_DIR" -mindepth 1 -maxdepth 1 -type d)
+    rm -rf "$PROJECT_PATH"
+    mv "$EXTRACTED_DIR" "$PROJECT_PATH"
+    echo "✅ Project installed at '$PROJECT_PATH'"
+    echo "🔧 Setting execute permissions on all .sh files in $PROJECT_PATH..."
+    find "$PROJECT_PATH" -type f -name "*.sh" -exec chmod +x {} \;
+    rm -rf "$TMP_DIR"
+    exit 0
+  fi
+
+
+  if [ "$DOWNLOAD_INSTALL" = true ]; then
     echo "🚀 Starting default install using path: $PROJECT_PATH"
     FORCE=true
     backup_existing_project
     install_project
-  if [ -x "$HOME/buildserver/provision.sh" ]; then
-    echo "🚀 Running post-install: provision.sh..."
-    "$HOME/buildserver/provision.sh"
-  else
-    echo "⚠️  provision.sh not found or not executable at $HOME/buildserver/provision.sh"
-  fi
     exit 0
   fi
 
