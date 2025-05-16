@@ -163,11 +163,11 @@ exit 1
 
 **Linux Install Script Examples**
 
-Install - Downloads repo, backup if exists and installs dependencies (all-in-one):
+Install - Downloads repo, extract and backup if exists and installs dependencies (all-in-one):
 ```bash
 curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh && chmod +x install-script.sh && ./install-script.sh --install
 ```
-Downloads repo, backup if exists and force install dependencies (all-in-one):
+Downloads repo, extract and backup if exists: (manual install ./provision)
 ```bash
 curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh && chmod +x install-script.sh && ./install-script.sh --repo-download
 ```
