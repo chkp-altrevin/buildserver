@@ -116,6 +116,7 @@ Upon SSH login, you'll be greeted with a custom MOTD and available commands to a
 After provisioning is complete logut/login. You will be greeted with a custom MOTD and available commands to assist with further setup.
 
 **DEV | Testing Install Script**
+
 Downloads repo only:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/dev/install-script.sh | bash -s -- --download-repo
