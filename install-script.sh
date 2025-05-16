@@ -50,20 +50,14 @@ EOF
 }
 
 parse_args() {
-  PROJECT_PATH="$DEFAULT_PROJECT_PATH"
-  UPGRADE=false
   RESTORE=""
+  INSTALL=false
+  REPO_DOWNLOAD=false
 
   for arg in "$@"; do
     case "$arg" in
-      --project-path=*)
-        PROJECT_PATH="${arg#*=}"
-        ;;
       --restore=*)
         RESTORE="${arg#*=}"
-        ;;
-      
-        
         ;;
       --install)
         INSTALL=true
@@ -71,7 +65,6 @@ parse_args() {
       --repo-download)
         REPO_DOWNLOAD=true
         ;;
-      
       --help)
         usage
         ;;
