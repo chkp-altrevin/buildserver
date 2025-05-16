@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # === Constants ===
-DEFAULT_PROJECT_PATH="${HOME}/buildserver"
+PROJECT_PATH="${HOME}/buildserver"
 BACKUP_DIR="${HOME}/backup"
 MAX_BACKUPS=3
 REPO_URL="https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip"
