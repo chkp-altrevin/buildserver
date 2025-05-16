@@ -103,7 +103,32 @@ Upon SSH login, you'll be greeted with a custom MOTD and available commands to a
 ---
 
 ### 🧰 Use Case 2: Bring Your Own Linux
+1. **Download Latest Release**: [buildserver-main.zip](https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip)
+2. **Extract**: buildserver-main.zip rename to folder **buildserver** Example Structure: **/home/$USER/buildserver**
 
+   ```bash
+   chdmod +x ./provision.sh
+   ```
+
+   ```bash
+   sudo ./provision.sh
+   ```
+After provisioning is complete logut/login. You will be greeted with a custom MOTD and available commands to assist with further setup.
+
+**Install Script | Dev Only**
+
+Downloads repo only:
+```bash
+curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh | bash -s -- --download-repo
+```
+Downloads Repo and Foce Installs:
+```bash
+curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh | bash -s -- --download-install
+```
+Dispalys Help Menu:
+```bash
+curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh | bash -s -- --help
+```
 ---
 
 ## 🛠️ Clone and Make it Yours!
@@ -288,7 +313,7 @@ Please ensure your code adheres to the existing style and includes relevant test
 * One-liners and script logic now dynamically point to:
 
   ```
-  https://raw.githubusercontent.com/${YOUR_USERNAME:-chkp-altrevin}/buildserver/main/provision.sh
+  https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/provision.sh
   ```
 
 ---
