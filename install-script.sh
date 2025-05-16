@@ -6,26 +6,49 @@ DEFAULT_PROJECT_PATH="${HOME}/buildserver"
 BACKUP_DIR="${HOME}/backup"
 MAX_BACKUPS=3
 REPO_URL="https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip"
-DOWNLOAD_INSTALL=false
-DOWNLOAD_REPO=false
+REPO_INSTALL=false
+REPO_DOWNLOAD=false
 AUTO_CONFIRM=false
+CLEANUP=false
 SUDO=""
+LOG_FILE="$HOME/install-script.log"
+CREATED_FILES=()
+
+# === Logging ===
+log_info()    { echo -e "[INFO]    $(date '+%F %T') - $*" | tee -a "$LOG_FILE"; }
+log_success() { echo -e "[SUCCESS] $(date '+%F %T') - $*" | tee -a "$LOG_FILE"; }
+log_error()   { echo -e "[ERROR]   $(date '+%F %T') - $*" | tee -a "$LOG_FILE" >&2; }
+
+cleanup() {
+  log_info "Starting cleanup..."
+  for file in "${CREATED_FILES[@]}"; do
+    if [[ -e "$file" ]]; then
+      rm -rf "$file"
+      log_info "Removed: $file"
+    fi
+  done
+  log_success "Cleanup complete."
+  exit 0
+}
+
+trap 'log_error "An unexpected error occurred."; cleanup' ERR
 
 usage() {
   cat <<EOF
 Usage: $0 [OPTIONS]
-  cat <<EOF
-Usage: $0 [OPTIONS]
 
 Options:
-  --download-install    Download project and run provision.sh
-  --download-repo       Download project only, no execution
+  --repo-install        Download project and run provision.sh installs everything
+  --repo-download       Download project only, no execution
   --project-path=PATH   Custom install location (default: $HOME/buildserver)
   --restore=FILE        Restore from a previous backup zip
   --force               Overwrite without confirmation
   --dry-run             Simulate actions without changes
   --auto-confirm        Automatically install missing dependencies
+  --cleanup             Remove created files and exit
   --help                Show this help message
+  
+Example: ./install-script.sh --repo-download
 EOF
   exit 0
 }
@@ -50,21 +73,23 @@ parse_args() {
       --dry-run)
         DRY_RUN=true
         ;;
-      --download-install)
-        DOWNLOAD_INSTALL=true
+      --repo-install)
+        REPO_INSTALL=true
         ;;
-      --download-repo)
-        DOWNLOAD_REPO=true
-        DOWNLOAD_INSTALL=true
+      --repo-download)
+        REPO_DOWNLOAD=true
         ;;
       --auto-confirm)
         AUTO_CONFIRM=true
+        ;;
+      --cleanup)
+        CLEANUP=true
         ;;
       --help)
         usage
         ;;
       *)
-        echo "❌ Unknown flag: $arg"
+        log_error "Unknown flag: $arg"
         usage
         ;;
     esac
@@ -73,7 +98,7 @@ parse_args() {
 
 require_root_or_sudo() {
   if [ "$(id -u)" -ne 0 ]; then
-    echo "⚠️  This script may require root privileges. Re-run with sudo if needed."
+    log_info "This script may require root privileges. Re-run with sudo if needed."
     SUDO="sudo"
   fi
 }
@@ -92,7 +117,7 @@ check_dependencies() {
     return
   fi
 
-  echo "❌ Missing required dependencies: ${MISSING[*]}"
+  log_error "Missing required dependencies: ${MISSING[*]}"
   if [ "$AUTO_CONFIRM" = true ]; then
     CONFIRM=yes
   else
@@ -114,12 +139,12 @@ check_dependencies() {
       elif command -v brew >/dev/null; then
         brew install "${MISSING[@]}"
       else
-        echo "⚠️  Unsupported package manager. Please install manually: ${MISSING[*]}"
+        log_error "Unsupported package manager. Please install manually: ${MISSING[*]}"
         exit 1
       fi
       ;;
     *)
-      echo "❌ Dependencies not installed. Exiting."
+      log_error "Dependencies not installed. Exiting."
       exit 1
       ;;
   esac
@@ -131,8 +156,8 @@ backup_existing_project() {
     BACKUP_FILE="${BACKUP_DIR}/buildserver_${TIMESTAMP}.zip"
     mkdir -p "$BACKUP_DIR"
     zip -r "$BACKUP_FILE" "$PROJECT_PATH" >/dev/null
-    echo "📦 Existing project backed up to $BACKUP_FILE"
-
+    log_info "Existing project backed up to $BACKUP_FILE"
+    CREATED_FILES+=("$BACKUP_FILE")
     ls -1t "${BACKUP_DIR}"/buildserver_*.zip | tail -n +$((MAX_BACKUPS + 1)) | xargs -r rm --
   fi
 }
@@ -140,23 +165,22 @@ backup_existing_project() {
 restore_backup() {
   BACKUP_FILE="${BACKUP_DIR}/${RESTORE}"
   if [ ! -f "$BACKUP_FILE" ]; then
-    echo "Error: Backup file '$BACKUP_FILE' not found."
+    log_error "Backup file '$BACKUP_FILE' not found."
     exit 1
   fi
 
-  echo "This will replace the current project at '$PROJECT_PATH' with the backup '$BACKUP_FILE'."
+  log_info "Restoring backup from '$BACKUP_FILE' to '$PROJECT_PATH'"
   read -rp "Proceed? (yes/no): " CONFIRM
   case $CONFIRM in
     yes|y|Y)
       rm -rf "$PROJECT_PATH"
       unzip -q "$BACKUP_FILE" -d "$(dirname "$PROJECT_PATH")"
-      echo "✅ Project restored from backup."
-      echo "🔧 Setting execute permissions on all .sh files in $PROJECT_PATH..."
       find "$PROJECT_PATH" -type f -name "*.sh" -exec chmod +x {} \;
+      log_success "Project restored."
       exit 0
       ;;
     *)
-      echo "❌ Restore aborted."
+      log_info "Restore aborted."
       exit 0
       ;;
   esac
@@ -164,33 +188,37 @@ restore_backup() {
 
 install_project() {
   TMP_DIR=$(mktemp -d)
-  echo "⬇️  Downloading project archive..."
+  log_info "Downloading and extracting project archive..."
   curl -fsSL "$REPO_URL" -o "$TMP_DIR/project.zip"
-  echo "📂 Extracting project..."
   unzip -q "$TMP_DIR/project.zip" -d "$TMP_DIR"
   EXTRACTED_DIR=$(find "$TMP_DIR" -mindepth 1 -maxdepth 1 -type d)
   rm -rf "$PROJECT_PATH"
   mv "$EXTRACTED_DIR" "$PROJECT_PATH"
-  echo "✅ Project installed at '$PROJECT_PATH'"
-  echo "🔧 Setting execute permissions on all .sh files in $PROJECT_PATH..."
   find "$PROJECT_PATH" -type f -name "*.sh" -exec chmod +x {} \;
+  CREATED_FILES+=("$PROJECT_PATH")
   rm -rf "$TMP_DIR"
 
   if [ -x "$PROJECT_PATH/provision.sh" ]; then
-  echo "🚀 Running post-install: provision.sh with sudo..."
-  if [ "$EUID" -ne 0 ]; then
-    sudo "$PROJECT_PATH/provision.sh"
+    log_info "Executing provision.sh..."
+    if [ "$EUID" -ne 0 ]; then
+      sudo "$PROJECT_PATH/provision.sh"
+    else
+      "$PROJECT_PATH/provision.sh"
+    fi
   else
-    "$PROJECT_PATH/provision.sh"
+    log_info "provision.sh not found or not executable."
   fi
-else
-  echo "⚠️  provision.sh not found or not executable at $PROJECT_PATH/provision.sh"
-fi
 
+  log_success "Project installation complete."
 }
 
 main() {
   parse_args "$@"
+
+  if [ "$CLEANUP" = true ]; then
+    cleanup
+  fi
+
   require_root_or_sudo
   check_dependencies
 
@@ -198,29 +226,27 @@ main() {
     usage
   fi
 
-  
-  if [ "$DOWNLOAD_REPO" = true ]; then
-    echo "📥 Downloading project to path: $PROJECT_PATH"
+  if [ "$REPO_DOWNLOAD" = true ]; then
+    log_info "Download-only mode to: $PROJECT_PATH"
     FORCE=true
     backup_existing_project
+
     TMP_DIR=$(mktemp -d)
-    echo "⬇️  Downloading project archive..."
+    log_info "Downloading and extracting project archive..."
     curl -fsSL "$REPO_URL" -o "$TMP_DIR/project.zip"
-    echo "📂 Extracting project..."
     unzip -q "$TMP_DIR/project.zip" -d "$TMP_DIR"
     EXTRACTED_DIR=$(find "$TMP_DIR" -mindepth 1 -maxdepth 1 -type d)
     rm -rf "$PROJECT_PATH"
     mv "$EXTRACTED_DIR" "$PROJECT_PATH"
-    echo "✅ Project installed at '$PROJECT_PATH'"
-    echo "🔧 Setting execute permissions on all .sh files in $PROJECT_PATH..."
     find "$PROJECT_PATH" -type f -name "*.sh" -exec chmod +x {} \;
+    CREATED_FILES+=("$PROJECT_PATH")
     rm -rf "$TMP_DIR"
+    log_success "Project downloaded to '$PROJECT_PATH'."
     exit 0
   fi
 
-
-  if [ "$DOWNLOAD_INSTALL" = true ]; then
-    echo "🚀 Starting default install using path: $PROJECT_PATH"
+  if [ "$REPO_INSTALL" = true ]; then
+    log_info "Running full install to: $PROJECT_PATH"
     FORCE=true
     backup_existing_project
     install_project
@@ -228,8 +254,7 @@ main() {
   fi
 
   if [ "$DRY_RUN" = true ]; then
-    echo "⚙️  Dry run mode enabled. No changes will be made."
-    echo "Would install to: $PROJECT_PATH"
+    log_info "Dry run enabled. Would install to: $PROJECT_PATH"
     exit 0
   fi
 
@@ -238,14 +263,13 @@ main() {
   fi
 
   if [ -d "$PROJECT_PATH" ] && [ "$FORCE" = false ]; then
-    echo "⚠️  Project directory '$PROJECT_PATH' already exists."
-    read -rp "Do you want to overwrite it? (yes/no): " CONFIRM
+    read -rp "Project exists at '$PROJECT_PATH'. Overwrite? (yes/no): " CONFIRM
     case $CONFIRM in
       yes|y|Y)
         backup_existing_project
         ;;
       *)
-        echo "❌ Installation aborted."
+        log_info "Installation aborted."
         exit 0
         ;;
     esac
