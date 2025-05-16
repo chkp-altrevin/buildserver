@@ -153,7 +153,7 @@ make_scripts_executable() {
 # ----- Install Dependancies ----------------------------------------------------
 install_dependancies() {
   log_info "Installing dependancies..."
-  run_with_sudo apt-get install -y curl unzip apt-utils fakeroot && \
+  run_with_sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install curl unzip apt-utils fakeroot && \
     log_success "APT Dependancies installed." || log_error "FATAL: Installing dependancies failed."
 }
 
@@ -374,7 +374,7 @@ update_home_permissions() {
 # ----- Update and Upgrade System ---------------------------------------------
 update_system() {
   log_info "Updating and upgrading system packages..."
-  run_with_sudo apt-get update && run_with_sudo apt-get upgrade -y && \
+  run_with_sudo DEBIAN_FRONTEND=noninteractive apt-get update && run_with_sudo apt-get upgrade -y && \
     log_success "System updated and upgraded." || log_error "NON-FATAL: System update/upgrade failed."
 }
 
@@ -403,7 +403,7 @@ clone_repositories() {
 # ----- Install Additional Packages -------------------------------------------
 install_packages() {
   log_info "Installing selected packages..."
-  run_with_sudo apt-get install -y jq kubectl dos2unix build-essential git python3-pip python3 pkg-config \
+  run_with_sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install jq kubectl dos2unix build-essential git python3-pip python3 pkg-config \
     shellcheck net-tools apt-transport-https unzip gnupg software-properties-common docker-compose-plugin \
     terraform google-cloud-cli pass gpg gnupg2 xclip pinentry-tty powershell azure-cli && \
     log_success "APT Additional packages installed." || log_error "FATAL: APT Additional packages failed install."
