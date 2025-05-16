@@ -14,10 +14,13 @@ SUDO=""
 usage() {
   cat <<EOF
 Usage: $0 [OPTIONS]
+  cat <<EOF
+Usage: $0 [OPTIONS]
 
 Options:
-  --download-install    Run default install with overwrite
-  --project-path=PATH   Custom install location (default: \$HOME/buildserver)
+  --download-install    Download project and run provision.sh
+  --download-repo       Download project only, no execution
+  --project-path=PATH   Custom install location (default: $HOME/buildserver)
   --restore=FILE        Restore from a previous backup zip
   --force               Overwrite without confirmation
   --dry-run             Simulate actions without changes
