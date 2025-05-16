@@ -38,12 +38,11 @@ usage() {
 Usage: $0 [OPTIONS]
 
 Options:
-  --repo-install        Download project and run provision.sh installs everything
+  --install             Download project and run provision.sh installs everything
   --repo-download       Download project only, no execution
   --project-path=PATH   Custom install location (default: $HOME/buildserver)
   --restore=FILE        Restore from a previous backup zip
   --upgrade             Overwrite without confirmation
-  --cleanup             Remove created files and exit
   --help                Show this help message
   
 Example: ./install-script.sh --repo-download
@@ -67,15 +66,13 @@ parse_args() {
       --upgrade)
         UPGRADE=true
         ;;
-      --repo-install)
-        REPO_INSTALL=true
+      --install)
+        INSTALL=true
         ;;
       --repo-download)
         REPO_DOWNLOAD=true
         ;;
-      --cleanup)
-        CLEANUP=true
-        ;;
+      
       --help)
         usage
         ;;
@@ -202,11 +199,7 @@ install_project() {
 main() {
   parse_args "$@"
 
-  if [ "$CLEANUP" = true ]; then
-    cleanup
-  fi
-
-  require_root_or_sudo
+    require_root_or_sudo
   check_dependencies
 
   if [ "$#" -eq 0 ]; then
@@ -232,7 +225,7 @@ main() {
     exit 0
   fi
 
-  if [ "$REPO_INSTALL" = true ]; then
+  if [ "$INSTALL" = true ]; then
     log_info "Running full install to: $PROJECT_PATH"
     UPGRADE=true
     backup_existing_project
