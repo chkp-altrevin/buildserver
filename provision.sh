@@ -1,33 +1,87 @@
 #!/usr/bin/env bash
 # set -e
 export DEBIAN_FRONTEND=noninteractive
-# ==============================================================================
-# DIY Buildserver Lab Environment Setup Script
-#
-# This script sets up your environment by:
-#   - Displaying a banner and updating .bashrc
-#   - Creating necessary directories and copying profile files
-#   - Configuring hostname and hosts file entries
-#   - Installing preflight, spectral, docker, helm, k3d, and more
-#   - Setting up repositories, cloning demo repos, and installing packages
-#   - Modifying bashrc, generating an initial SBOM, and cleaning up
-#
-# ====================== USECASE 2 =============================================
-# If you plan to run the provisioning on your own linux server modify the below 
-# env vars with your env settings. Otherwise leave these unmodified.
-# ==============================================================================
-#
-export PROJECT_NAME="buildserver"
-# project name or folder, should match your project folder, example buildserver
-export PROJECT_PATH="/home/vagrant/buildserver"
-# project path. example: export PROJECT_PATH="/home/ubuntu/buildserver"
-export VAGRANT_USER_PATH="/home/vagrant"
-# example: export VAGRANT_USER_PATH="/home/ubuntu"
-export VAGRANT_USER="vagrant"
-# example: export VAGRANT_USER="ubuntu"
-#
-#==============================================================================
-#
+
+# ============================ Command-Line Flags ==============================
+show_help() {
+  echo "Usage: $0 [OPTIONS]"
+  echo ""
+  echo "Optional flags to override default environment variables:"
+  echo "  --project-name NAME           Set custom project name (default: buildserver)"
+  echo "  --project-path PATH           Set custom project path (default: /home/vagrant/buildserver)"
+  echo "  --vagrant-user-path PATH      Set custom user path (default: /home/vagrant)"
+  echo "  --vagrant-user NAME           Set custom username (default: vagrant)"
+  echo "  -h, --help                    Display this help message and exit"
+}
+
+# Logging functions for override tracking
+log_override() {
+  local key="$1"
+  local value="$2"
+  echo "[OVERRIDE] ${key} set to '${value}'"
+}
+
+# Validate directory exists or can be created
+validate_path() {
+  local path="$1"
+  if [[ ! -d "$path" ]]; then
+    echo "[VALIDATION] Directory '$path' does not exist. Creating it..."
+    mkdir -p "$path" || { echo "[ERROR] Failed to create directory '$path'"; exit 1; }
+  fi
+}
+
+# Default values
+PROJECT_NAME="buildserver"
+PROJECT_PATH="/home/vagrant/buildserver"
+VAGRANT_USER_PATH="/home/vagrant"
+VAGRANT_USER="vagrant"
+
+# Parse command-line arguments
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --project-name)
+      PROJECT_NAME="$2"
+      log_override "PROJECT_NAME" "$PROJECT_NAME"
+      shift 2
+      ;;
+    --project-path)
+      PROJECT_PATH="$2"
+      log_override "PROJECT_PATH" "$PROJECT_PATH"
+      shift 2
+      ;;
+    --vagrant-user-path)
+      VAGRANT_USER_PATH="$2"
+      log_override "VAGRANT_USER_PATH" "$VAGRANT_USER_PATH"
+      shift 2
+      ;;
+    --vagrant-user)
+      VAGRANT_USER="$2"
+      log_override "VAGRANT_USER" "$VAGRANT_USER"
+      shift 2
+      ;;
+    -h|--help)
+      show_help
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1"
+      show_help
+      exit 1
+      ;;
+  esac
+done
+
+# Export the possibly overridden values
+export PROJECT_NAME
+export PROJECT_PATH
+export VAGRANT_USER_PATH
+export VAGRANT_USER
+
+# Validate required directories
+validate_path "$PROJECT_PATH"
+validate_path "$VAGRANT_USER_PATH"
+# -----  End of this stuff  ---------------------------------------------------
+
 # -----  Run as root check ----------------------------------------------------
 #
 if [[ $EUID -ne 0 ]]; then
