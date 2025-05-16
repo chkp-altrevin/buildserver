@@ -165,15 +165,15 @@ exit 1
 
 Download repo, backup if exists:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh | bash -s -- --download-repo
+curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh && chmod +x install-script.sh && ./install-script.sh --download-repo
 ```
 Downloads repo, backup if exists and force install dependencies (all-in-one):
 ```bash
-curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh | bash -s -- --download-install
+curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh && chmod +x install-script.sh && ./install-script.sh --download-install
 ```
 Displays Help Menu:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh | bash -s -- --help
+curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh && chmod +x install-script.sh && ./install-script.sh --help
 ```
 ---
 
