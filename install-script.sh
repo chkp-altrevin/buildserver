@@ -8,7 +8,7 @@ MAX_BACKUPS=3
 REPO_URL="https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip"
 REPO_INSTALL=false
 REPO_DOWNLOAD=false
-AUTO_CONFIRM=false
+UPGRADE=false
 CLEANUP=false
 SUDO=""
 LOG_FILE="$HOME/install-script.log"
@@ -42,9 +42,7 @@ Options:
   --repo-download       Download project only, no execution
   --project-path=PATH   Custom install location (default: $HOME/buildserver)
   --restore=FILE        Restore from a previous backup zip
-  --force               Overwrite without confirmation
-  --dry-run             Simulate actions without changes
-  --auto-confirm        Automatically install missing dependencies
+  --upgrade             Overwrite without confirmation
   --cleanup             Remove created files and exit
   --help                Show this help message
   
@@ -55,9 +53,8 @@ EOF
 
 parse_args() {
   PROJECT_PATH="$DEFAULT_PROJECT_PATH"
-  FORCE=false
+  UPGRADE=false
   RESTORE=""
-  DRY_RUN=false
 
   for arg in "$@"; do
     case "$arg" in
@@ -67,20 +64,14 @@ parse_args() {
       --restore=*)
         RESTORE="${arg#*=}"
         ;;
-      --force)
-        FORCE=true
-        ;;
-      --dry-run)
-        DRY_RUN=true
+      --upgrade)
+        UPGRADE=true
         ;;
       --repo-install)
         REPO_INSTALL=true
         ;;
       --repo-download)
         REPO_DOWNLOAD=true
-        ;;
-      --auto-confirm)
-        AUTO_CONFIRM=true
         ;;
       --cleanup)
         CLEANUP=true
@@ -118,11 +109,7 @@ check_dependencies() {
   fi
 
   log_error "Missing required dependencies: ${MISSING[*]}"
-  if [ "$AUTO_CONFIRM" = true ]; then
-    CONFIRM=yes
-  else
-    read -rp "Would you like to attempt to install them now? (yes/no): " CONFIRM
-  fi
+  read -rp "Would you like to attempt to install them now? (yes/no): " CONFIRM
 
   case "$CONFIRM" in
     yes|y|Y)
@@ -228,7 +215,7 @@ main() {
 
   if [ "$REPO_DOWNLOAD" = true ]; then
     log_info "Download-only mode to: $PROJECT_PATH"
-    FORCE=true
+    UPGRADE=true
     backup_existing_project
 
     TMP_DIR=$(mktemp -d)
@@ -247,14 +234,9 @@ main() {
 
   if [ "$REPO_INSTALL" = true ]; then
     log_info "Running full install to: $PROJECT_PATH"
-    FORCE=true
+    UPGRADE=true
     backup_existing_project
     install_project
-    exit 0
-  fi
-
-  if [ "$DRY_RUN" = true ]; then
-    log_info "Dry run enabled. Would install to: $PROJECT_PATH"
     exit 0
   fi
 
@@ -262,7 +244,7 @@ main() {
     restore_backup
   fi
 
-  if [ -d "$PROJECT_PATH" ] && [ "$FORCE" = false ]; then
+  if [ -d "$PROJECT_PATH" ] && [ "$UPGRADE" = false ]; then
     read -rp "Project exists at '$PROJECT_PATH'. Overwrite? (yes/no): " CONFIRM
     case $CONFIRM in
       yes|y|Y)
