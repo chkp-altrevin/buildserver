@@ -187,10 +187,10 @@ main() {
   parse_args "$@"
 
   # Detect if running on Windows natively
-  if [[ "$OS" == "Windows_NT" || "$(uname -o 2>/dev/null)" == "Msys" ]]; then
+  if [[ "${OS:-}" == "Windows_NT" || "$(uname -o 2>/dev/null)" == "Msys" ]]; then
     IS_WINDOWS=true
   fi
-
+  
   require_root_or_sudo
   check_dependencies
 
