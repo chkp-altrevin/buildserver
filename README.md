@@ -120,6 +120,18 @@ After provisioning is complete logut/login. You will be greeted with a custom MO
 ### 🔁 Automated Download and Install Script:
 
 **Winows and WSL Powershell Install**
+
+PowerShell will likely need it's execution policies set. Did you set the execution policy?
+
+As an Administrator, you can set the execution policy by typing this into your PowerShell window:
+
+`Set-ExecutionPolicy RemoteSigned`
+For more information, see Using the Set-ExecutionPolicy Cmdlet.
+
+When you are done, you can set the policy back to its default value with:
+
+`Set-ExecutionPolicy Restricted`
+
 Copy the below and save as `install-script.ps1`. Runas: `PS C:\Users\user\install-secret.ps1`
 
 ```bash
@@ -149,7 +161,7 @@ Write-Host "Please install Git for Windows (https://gitforwindows.org/) or WSL."
 exit 1
 ```
 
-**Install Script Examples**
+**Linux Install Script Examples**
 
 Download repo, backup if exists:
 ```bash
