@@ -115,17 +115,25 @@ Upon SSH login, you'll be greeted with a custom MOTD and available commands to a
    ```
 After provisioning is complete logut/login. You will be greeted with a custom MOTD and available commands to assist with further setup.
 
-**All-in-One Install Script**
+## 🆕 What’s Included:
+
+### 🔁 Script Reference:
+* One-liners and script logic now dynamically point to help shows optional flags:
+  ```
+  https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh
+  ```
+
+**Install Script with flags**
 
 Download repo, backup if exists:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh | bash -s -- --download-repo
 ```
-Downloads repo, backup if exists and force install dependencies:
+Downloads repo, backup if exists and force install dependencies (all-in-one):
 ```bash
 curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh | bash -s -- --download-install
 ```
-Dispalys Help Menu:
+Displays Help Menu:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh | bash -s -- --help
 ```
@@ -304,17 +312,6 @@ Contributions are welcome! To contribute:
 5. Open a pull request.
 
 Please ensure your code adheres to the existing style and includes relevant tests.
-
----
-
-## 🆕 What’s Included:
-
-### 🔁 Script Reference:
-* One-liners and script logic now dynamically point to:
-
-  ```
-  https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/provision.sh
-  ```
 
 ---
 
