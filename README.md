@@ -1,4 +1,4 @@
-# 🛠️ BuildServer: Rapid DevOps Lab Provisioning
+ # 🛠️ BuildServer: Rapid DevOps Lab Provisioning
 
 **Automated, repeatable, and customizable environments for DevOps workflows.**
 
@@ -145,14 +145,14 @@ $gitBash = "${env:ProgramFiles}\Git\bin\bash.exe"
 
 if (Test-Path $gitBash) {
     Write-Host "✅ Git Bash found. Running install-script.sh..."
-    & "$gitBash" -c "curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh | bash -s -- --download-repo"
+    & "$gitBash" -c "curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh | bash -s -- --repo-download"
     exit 0
 }
 
 Write-Host "🔍 Checking for WSL..."
 if (Get-Command "wsl.exe" -ErrorAction SilentlyContinue) {
     Write-Host "✅ WSL found. Running install-script.sh..."
-    wsl curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh | wsl bashbash -s -- --download-repo
+    wsl curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh | wsl bashbash -s -- --repo-download
     exit 0
 }
 
@@ -163,13 +163,13 @@ exit 1
 
 **Linux Install Script Examples**
 
-Download repo, backup if exists:
+Install - Downloads repo, backup if exists and installs dependencies (all-in-one):
 ```bash
-curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh && chmod +x install-script.sh && ./install-script.sh --download-repo
+curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh && chmod +x install-script.sh && ./install-script.sh --install
 ```
 Downloads repo, backup if exists and force install dependencies (all-in-one):
 ```bash
-curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh && chmod +x install-script.sh && ./install-script.sh --download-install
+curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh && chmod +x install-script.sh && ./install-script.sh --repo-download
 ```
 Displays Help Menu:
 ```bash
