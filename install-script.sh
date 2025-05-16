@@ -177,11 +177,16 @@ install_project() {
   rm -rf "$TMP_DIR"
 
   if [ -x "$PROJECT_PATH/provision.sh" ]; then
-    echo "🚀 Running post-install: provision.sh..."
-    "$PROJECT_PATH/provision.sh"
+  echo "🚀 Running post-install: provision.sh with sudo..."
+  if [ "$EUID" -ne 0 ]; then
+    sudo "$PROJECT_PATH/provision.sh"
   else
-    echo "⚠️  provision.sh not found or not executable at $PROJECT_PATH/provision.sh"
+    "$PROJECT_PATH/provision.sh"
   fi
+else
+  echo "⚠️  provision.sh not found or not executable at $PROJECT_PATH/provision.sh"
+fi
+
 }
 
 main() {
