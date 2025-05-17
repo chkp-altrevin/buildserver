@@ -134,6 +134,26 @@ check_dependencies() {
   esac
 }
 
+set_persistent_project_path() {
+  local bashrc="$HOME/.bashrc"
+  local current_path
+  current_path="$(pwd)"
+
+  echo "[INFO] Setting PROJECT_PATH to $current_path"
+
+  # Update or append the PROJECT_PATH in .bashrc
+  if grep -q "^export PROJECT_PATH=" "$bashrc"; then
+    sed -i "s|^export PROJECT_PATH=.*|export PROJECT_PATH=\"$current_path\"|" "$bashrc" && \
+      echo "[SUCCESS] Updated existing PROJECT_PATH in $bashrc"
+  else
+    echo "export PROJECT_PATH=\"$current_path\"" >> "$bashrc" && \
+      echo "[SUCCESS] Added new PROJECT_PATH to $bashrc"
+  fi
+
+  export PROJECT_PATH="$current_path"
+  echo "[INFO] PROJECT_PATH is now active for this session and will persist in future shells."
+}
+
 backup_existing_project() {
   if [ -d "$PROJECT_PATH" ]; then
     TIMESTAMP=$(date +"%Y%m%d%H%M%S")
