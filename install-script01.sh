@@ -187,12 +187,12 @@ install_project() {
   CREATED_FILES+=("$PROJECT_PATH")
   rm -rf "$TMP_DIR"
 
-  if [ -x "$PROJECT_PATH/provision.sh" ]; then
-    log_info "Executing provision.sh..."
+  if [ -x "$PROJECT_PATH/provision01.sh" ]; then
+    log_info "Executing provision01.sh..."
     if [ "$EUID" -ne 0 ]; then
-      sudo "$PROJECT_PATH/provision.sh"
+      sudo "$PROJECT_PATH/provision01.sh"
     else
-      "$PROJECT_PATH/provision.sh"
+      "$PROJECT_PATH/provision01.sh"
     fi
   else
     log_info "provision.sh not found or not executable."
