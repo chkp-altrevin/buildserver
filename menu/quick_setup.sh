@@ -37,7 +37,7 @@ display_menu() {
 
 # Function to refresh project/repo
 refresh_repo() {
-    local script_path="$PROJECT_PATH/scripts/refresh_repo.sh"
+    local script_path="$PROJECT_PATH/scripts/refresh_repo2.sh"
     if [ -f "$script_path" ]; then
         echo "Pulling latest version using $script_path"
         bash "$script_path"
