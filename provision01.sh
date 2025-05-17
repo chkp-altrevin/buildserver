@@ -232,8 +232,6 @@ import_menu_aliases() {
 }
 #
 touch $PROJECT_PATH/provisioning.log
-touch $PROJECT_PATH/success.log
-touch $PROJECT_PATH/error.log
 #
 # --------- Logging Functions ------------------------------------------------
 
@@ -245,21 +243,12 @@ log_info() {
 log_success() {
   local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
   echo "[$timestamp] [SUCCESS] $1" >> $PROJECT_PATH/provisioning.log
-  echo "[$timestamp] [SUCCESS] $1" >> $PROJECT_PATH/success.log
 }
 
 log_error() {
   local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
   echo "[$timestamp] [ERROR] $1" >> $PROJECT_PATH/provisioning.log
-  echo "[$timestamp] [ERROR] $1" >> $PROJECT_PATH/error.log
 }
-
-# used to clear out error.logs when using vagrant up --provision
-touch $PROJECT_PATH/error.log
-> "$PROJECT_PATH/error.log"
-# used to clear out success.logs when using vagrant up --provision
-touch $PROJECT_PATH/success.log
-> "$PROJECT_PATH/success.log"
 
 # ------ Helper Function for Sudo ----------------------------------------------
 # run_with_sudo: Executes a command with sudo if not already running as root.
@@ -303,14 +292,14 @@ add_custom_motd() {
 # ----- Update .bashrc with PATH ----------------------------------------------
 update_bashrc_path() {
   log_info "Updating .bashrc to include local bin in PATH..."
-  sudo su -l $VAGRANT_USER -c 'echo $PATH' echo "export PATH=\$PATH:$VAGRANT_USER_PATH/.local/bin" >> "$VAGRANT_USER_PATH/.bashrc" && \
+  sudo su -l $USER -c 'echo $PATH' echo "export PATH=\$PATH:$HOME/.local/bin" >> "$HOME/.bashrc" && \
     log_success ".bashrc updated." || log_error "FATAL: Failed to update .bashrc."
 }
 
 # ----- Create Kube and Local Bin Directories ----------------------------------
 create_directories() {
   log_info "Creating necessary directories..."
-  run_with_sudo mkdir -p "$VAGRANT_USER_PATH/.local/bin" "$VAGRANT_USER_PATH/.kube" && \
+  run_with_sudo mkdir -p "$HOME/.local/bin" "$HOME/.kube" && \
     log_success "Directories created." || log_error "FATAL: Failed to create directories."
 }
 
@@ -318,8 +307,8 @@ create_directories() {
 copy_profile_files() {
   log_info "Copying profile files..."
 
-  local bash_aliases_path="$VAGRANT_USER_PATH/.bash_aliases"
-  local env_file_path="$VAGRANT_USER_PATH/.env"
+  local bash_aliases_path="$HOME/.bash_aliases"
+  local env_file_path="$HOME/.env"
 
   cp "$PROJECT_PATH/profile/bash_aliases" "$bash_aliases_path" && \
     log_success "bash_aliases copied." || log_error "FATAL: Failed to copy bash_aliases."
@@ -327,11 +316,11 @@ copy_profile_files() {
   cp "$PROJECT_PATH/profile/env.example" "$env_file_path" && \
     log_success "env.example copied." || log_error "FATAL: Failed to copy env.example."
 
-  touch "$VAGRANT_USER_PATH/.Xauthority" && \
+  touch "$HOME/.Xauthority" && \
     log_success "Xauthority created." || log_error "NON-FATAL: Failed to create Xauthority."
 
   # Apply .bash_aliases if running in an interactive shell
-  if [[ $- == *i* && "$VAGRANT_USER_PATH" == "$HOME" ]]; then
+  if [[ $- == *i* && "$HOME" == "$HOME" ]]; then
     log_info "Sourcing bash_aliases for current session..."
     source "$bash_aliases_path"
   else
@@ -382,14 +371,14 @@ install_docker() {
 
 # ----- Add User to Docker Group ----------------------------------------------
 add_user_to_docker() {
-  log_info "Adding user $VAGRANT_USER to the Docker group..."
-  run_with_sudo usermod -aG docker $VAGRANT_USER | newgrp docker && \
-    log_success "User $VAGRANT_USER added to Docker group." || log_error "FATAL: Failed to add user $VAGRANT_USER to Docker group."
+  log_info "Adding user $USER to the Docker group..."
+  run_with_sudo usermod -aG docker $USER | newgrp docker && \
+    log_success "User $USER added to Docker group." || log_error "FATAL: Failed to add user $USER to Docker group."
 }
 # ----- Install NVM -----------------------------------------------------------
 install_nvm() {
   log_info "Installing NVM..."
-  sudo -i -u "$VAGRANT_USER" "$PROJECT_PATH/scripts/deploy_nvm.sh" && \
+  sudo -i -u "$USER" "$PROJECT_PATH/scripts/deploy_nvm.sh" && \
     log_success "NVM installed." || log_error "NON-FATAL: NVM installation failed. If this was a --provision you can likely ignore"
 }
 
@@ -494,8 +483,8 @@ configure_kubectl_repo() {
 # ----- Update Home Directory Permissions -------------------------------------
 update_home_permissions() {
   log_info "Updating home directory permissions..."
-  run_with_sudo chgrp -R "$VAGRANT_USER" "$VAGRANT_USER_PATH" && \
-    run_with_sudo chown -R "$VAGRANT_USER" "$VAGRANT_USER_PATH" && \
+  run_with_sudo chgrp -R "$USER" "$HOME" && \
+    run_with_sudo chown -R "$USER" "$HOME" && \
     log_success "Home directory permissions updated." || log_error "FATAL: Failed to update home directory permissions."
 }
 
@@ -509,9 +498,9 @@ update_system() {
 # ----- Configure Git ---------------------------------------------------------
 configure_git() {
   log_info "Configuring Git global settings..."
-  git config --global user.email "$VAGRANT_USER@buildserver.local" && \
-    git config --global --add safe.directory "$VAGRANT_USER_PATH/repos" && \
-    git config --global user.name "$VAGRANT_USER" && \
+  git config --global user.email "$USER@buildserver.local" && \
+    git config --global --add safe.directory "$HOME/repos" && \
+    git config --global user.name "$USER" && \
     git config --global init.defaultBranch main && \
     log_success "Git configured." || log_error "NON-FATAL: Git configuration failed."
 }
@@ -519,12 +508,12 @@ configure_git() {
 # ----- Clone Repositories ----------------------------------------------------
 clone_repositories() {
   log_info "Cloning demo repositories..."
-  mkdir -p "$VAGRANT_USER_PATH/repos"
-  git clone https://github.com/chkp-altrevin/datacenter-objects-k8s.git "$VAGRANT_USER_PATH/repos/datacenter-objects-k8s" && \
+  mkdir -p "$HOME/repos"
+  git clone https://github.com/chkp-altrevin/datacenter-objects-k8s.git "$HOME/repos/datacenter-objects-k8s" && \
     log_success "Cloned datacenter-objects-k8s." || log_error "NON-FATAL: Failed to clone datacenter-objects-k8. If this was a --provision you can likely ignore"
-  git clone https://github.com/SpectralOps/spectral-goat.git "$VAGRANT_USER_PATH/repos/spectral-goat" && \
+  git clone https://github.com/SpectralOps/spectral-goat.git "$HOME/repos/spectral-goat" && \
     log_success "Cloned spectral-goat." || log_error "NON-FATAL: Failed to clone spectral-goat. If this was a --provision you can likely ignore"
-  git clone https://github.com/openappsec/waf-comparison-project.git "$VAGRANT_USER_PATH/repos/waf-comparison-project" && \
+  git clone https://github.com/openappsec/waf-comparison-project.git "$HOME/repos/waf-comparison-project" && \
     log_success "Cloned waf-comparison-project." || log_error "NON-FATAL: Failed to clone waf-comparison-project. If this was a --provision you can likely ignore"
 }
 
@@ -612,11 +601,12 @@ echo "| Software Packages    | exported to $PROJECT_PATH/initial_sbom           
 echo "| Provision Error Logs | exported to $PROJECT_PATH/error.log              "
 echo "=========================================================================="
 sleep 6
-echo "Summarizing errors if any"
-echo ""
-cat "$PROJECT_PATH/success.log"
+echo -e "\\n\033[1;31m[✖] Errors Detected:\033[0m"
+grep --color=always ERROR "$PROJECT_PATH/provisioning.log"
 echo "=========================================================================="
-cat "$PROJECT_PATH/error.log"
+echo -e "\\n\033[1;32m[✔] Successful Tasks:\033[0m"
+grep --color=always SUCCESS "$PROJECT_PATH/provisioning.log"
+
 echo ""
 echo "If errors, fix and reprovision using, vagrant up --provision. If this is a"
 echo "custom install using provision.sh, you can likely ignore NON-FATAL errors."
