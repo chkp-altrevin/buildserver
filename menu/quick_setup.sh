@@ -23,7 +23,7 @@ display_menu() {
     echo ""
     echo "Buildserver Info =================================="
     echo "Path: $PROJECT_PATH | User: $USER"
-    echo "Provisioned: 05-15-2024 09:37 | x. Refresh $PROJECT_PATH"
+    echo "Provisioned: 05-15-2024 09:37 | Q. Update $PROJECT_PATH" Content
     # echo "Current commit is: $(cd "$PROJECT_PATH" && git rev-parse --short HEAD) | Q. Update Project"
     echo "8. INSTALL APPLICATIONS"
     echo "==================================================="
