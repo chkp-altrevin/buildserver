@@ -111,8 +111,8 @@ download_repo() {
 }
 
 run_provision() {
-  if [ ! -f "$PROJECT_PATH/provision.sh" ]; then
-    log_error "provision.sh not found in $PROJECT_PATH"
+  if [ ! -f "$PROJECT_PATH/provision01.sh" ]; then
+    log_error "provision01.sh not found in $PROJECT_PATH"
     exit 1
   fi
 
@@ -122,7 +122,7 @@ run_provision() {
     ARGS+=(--test)
   fi
 
-  TEST_MODE="$TEST_MODE"   PROJECT_NAME="$PROJECT_NAME"   PROJECT_PATH="$PROJECT_PATH"   $SUDO -E bash "$PROJECT_PATH/provision.sh" "${ARGS[@]}"
+  TEST_MODE="$TEST_MODE"   PROJECT_NAME="$PROJECT_NAME"   PROJECT_PATH="$PROJECT_PATH"   $SUDO -E bash "$PROJECT_PATH/provision01.sh" "${ARGS[@]}"
 }
 
 main() {
