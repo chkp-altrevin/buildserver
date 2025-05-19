@@ -549,8 +549,8 @@ configure_kubectl_repo() {
 # ----- Update Preoject Directory Permissions ---------------------------------
 update_home_permissions() {
   log_info "Updating project directory permissions..."
-  run_with_sudo chgrp -R "$PROJECT_PATH" && \
-    run_with_sudo chown -R "$PROJECT_PATH" && \
+  run_with_sudo chgrp -R "$USER" "$PROJECT_PATH" && \
+    run_with_sudo chown -R "$USER" "$PROJECT_PATH" && \
     log_success "Project directory permissions updated." || log_error "FATAL: Failed to update Project directory permissions."
 }
 
