@@ -622,11 +622,10 @@ cleanup() {
 # Use Case 2  = Comments that start with a 2, are optional review comments below for more info
 main() {
   install_required_dependencies
-  check_vagrant_user # 2 responsible for checking if we are a vagrant user and if so, we notify first
-  make_scripts_executable # 2 chmod .sh +x the script folder, you need to do this manually if disabled
-  install_dependencies  # 2 mainly to support extractions, utilities to automate and help run commands used for automation, disable for manual cycles
-  display_banner # 2 fun stuff
-  add_custom_motd # 2 more fun stuff but also the motd
+  check_vagrant_user
+  make_scripts_executable
+  display_banner # fun stuff
+  add_custom_motd # the motd
   import_menu_aliases # if you plan to use cli menu and automation these are required
   create_directories # 2 create custom directories needed for use case 1
   copy_profile_files # 2 alias and bash stuff needed for use case 1
