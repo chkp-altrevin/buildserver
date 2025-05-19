@@ -415,7 +415,6 @@ configure_hostname_hosts() {
       log_success "Added $host to /etc/hosts." || log_error "FATAL: Failed to add $host to /etc/hosts."
   done
 }
-$(ip route get 1.1.1.1 | awk '{print $7}' | head -1)
 
 # ----- Install Preflight -----------------------------------------------------
 install_preflight() {
