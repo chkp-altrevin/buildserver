@@ -1,6 +1,72 @@
 #!/usr/bin/env bash
-# set -e
-export DEBIAN_FRONTEND=noninteractive
+set -euo pipefail
+
+: "${PROJECT_NAME:="buildserver"}"
+: "${PROJECT_PATH:="$HOME/$PROJECT_NAME"}"
+: "${TEST_MODE:=false}"
+
+mkdir -p "$PROJECT_PATH"
+LOG="$PROJECT_PATH/provisioning.log"
+touch "$LOG"
+# --- Log Rotation ---
+MAX_LOG_SIZE=1048576  # 1MB
+if [ -f "$LOG" ] && [ "$(stat -c%s "$LOG")" -ge "$MAX_LOG_SIZE" ]; then
+  mv "$LOG" "$LOG.old"
+  touch "$LOG"
+  log_info "Rotated provisioning log (exceeded 1MB)."
+fi
+
+# --- Trap Cleanup and Rollback ---
+rollback_on_failure() {
+  log_error "Provisioning failed. Initiating rollback..."
+  # Example: remove partial installs or restore backups
+  # rm -rf "$PROJECT_PATH/some_temp_dir"
+  # [ -f "$PROJECT_PATH/.backup_config" ] && mv "$PROJECT_PATH/.backup_config" "$PROJECT_PATH/config"
+  log_info "Rollback completed (placeholder)."
+}
+
+cleanup_on_exit() {
+  log_info "Cleaning up temporary files and exiting."
+}
+
+trap 'rollback_on_failure' ERR
+trap 'cleanup_on_exit' EXIT
+
+# Auto-recover if shell-init fails due to invalid working directory
+if ! cd "$PWD" 2>/dev/null; then
+  log_info "Current working directory is invalid. Changing to PROJECT_PATH: $PROJECT_PATH"
+  cd "$PROJECT_PATH" || { log_error "Failed to change to PROJECT_PATH: $PROJECT_PATH"; exit 1; }
+fi
+
+
+log_info()    { echo "[INFO]    $(date '+%F %T') - $*" | tee -a "$LOG"; }
+log_success() { echo "[SUCCESS] $(date '+%F %T') - $*" | tee -a "$LOG"; }
+log_error()   { echo "[ERROR]   $(date '+%F %T') - $*" | tee -a "$LOG" >&2; }
+
+run_with_sudo() {
+  if [[ $EUID -ne 0 ]]; then
+    sudo "$@"
+  else
+    "$@"
+  fi
+}
+
+# === Injected Original Functions ===
+
+install_required_dependencies() {
+  log_info "Installing required dependencies..."
+  local packages=(curl zip unzip apt-utils fakeroot dos2unix software-properties-common)
+  if [[ "$TEST_MODE" == "true" ]]; then
+    log_info "[TEST MODE] Would run: apt-get install -y ${packages[*]}"
+    return 0
+  fi
+  run_with_sudo apt-get update -y
+  run_with_sudo apt-get install -y "${packages[@]}" &&     log_success "Dependencies installed." ||     log_error "FATAL: Failed to install required dependencies."
+}
+
+
+# 
+
 # ---------------- Flag Handling and Validation ----------------
 
 show_help() {
@@ -345,10 +411,11 @@ configure_hostname_hosts() {
     log_success "Hostname set to buildserver." || log_error "FATAL: Hostname update failed."
   
   for host in "rancher.buildserver.local" "waf.buildserver.local" "web.buildserver.local" "demo.buildserver.local" "repo.buildserver.local" "api.buildserver.local" "buildserver.local"; do
-    run_with_sudo sh -c "echo '192.168.56.10  $host' >> /etc/hosts" && \
+    run_with_sudo sh -c "echo '$(ip route get 1.1.1.1 | awk '{print $7}' | head -1)  $host' >> /etc/hosts" && \
       log_success "Added $host to /etc/hosts." || log_error "FATAL: Failed to add $host to /etc/hosts."
   done
 }
+$(ip route get 1.1.1.1 | awk '{print $7}' | head -1)
 
 # ----- Install Preflight -----------------------------------------------------
 install_preflight() {
@@ -480,12 +547,12 @@ configure_kubectl_repo() {
   fi
 }
 
-# ----- Update Home Directory Permissions -------------------------------------
+# ----- Update Preoject Directory Permissions ---------------------------------
 update_home_permissions() {
-  log_info "Updating home directory permissions..."
-  run_with_sudo chgrp -R "$USER" "$HOME" && \
-    run_with_sudo chown -R "$USER" "$HOME" && \
-    log_success "Home directory permissions updated." || log_error "FATAL: Failed to update home directory permissions."
+  log_info "Updating project directory permissions..."
+  run_with_sudo chgrp -R "$PROJECT_PATH" && \
+    run_with_sudo chown -R "$PROJECT_PATH" && \
+    log_success "Project directory permissions updated." || log_error "FATAL: Failed to update Project directory permissions."
 }
 
 # ----- Update and Upgrade System ---------------------------------------------
@@ -555,6 +622,7 @@ cleanup() {
 # Use Case 1  = All functions below are required for Use Case 1 Vagrant and VirtualBox automated full deployment
 # Use Case 2  = Comments that start with a 2, are optional review comments below for more info
 main() {
+  install_required_dependencies
   check_vagrant_user # 2 responsible for checking if we are a vagrant user and if so, we notify first
   make_scripts_executable # 2 chmod .sh +x the script folder, you need to do this manually if disabled
   install_dependencies  # 2 mainly to support extractions, utilities to automate and help run commands used for automation, disable for manual cycles
@@ -576,7 +644,7 @@ main() {
   install_gcloudcli # 2 install the google cloud repository
   install_azurecli # 2 install the azure cli repository
   configure_kubectl_repo # 2 install the kubectl repository used for use case 1
-  update_home_permissions # 2 updates anything copied over to the $USER and $HOME paths used for use case 1 and 2
+  update_home_permissions # 2 updates anything copied over to the vagrant and $HOME paths used for use case 1 and 2
   update_system # 2 apt update upgrade used for use case 1
   configure_git # 2 configures git common configurations feel free to modify but used for use case 1
   clone_repositories # 2 install a few repos modify any as needed or remove your call
@@ -615,3 +683,13 @@ echo "SSH with vagrant ssh or your terminal of choice                           
 echo "Login: vagrant:privatekey port:2222"
 echo "=========================================================================="
 echo "If you manually ran provision.sh - Logout and log back in to see changes  "
+
+# Safe argument parsing (override project vars)
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --project-name) PROJECT_NAME="$2"; shift 2 ;;
+    --project-path) PROJECT_PATH="$2"; shift 2 ;;
+    --test) TEST_MODE=true; shift ;;
+    *) shift ;;
+  esac
+done
