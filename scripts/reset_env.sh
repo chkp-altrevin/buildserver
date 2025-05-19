@@ -1,1 +1,1 @@
-cp $HOME/buildserver/profile/env.example $HOME/.env
+cp $PROJECT_PATH/profile/env.example $HOME/.env
