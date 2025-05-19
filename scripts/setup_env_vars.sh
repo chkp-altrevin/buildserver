@@ -1,6 +1,6 @@
 #!/bin/bash
 # modify as needed
-export PROJECT_PATH="$HOME/buildserver"
+# export PROJECT_PATH="$HOME/buildserver"
 
 # Define source file and destination directory
 source_file="$HOME/.env"
