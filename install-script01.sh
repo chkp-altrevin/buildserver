@@ -70,21 +70,20 @@ install_missing_dependencies() {
   local missing=("$@")
   log_info "Attempting to install missing dependencies: ${missing[*]}"
   if command -v apt-get >/dev/null; then
-    run_with_sudo apt-get update && run_with_sudo apt-get install -y "${missing[@]}"
+    $SUDO apt-get update && $SUDO apt-get install -y "${missing[@]}"
   elif command -v yum >/dev/null; then
-    run_with_sudo yum install -y "${missing[@]}"
+    $SUDO yum install -y "${missing[@]}"
   elif command -v dnf >/dev/null; then
-    run_with_sudo dnf install -y "${missing[@]}"
+    $SUDO dnf install -y "${missing[@]}"
   elif command -v apk >/dev/null; then
-    run_with_sudo apk add --no-cache "${missing[@]}"
+    $SUDO apk add --no-cache "${missing[@]}"
   elif command -v pacman >/dev/null; then
-    run_with_sudo pacman -Sy --noconfirm "${missing[@]}"
+    $SUDO pacman -Sy --noconfirm "${missing[@]}"
   else
     log_error "No supported package manager found. Please install manually: ${missing[*]}"
     exit 1
   fi
 }
-
 check_dependencies() {
   local REQUIRED_CMDS=(curl zip unzip)
   local MISSING=()
