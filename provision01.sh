@@ -2,7 +2,7 @@
 set -euo pipefail
 
 : "${PROJECT_NAME:="buildserver"}"
-: "${PROJECT_PATH:="$HOME/$PROJECT_NAME"}"
+: "${PROJECT_PATH:="$VAGRANT_USER_PATH/$PROJECT_NAME"}"
 : "${TEST_MODE:=false}"
 
 mkdir -p "$PROJECT_PATH"
