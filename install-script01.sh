@@ -209,7 +209,6 @@ main() {
 
   if [ "$CLEANUP" = true ]; then
     cleanup_installation_artifacts
-    SCRIPT_EXITED_CLEANLY=true
     exit 0
   fi
 
@@ -228,7 +227,6 @@ main() {
     fi
     unzip -q "$backup_file" -d "$(dirname "$PROJECT_PATH")"
     log_success "Restored from $backup_file"
-    SCRIPT_EXITED_CLEANLY=true
     exit 0
   fi
 
