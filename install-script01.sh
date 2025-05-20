@@ -25,7 +25,7 @@ cleanup_installation_artifacts() {
   log_info "Performing cleanup of installation artifacts..."
   [[ -d "$PROJECT_PATH" ]] && rm -rf "$PROJECT_PATH" && log_info "Removed $PROJECT_PATH"
   for file in "${CREATED_FILES[@]:-}"; do
-    [[ -e "$file" ]] && rm -f "$file" && log_info "Removed $file"
+    [[ -e "$file" ]] && rm -f "$file" "install-script*.sh" && log_info "Removed $file"
   done
   log_success "Cleanup completed."
 }
