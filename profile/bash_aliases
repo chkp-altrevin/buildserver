@@ -1,6 +1,3 @@
-# switch between multiple projects
-export PROJECT_PATH="/home/vagrant/buildserver"
-
 # demo menu required aliases
 alias quick-setup='$PROJECT_PATH/menu/quick_setup.sh'
 # alias pass-setup='$PROJECT_PATH/menu/pass_setup.sh'
