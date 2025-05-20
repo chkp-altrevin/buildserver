@@ -129,7 +129,6 @@ Options:
     Example: install-script.sh --install-custom --project-path $HOME/repos --project-name buildserver
     
 EOF
-  SCRIPT_EXITED_CLEANLY=true
   exit 0
 }
 
@@ -229,6 +228,7 @@ main() {
     fi
     unzip -q "$backup_file" -d "$(dirname "$PROJECT_PATH")"
     log_success "Restored from $backup_file"
+    SCRIPT_EXITED_CLEANLY=true
     exit 0
   fi
 
