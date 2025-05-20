@@ -25,12 +25,12 @@ cleanup_installation_artifacts() {
   log_info "Performing cleanup of installation artifacts..."
   [[ -d "$PROJECT_PATH" ]] && rm -rf "$PROJECT_PATH" && log_info "Removed $PROJECT_PATH"
   for file in "${CREATED_FILES[@]:-}"; do
-    [[ -e "$file" ]] && rm -f "$file" && rm -f "install-script*.sh" && log_info "Removed $file"
+    [[ -e "$file" ]] && rm -f "$file" && log_info "Removed $file"
   done
-  log_success "Cleanup completed. You can safely remove installer files: rm -rf install-script*.sh install-script.log"
+  log_success "Cleanup completed. You can safely remove installer: rm -rf install-script*.sh install-script.log"
 }
 
-trap cleanup_installation_artifacts EXIT
+# trap cleanup_installation_artifacts EXIT
 
 # === Time Sync ===
 validate_and_fix_time_sync() {
