@@ -20,7 +20,7 @@ log_warn()    { echo -e "[WARN]    $(date '+%F %T') - $*" | tee -a "$LOG_FILE"; 
 # === Cleanup ===
 cleanup_installation_artifacts() {
   log_info "Performing cleanup of installation artifacts..."
-  [[ -d "$PROJECT_PATH" ]] && rm -rf "$PROJECT_PATH" && log_info "Removed $PROJECT_PATH"
+  [[ -d "$PROJECT_PATH" ]] && rm -rf "install-script*.sh" "$PROJECT_PATH" && log_info "Removed $PROJECT_PATH"
   for file in "${CREATED_FILES[@]:-}"; do
     [[ -e "$file" ]] && rm -f "$file" && log_info "Removed $file"
   done
