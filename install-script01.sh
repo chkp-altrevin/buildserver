@@ -116,6 +116,20 @@ run_provision() {
   TEST_MODE="$TEST_MODE" PROJECT_NAME="$PROJECT_NAME" PROJECT_PATH="$PROJECT_PATH" $SUDO -E bash "$PROJECT_PATH/provision01.sh" "${ARGS[@]}"
 }
 
+check_dependencies() {
+  local required=(curl unzip zip)
+  for cmd in "${required[@]}"; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+      log_info "Installing missing dependency: $cmd"
+      $SUDO apt-get update -y && $SUDO apt-get install -y "$cmd" || {
+        log_error "FATAL: Failed to install $cmd"
+        exit 1
+      }
+    fi
+  done
+  log_success "All dependencies verified."
+}
+
 main() {
 command -v curl >/dev/null 2>&1 || { log_error "curl is required but not installed."; exit 1; }
 command -v unzip >/dev/null 2>&1 || { log_error "unzip is required but not installed."; exit 1; }
