@@ -118,13 +118,16 @@ Usage: $0 [OPTIONS]
 
 Options:
   --install                 Download and provision the project
+  --install-custom          Download and customize provision path/name
   --repo-download           Only download the repository
-  --install-custom          Run provision.sh with current settings
+  
   --project-path=PATH       Set custom project path
   --restore=FILENAME        Restore from a previous backup
   --cleanup                 Remove created files and reset state
   --test                    Dry-run mode (no changes made)
   --help                    Show this help message
+
+  Example: --install-custom --project-path $HOME/demo --project-name buildserver 
 EOF
   exit 0
 }
@@ -154,7 +157,7 @@ require_root_or_sudo() {
 backup_existing_project() {
   if [ -d "$PROJECT_PATH" ]; then
     mkdir -p "$BACKUP_DIR"
-    local backup_file="${BACKUP_DIR}/buildserver_$(date +%Y%m%d%H%M%S).zip"
+    local backup_file="${BACKUP_DIR}/$PROJECT_NAME_$(date +%Y%m%d%H%M%S).zip"
     zip -r "$backup_file" "$PROJECT_PATH" >/dev/null
     log_info "Backup created: $backup_file"
     CREATED_FILES+=("$backup_file")
