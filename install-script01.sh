@@ -217,7 +217,6 @@ main() {
   if [ "$REPO_DOWNLOAD" = true ]; then
     backup_existing_project
     download_repo
-    SCRIPT_EXITED_CLEANLY=true
     exit 0
   fi
 
@@ -236,13 +235,11 @@ main() {
     backup_existing_project
     download_repo
     run_provision
-    SCRIPT_EXITED_CLEANLY=true
     exit 0
   fi
 
   if [ "$PROVISION_ONLY" = true ]; then
     run_provision
-    SCRIPT_EXITED_CLEANLY=true
     exit 0
   fi
 
