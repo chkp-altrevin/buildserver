@@ -57,6 +57,31 @@ require_root_or_sudo() {
   fi
 }
 
+backup_existing_project() {
+  if [ -d "$PROJECT_PATH" ]; then
+    mkdir -p "$BACKUP_DIR"
+    local backup_file="${BACKUP_DIR}/${PROJECT_NAME}_$(date +%Y%m%d%H%M%S).zip"
+    zip -r "$backup_file" "$PROJECT_PATH" >/dev/null
+    log_info "Backup created: $backup_file"
+    CREATED_FILES+=("$backup_file")
+  fi
+}
+
+download_repo() {
+  TMP_DIR=$(mktemp -d)
+  log_info "Downloading repository to temporary directory..."
+  curl -fsSL "$REPO_URL" -o "$TMP_DIR/project.zip"
+  unzip -q "$TMP_DIR/project.zip" -d "$TMP_DIR"
+  EXTRACTED_DIR=$(find "$TMP_DIR" -mindepth 1 -maxdepth 1 -type d)
+
+  rm -rf "$PROJECT_PATH"
+  mv "$EXTRACTED_DIR" "$PROJECT_PATH"
+  find "$PROJECT_PATH" -type f -name "*.sh" -exec chmod +x {} \;
+  rm -rf "$TMP_DIR"
+
+  log_success "Repository installed to $PROJECT_PATH"
+}
+
 run_provision() {
   export PROJECT_PATH="$PROJECT_PATH"
   if [ ! -d "$PROJECT_PATH" ]; then
@@ -83,9 +108,37 @@ main() {
   REPO_DOWNLOAD=false
   CLEANUP=false
   RESTORE=""
+  INSTALL=false
+  INSTALL_CUSTOM=false
+  REPO_DOWNLOAD=false
+  CLEANUP=false
+  RESTORE=""
 
   parse_args "$@"
   require_root_or_sudo
+
+  if [ -n "$RESTORE" ]; then
+    local backup_file="${BACKUP_DIR}/${RESTORE}"
+    if [ ! -f "$backup_file" ]; then
+      log_error "Restore file not found: $backup_file"
+      exit 1
+    fi
+    unzip -q "$backup_file" -d "$(dirname "$PROJECT_PATH")"
+    log_success "Restored from $backup_file"
+    exit 0
+  fi
+
+  if [ "$REPO_DOWNLOAD" = true ]; then
+    download_repo
+    exit 0
+  fi
+
+  if [ "$INSTALL" = true ]; then
+    backup_existing_project
+    download_repo
+    run_provision
+    exit 0
+  fi
 
   if [ "$INSTALL_CUSTOM" = true ]; then
     run_provision
