@@ -120,14 +120,14 @@ Options:
   --install                 Download and provision the project
   --install-custom          Download and customize provision path/name
   --repo-download           Only download the repository
-  
-  --project-path=PATH       Set custom project path
-  --restore=FILENAME        Restore from a previous backup
+  --restore=FILENAME        Restore from a previous "$HOME/backup" project backup
   --cleanup                 Remove created files and reset state
   --test                    Dry-run mode (no changes made)
   --help                    Show this help message
-
-  Example: --install-custom --project-path $HOME/demo --project-name buildserver 
+  
+    Default: install-script.sh --install (installs in $HOME/buildserver)
+    Example: install-script.sh --install-custom --project-path $HOME/repos --project-name buildserver
+    
 EOF
   SCRIPT_EXITED_CLEANLY=true
   exit 0
