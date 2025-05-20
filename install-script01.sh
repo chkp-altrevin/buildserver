@@ -181,7 +181,7 @@ run_provision() {
     log_error "provision01.sh not found in $PROJECT_PATH"
     exit 1
   fi
-  if [[ -t 0 && -z "$PROJECT_PATH_SET" ]]; then
+  if [[ -t 0 && -z "$PROJECT_PATH" ]]; then
     read -p "No --project-path specified. Continue with default path: $PROJECT_PATH? [Y/n] " answer
     if [[ "$answer" =~ ^[Nn] ]]; then
       log_info "User chose to exit. Rerun the script with --project-path=/path/to/project"
