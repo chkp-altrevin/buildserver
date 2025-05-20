@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Auto-recover if shell-init fails due to invalid working directory
+if ! cd "$PWD" 2>/dev/null; then
+  log_info "Current working directory is invalid. Changing to fallback: $PROJECT_PATH"
+  cd "$PROJECT_PATH" || { log_error "Failed to change to fallback PROJECT_PATH: $PROJECT_PATH"; exit 1; }
+fi
+
 : "${PROJECT_NAME:="buildserver"}"
 : "${PROJECT_PATH:="$HOME/$PROJECT_NAME"}"
 : "${TEST_MODE:=false}"
