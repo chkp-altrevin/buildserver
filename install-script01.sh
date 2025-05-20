@@ -82,6 +82,20 @@ download_repo() {
   log_success "Repository installed to $PROJECT_PATH"
 }
 
+
+ensure_project_env_export() {
+  if ! grep -q "export PROJECT_PATH=" "$HOME/.bashrc"; then
+    echo "export PROJECT_PATH=\"$PROJECT_PATH\"" >> "$HOME/.bashrc"
+    echo "export PROJECT_NAME=\"$PROJECT_NAME\"" >> "$HOME/.bashrc"
+    log_info "Added PROJECT_PATH and PROJECT_NAME to .bashrc"
+  if ! grep -q "$PROJECT_PATH/scripts" "$HOME/.bashrc"; then
+    echo 'export PATH="$PROJECT_PATH/scripts:$PATH"' >> "$HOME/.bashrc"
+    log_info "Updated PATH to include $PROJECT_PATH/scripts"
+  fi
+
+  fi
+}
+
 run_provision() {
   export PROJECT_PATH="$PROJECT_PATH"
   if [ ! -d "$PROJECT_PATH" ]; then
@@ -103,6 +117,8 @@ run_provision() {
 }
 
 main() {
+command -v curl >/dev/null 2>&1 || { log_error "curl is required but not installed."; exit 1; }
+command -v unzip >/dev/null 2>&1 || { log_error "unzip is required but not installed."; exit 1; }
   INSTALL=false
   INSTALL_CUSTOM=false
   REPO_DOWNLOAD=false
@@ -137,11 +153,13 @@ main() {
     backup_existing_project
     download_repo
     run_provision
+    ensure_project_env_export
     exit 0
   fi
 
   if [ "$INSTALL_CUSTOM" = true ]; then
     run_provision
+    ensure_project_env_export
     exit 0
   fi
 
