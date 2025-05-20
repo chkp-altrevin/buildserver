@@ -234,7 +234,6 @@ main() {
     backup_existing_project
     download_repo
     run_provision
-    SCRIPT_EXITED_CLEANLY=true
     exit 0
   fi
 
