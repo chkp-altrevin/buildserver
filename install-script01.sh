@@ -217,6 +217,7 @@ main() {
   if [ "$REPO_DOWNLOAD" = true ]; then
     backup_existing_project
     download_repo
+    SCRIPT_EXITED_CLEANLY=true
     exit 0
   fi
 
