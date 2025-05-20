@@ -133,7 +133,7 @@ parse_args() {
 
 require_root_or_sudo() {
   if [ "$(id -u)" -ne 0 ]; then
-    run_with_sudo
+    SUDO="sudo"
   fi
 }
 
