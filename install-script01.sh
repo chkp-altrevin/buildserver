@@ -16,20 +16,69 @@ log_info()    { echo -e "[INFO]    $(date '+%F %T') - $*" | tee -a "$LOG_FILE"; 
 log_success() { echo -e "[SUCCESS] $(date '+%F %T') - $*" | tee -a "$LOG_FILE"; }
 log_error()   { echo -e "[ERROR]   $(date '+%F %T') - $*" | tee -a "$LOG_FILE" >&2; }
 
+# === Off Timesync Handling ===
+validate_and_fix_time_sync() {
+  log_info "🕒 Validating system time synchronization..."
+
+  local status=$(timedatectl show -p NTPSynchronized --value)
+  local time_now=$(date)
+  local time_source=$(timedatectl show -p TimeSyncNTP --value)
+
+  log_info "Current time: $time_now"
+  log_info "NTP synchronized: $status"
+  log_info "Time source: ${time_source:-Unknown}"
+
+  if [[ "$status" != "yes" ]]; then
+    log_warn "⏳ Time is not synchronized. Attempting to re-enable NTP..."
+
+    if command -v timedatectl &>/dev/null; then
+      run_with_sudo timedatectl set-ntp true
+      sleep 3
+      new_status=$(timedatectl show -p NTPSynchronized --value)
+      if [[ "$new_status" == "yes" ]]; then
+        log_success "✅ NTP resynchronization successful."
+      else
+        log_error "❌ Failed to enable NTP with timedatectl. Trying chrony/ntp as fallback..."
+        try_chrony_ntp_fallback
+      fi
+    else
+      log_error "⚠️ 'timedatectl' not found. Skipping."
+    fi
+  else
+    log_success "✅ Time appears synchronized."
+  fi
+}
+
+try_chrony_ntp_fallback() {
+  if command -v chronyc &>/dev/null; then
+    run_with_sudo systemctl restart chronyd
+    sleep 3
+    chronyc tracking | grep -q "Leap status.*Normal" && \
+      log_success "✅ Chrony reports normal synchronization." || \
+      log_warn "⚠️ Chrony did not confirm sync."
+  elif command -v ntpdate &>/dev/null; then
+    run_with_sudo ntpdate -u pool.ntp.org && \
+      log_success "✅ Time resynced via ntpdate." || \
+      log_error "❌ Failed to sync time via ntpdate."
+  else
+    log_error "❌ No NTP sync tools available (chrony, ntpdate, timedatectl)."
+  fi
+}
+
 # === Dependency Handling ===
 install_missing_dependencies() {
   local missing=("$@")
   log_info "Attempting to install missing dependencies: ${missing[*]}"
   if command -v apt-get >/dev/null; then
-    $SUDO apt-get update && $SUDO apt-get install -y "${missing[@]}"
+    run_with_sudo apt-get update && run_with_sudo apt-get install -y "${missing[@]}"
   elif command -v yum >/dev/null; then
-    $SUDO yum install -y "${missing[@]}"
+    run_with_sudo yum install -y "${missing[@]}"
   elif command -v dnf >/dev/null; then
-    $SUDO dnf install -y "${missing[@]}"
+    run_with_sudo dnf install -y "${missing[@]}"
   elif command -v apk >/dev/null; then
-    $SUDO apk add --no-cache "${missing[@]}"
+    run_with_sudo apk add --no-cache "${missing[@]}"
   elif command -v pacman >/dev/null; then
-    $SUDO pacman -Sy --noconfirm "${missing[@]}"
+    run_with_sudo pacman -Sy --noconfirm "${missing[@]}"
   else
     log_error "No supported package manager found. Please install manually: ${missing[*]}"
     exit 1
@@ -84,7 +133,7 @@ parse_args() {
 
 require_root_or_sudo() {
   if [ "$(id -u)" -ne 0 ]; then
-    SUDO="sudo"
+    run_with_sudo
   fi
 }
 
