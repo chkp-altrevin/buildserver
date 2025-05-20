@@ -27,7 +27,7 @@ cleanup_installation_artifacts() {
   for file in "${CREATED_FILES[@]:-}"; do
     [[ -e "$file" ]] && rm -f "$file" && rm -f "install-script*.sh" && log_info "Removed $file"
   done
-  log_success "Cleanup completed."
+  log_success "Cleanup completed. You can safely remove installer files: rm -rf install-script*.sh install-script.log"
 }
 
 trap cleanup_installation_artifacts EXIT
