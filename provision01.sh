@@ -2,7 +2,7 @@
 set -euo pipefail
 
 : "${PROJECT_NAME:="buildserver"}"
-: "${PROJECT_PATH:="$VAGRANT_USER_PATH/$PROJECT_NAME"}"
+: "${PROJECT_PATH:="$HOME/$PROJECT_NAME"}"
 : "${TEST_MODE:=false}"
 
 mkdir -p "$PROJECT_PATH"
@@ -82,7 +82,7 @@ show_help() {
 
 # Defaults
 PROJECT_NAME="buildserver"
-PROJECT_PATH=""
+PROJECT_PATH="$HOME/$PROJECT_NAME"
 CHECK_VBOX_VAGRANT=false
 
 # Parse args
