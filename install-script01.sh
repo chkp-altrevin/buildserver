@@ -131,6 +131,7 @@ check_dependencies() {
 }
 
 main() {
+  check_dependencies
 command -v curl >/dev/null 2>&1 || { log_error "curl is required but not installed."; exit 1; }
 command -v unzip >/dev/null 2>&1 || { log_error "unzip is required but not installed."; exit 1; }
   INSTALL=false
