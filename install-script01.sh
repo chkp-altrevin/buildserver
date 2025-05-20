@@ -10,6 +10,7 @@ export TEST_MODE=false
 REPO_URL="https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip"
 CREATED_FILES=()
 SUDO=""
+SCRIPT_EXITED_CLEANLY=false
 
 # === Logging ===
 log_info()    { echo -e "[INFO]    $(date '+%F %T') - $*" | tee -a "$LOG_FILE"; }
@@ -17,15 +18,18 @@ log_success() { echo -e "[SUCCESS] $(date '+%F %T') - $*" | tee -a "$LOG_FILE"; 
 log_error()   { echo -e "[ERROR]   $(date '+%F %T') - $*" | tee -a "$LOG_FILE" >&2; }
 log_warn()    { echo -e "[WARN]    $(date '+%F %T') - $*" | tee -a "$LOG_FILE"; }
 
-# === Cleanup ===
 cleanup_installation_artifacts() {
+  if [[ "$SCRIPT_EXITED_CLEANLY" == true ]]; then
+    return
+  fi
   log_info "Performing cleanup of installation artifacts..."
-  [[ -d "$PROJECT_PATH" ]] && rm -rf "install-script*.sh" "$PROJECT_PATH" && log_info "Removed $PROJECT_PATH"
+  [[ -d "$PROJECT_PATH" ]] && rm -rf "$PROJECT_PATH" && log_info "Removed $PROJECT_PATH"
   for file in "${CREATED_FILES[@]:-}"; do
     [[ -e "$file" ]] && rm -f "$file" && log_info "Removed $file"
   done
   log_success "Cleanup completed."
 }
+
 trap cleanup_installation_artifacts EXIT
 
 # === Time Sync ===
@@ -208,6 +212,7 @@ main() {
   if [ "$REPO_DOWNLOAD" = true ]; then
     backup_existing_project
     download_repo
+    SCRIPT_EXITED_CLEANLY=true
     exit 0
   fi
 
