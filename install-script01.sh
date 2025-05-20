@@ -58,6 +58,7 @@ require_root_or_sudo() {
 }
 
 run_provision() {
+  export PROJECT_PATH="$PROJECT_PATH"
   if [ ! -d "$PROJECT_PATH" ]; then
     log_error "PROJECT_PATH does not exist: $PROJECT_PATH"
     exit 1
