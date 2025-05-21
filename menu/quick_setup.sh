@@ -23,7 +23,7 @@ display_menu() {
     echo ""
     echo "Buildserver Info =================================="
     echo "Path: $PROJECT_PATH | User: $USER"
-    echo "Provisioned: 05-15-2024 09:37 | Q. Update $PROJECT_PATH" Content
+    echo "Provisioned: 05-21-2025 09:37 | Q. Update $PROJECT_NAME"
     # echo "Current commit is: $(cd "$PROJECT_PATH" && git rev-parse --short HEAD) | Q. Update Project"
     echo "8. INSTALL APPLICATIONS"
     echo "==================================================="
@@ -37,7 +37,7 @@ display_menu() {
 
 # Function to refresh project/repo
 refresh_repo() {
-    local script_path="$PROJECT_PATH/scripts/refresh_repo2.sh"
+    local script_path="$PROJECT_PATH/scripts/refresh_repo3.sh"
     if [ -f "$script_path" ]; then
         echo "Pulling latest version using $script_path"
         bash "$script_path"
