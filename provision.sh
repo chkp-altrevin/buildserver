@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# === SUDO-SAFE ENV SETUP ===
+SUDO_USER="${SUDO_USER:-}"
+ORIGINAL_USER="${SUDO_USER:-$USER}"
+CALLER_HOME="${HOME}"
+
+if [[ -n "$SUDO_USER" ]]; then
+  CALLER_HOME="$(getent passwd "$SUDO_USER" | cut -d: -f6)"
+fi
+
+
 # Auto-recover if shell-init fails due to invalid working directory
 if ! cd "$PWD" 2>/dev/null; then
   log_info "Current working directory is invalid. Changing to fallback: $PROJECT_PATH"
