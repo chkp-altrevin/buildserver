@@ -685,7 +685,7 @@ if [[ "${SUDO_USER:-$USER}" == "vagrant" ]]; then
   echo "Login: vagrant:privatekey port:2222"
   echo "=========================================================================="
 else
-  echo "If you manually ran provision.sh - Logout and log back in to see changes  "
+  echo "Looks like you ran the installer script - Logout and log back in to see changes  "
 fi
   log_info "⚠️  Please log out and log back in to apply Docker group membership changes."
 }
