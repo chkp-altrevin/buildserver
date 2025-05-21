@@ -61,9 +61,21 @@ backup_existing_project() {
   if [ -d "$PROJECT_PATH" ]; then
     mkdir -p "$BACKUP_DIR"
     local backup_file="${BACKUP_DIR}/${PROJECT_NAME}_$(date +%Y%m%d%H%M%S).zip"
+
+    if ! command -v zip >/dev/null 2>&1; then
+      log_error "zip command not found. Cannot backup $PROJECT_PATH."
+      exit 1
+    fi
+
     zip -r "$backup_file" "$PROJECT_PATH" >/dev/null
-    log_info "Backup created: $backup_file"
-    CREATED_FILES+=("$backup_file")
+    if [ $? -eq 0 ]; then
+      log_info "Backup created: $backup_file"
+      zipinfo "$backup_file" | tee -a "$LOG_FILE"
+      CREATED_FILES+=("$backup_file")
+    else
+      log_error "Backup failed. Aborting before deleting $PROJECT_PATH."
+      exit 1
+    fi
   fi
 }
 
