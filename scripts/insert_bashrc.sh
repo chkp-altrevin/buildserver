@@ -6,4 +6,3 @@ command_to_add="source $HOME/.env"
 
 # Append the command to .bashrc
 echo "$command_to_add" >> ~/.bashrc
-echo "export $PROJECT_PATH" >> ~/.bashrc
