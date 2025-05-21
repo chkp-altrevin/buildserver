@@ -44,7 +44,7 @@ display_menu() {
 }
 # Function to refresh repo
 refresh_repo() {
-    local script_path="$PROJECT_PATH/menu/refresh_repo3.sh"
+    local script_path="$PROJECT_PATH/scripts/refresh_repo3.sh"
     if [ -f "$script_path" ]; then
         echo "refreshing repo using $script_path"
         bash "$script_path"
