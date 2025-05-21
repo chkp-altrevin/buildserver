@@ -3,12 +3,14 @@ set -euo pipefail
 
 # === Constants ===
 export PROJECT_NAME="buildserver"
-export PROJECT_PATH="${HOME}/${PROJECT_NAME}"
-export BACKUP_DIR="${HOME}/backup"
-export LOG_FILE="${HOME}/install-script.log"
+export CALLER_HOME="$(getent passwd "$SUDO_USER" | cut -d: -f6 2>/dev/null || echo "$HOME")"
+export PROJECT_PATH="${CALLER_HOME}/${PROJECT_NAME}"
+export BACKUP_DIR="${CALLER_HOME}/backup"
+export LOG_FILE="${CALLER_HOME}/install-script.log"
 export TEST_MODE=false
 REPO_URL="https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip"
 CREATED_FILES=()
+SUDO=""
 SUDO=""
 
 # === Logging ===
@@ -24,8 +26,8 @@ Usage: $0 [OPTIONS]
 
 Options:
   --install                 Download and provision the project
-  --install-custom          Run provision.sh with optional project path override
   --repo-download           Only download the repository
+  --install-custom          Run provision.sh with optional project path override
   --project-path=PATH       Set custom project path
   --restore=FILENAME        Restore from a previous backup
   --cleanup                 Remove created files and reset state
