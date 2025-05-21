@@ -23,35 +23,26 @@ display_menu() {
     echo ""
     echo "Buildserver Info =================================="
     echo "Path: $PROJECT_PATH | User: $USER"
-if [[ -f "$HOME/.buildserver_meta" ]]; then
-  source "$HOME/.buildserver_meta"
-else
-  Provisioned="Unknown"
-  Version="Unknown"
-fi
-    echo "Provisioned: $Provisioned | Version: $(egrep '^v' "$PROJECT_PATH/version.txt") | Q. Update $PROJECT_NAME
+
+    if [[ -f "$HOME/.buildserver_meta" ]]; then
+        source "$HOME/.buildserver_meta"
+    else
+        Provisioned="Unknown"
+    fi
+
+    if [[ -f "$PROJECT_PATH/version.txt" ]]; then
+        Version=$(egrep '^v' "$PROJECT_PATH/version.txt" | head -n1)
+    else
+        Version="Unknown"
+    fi
+
+    echo "Provisioned: $Provisioned | Version: $Version | Q. Update $PROJECT_NAME"
     # echo "Current commit is: $(cd "$PROJECT_PATH" && git rev-parse --short HEAD) | Q. Update Project"
     echo "8. INSTALL APPLICATIONS"
     echo "==================================================="
     echo -n "choose an option [1-9,a-z]: (x)  Exit "
 }
-# Global variable to store the custom project path
-# No need to modify unless you plan to use outside of the provisioning.sh script
-# =============================================
-# export PROJECT_PATH="/home/vagrant/buildserver"
-# =============================================
 
-# Function to refresh project/repo
-refresh_repo() {
-    local script_path="$PROJECT_PATH/scripts/refresh_repo3.sh"
-    if [ -f "$script_path" ]; then
-        echo "Pulling latest version using $script_path"
-        bash "$script_path"
-    else
-        echo "Failed to pull script does not exist at $script_path."
-    fi
-    pause
-}
 # Function to display motd
 run_motd() {
     local script_path="$PROJECT_PATH/menu/run_motd.sh"
