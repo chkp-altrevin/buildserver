@@ -27,7 +27,7 @@ display_menu() {
     if [[ -f "$HOME/.buildserver_meta" ]]; then
         source "$HOME/.buildserver_meta"
     else
-        Provisioned="Unknown"
+        Provisioned="v1.0.0"
     fi
 
     if [[ -f "$PROJECT_PATH/version.txt" ]]; then
