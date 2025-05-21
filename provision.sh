@@ -461,9 +461,9 @@ install_docker() {
 
 # ----- Add User to Docker Group ----------------------------------------------
 add_user_to_docker() {
-  log_info "Adding user $USER to the Docker group..."
-  run_with_sudo usermod -aG docker $USER | newgrp docker && \
-    log_success "User $USER added to Docker group." || log_error "FATAL: Failed to add user $USER to Docker group."
+  log_info "Adding user $ORIGINAL_USER to the Docker group..."
+  run_with_sudo usermod -aG docker "$ORIGINAL_USER" && \
+    log_success "User $ORIGINAL_USER added to Docker group." || log_error "FATAL: Failed to add user $ORIGINAL_USER to Docker group."
 }
 # ----- Install NVM -----------------------------------------------------------
 install_nvm() {
@@ -687,6 +687,7 @@ if [[ "${SUDO_USER:-$USER}" == "vagrant" ]]; then
 else
   echo "If you manually ran provision.sh - Logout and log back in to see changes  "
 fi
+  log_info "⚠️  Please log out and log back in to apply Docker group membership changes."
 }
 main
 
