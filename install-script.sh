@@ -3,6 +3,8 @@ set -euo pipefail
 
 # === Constants ===
 export PROJECT_NAME="buildserver"
+# Safe handling of caller home directory
+SUDO_USER="${SUDO_USER:-}"
 export CALLER_HOME="$(getent passwd "$SUDO_USER" | cut -d: -f6 2>/dev/null || echo "$HOME")"
 export PROJECT_PATH="${CALLER_HOME}/${PROJECT_NAME}"
 export BACKUP_DIR="${CALLER_HOME}/backup"
