@@ -13,7 +13,6 @@ export TEST_MODE=false
 REPO_URL="https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip"
 CREATED_FILES=()
 SUDO=""
-SUDO=""
 
 # === Logging ===
 log_info()    { echo -e "[INFO]    $(date '+%F %T') - $*" | tee -a "$LOG_FILE"; }
@@ -71,7 +70,7 @@ backup_existing_project() {
       exit 1
     fi
 
-    zip -r "$backup_file" "$PROJECT_PATH" >/dev/null
+    zip -rq "$backup_file" "$PROJECT_PATH" >> "$LOG_FILE" 2>&1
     if [ $? -eq 0 ]; then
       log_info "Backup created: $backup_file"
       zipinfo "$backup_file" | tee -a "$LOG_FILE"
@@ -167,7 +166,7 @@ main() {
       log_error "Restore file not found: $backup_file"
       exit 1
     fi
-    unzip -q "$backup_file" -d "$(dirname "$PROJECT_PATH")"
+    unzip -q "$backup_file" -d "$(dirname "$PROJECT_PATH")" >> "$LOG_FILE" 2>&1
     log_success "Restored from $backup_file"
     exit 0
   fi
