@@ -1,87 +1,232 @@
 #!/usr/bin/env bash
-# set -e
-export DEBIAN_FRONTEND=noninteractive
+set -euo pipefail
 
-# ============================ Command-Line Flags ==============================
-show_help() {
-  echo "Usage: $0 [OPTIONS]"
-  echo ""
-  echo "Optional flags to override default environment variables:"
-  echo "  --project-name NAME           Set custom project name (default: buildserver)"
-  echo "  --project-path PATH           Set custom project path (default: /home/vagrant/buildserver)"
-  echo "  --vagrant-user-path PATH      Set custom user path (default: /home/vagrant)"
-  echo "  --vagrant-user NAME           Set custom username (default: vagrant)"
-  echo "  -h, --help                    Display this help message and exit"
+# Auto-recover if shell-init fails due to invalid working directory
+if ! cd "$PWD" 2>/dev/null; then
+  log_info "Current working directory is invalid. Changing to fallback: $PROJECT_PATH"
+  cd "$PROJECT_PATH" || { log_error "Failed to change to fallback PROJECT_PATH: $PROJECT_PATH"; exit 1; }
+fi
+
+: "${PROJECT_NAME:="buildserver"}"
+: "${PROJECT_PATH:="$HOME/$PROJECT_NAME"}"
+: "${TEST_MODE:=false}"
+
+mkdir -p "$PROJECT_PATH"
+LOG="$PROJECT_PATH/provisioning.log"
+touch "$LOG"
+# --- Log Rotation ---
+MAX_LOG_SIZE=1048576  # 1MB
+if [ -f "$LOG" ] && [ "$(stat -c%s "$LOG")" -ge "$MAX_LOG_SIZE" ]; then
+  mv "$LOG" "$LOG.old"
+  touch "$LOG"
+  log_info "Rotated provisioning log (exceeded 1MB)."
+fi
+
+# --- Trap Cleanup and Rollback ---
+rollback_on_failure() {
+  log_error "Provisioning failed. Initiating rollback..."
+  # Example: remove partial installs or restore backups
+  # rm -rf "$PROJECT_PATH/some_temp_dir"
+  # [ -f "$PROJECT_PATH/.backup_config" ] && mv "$PROJECT_PATH/.backup_config" "$PROJECT_PATH/config"
+  log_info "Rollback completed (placeholder)."
 }
 
-# Logging functions for override tracking
-log_override() {
-  local key="$1"
-  local value="$2"
-  echo "[OVERRIDE] ${key} set to '${value}'"
+cleanup_on_exit() {
+  log_info "Cleaning up temporary files and exiting."
 }
 
-# Validate directory exists or can be created
-validate_path() {
-  local path="$1"
-  if [[ ! -d "$path" ]]; then
-    echo "[VALIDATION] Directory '$path' does not exist. Creating it..."
-    mkdir -p "$path" || { echo "[ERROR] Failed to create directory '$path'"; exit 1; }
+trap 'rollback_on_failure' ERR
+trap 'cleanup_on_exit' EXIT
+
+# Auto-recover if shell-init fails due to invalid working directory
+if ! cd "$PWD" 2>/dev/null; then
+  log_info "Current working directory is invalid. Changing to PROJECT_PATH: $PROJECT_PATH"
+  cd "$PROJECT_PATH" || { log_error "Failed to change to PROJECT_PATH: $PROJECT_PATH"; exit 1; }
+fi
+
+
+log_info()    { echo "[INFO]    $(date '+%F %T') - $*" | tee -a "$LOG"; }
+log_success() { echo "[SUCCESS] $(date '+%F %T') - $*" | tee -a "$LOG"; }
+log_error()   { echo "[ERROR]   $(date '+%F %T') - $*" | tee -a "$LOG" >&2; }
+
+run_with_sudo() {
+  if [[ $EUID -ne 0 ]]; then
+    sudo "$@"
+  else
+    "$@"
   fi
 }
 
-# Default values
-PROJECT_NAME="buildserver"
-PROJECT_PATH="/home/vagrant/buildserver"
-VAGRANT_USER_PATH="/home/vagrant"
-VAGRANT_USER="vagrant"
+# === Injected Original Functions ===
 
-# Parse command-line arguments
+install_required_dependencies() {
+  log_info "Installing required dependencies..."
+  local packages=(curl zip unzip apt-utils fakeroot dos2unix software-properties-common)
+  if [[ "$TEST_MODE" == "true" ]]; then
+    log_info "[TEST MODE] Would run: apt-get install -y ${packages[*]}"
+    return 0
+  fi
+  run_with_sudo apt-get update -y
+  run_with_sudo apt-get install -y "${packages[@]}" &&     log_success "Dependencies installed." ||     log_error "FATAL: Failed to install required dependencies."
+}
+
+
+# 
+
+# ---------------- Flag Handling and Validation ----------------
+
+show_help() {
+  echo "Usage: $0 [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  --project-name NAME        Optional: Project name (default: buildserver)"
+  echo "  --project-path PATH        Required*: Path to install (default: $HOME/<project-name> if omitted)"
+  echo "  --virtualbox-vagrant-win   Enable Vagrant/VirtualBox Windows setup flow"
+  echo "  -h, --help                 Show this help message"
+  exit 0
+}
+
+# Defaults
+PROJECT_NAME="buildserver"
+PROJECT_PATH="$HOME/$PROJECT_NAME"
+CHECK_VBOX_VAGRANT=false
+
+# Parse args
 while [[ $# -gt 0 ]]; do
   case $1 in
     --project-name)
       PROJECT_NAME="$2"
-      log_override "PROJECT_NAME" "$PROJECT_NAME"
       shift 2
       ;;
     --project-path)
       PROJECT_PATH="$2"
-      log_override "PROJECT_PATH" "$PROJECT_PATH"
       shift 2
       ;;
-    --vagrant-user-path)
-      VAGRANT_USER_PATH="$2"
-      log_override "VAGRANT_USER_PATH" "$VAGRANT_USER_PATH"
-      shift 2
-      ;;
-    --vagrant-user)
-      VAGRANT_USER="$2"
-      log_override "VAGRANT_USER" "$VAGRANT_USER"
-      shift 2
+    --virtualbox-vagrant-win)
+      CHECK_VBOX_VAGRANT=true
+      shift
       ;;
     -h|--help)
       show_help
-      exit 0
       ;;
     *)
       echo "Unknown option: $1"
       show_help
-      exit 1
       ;;
   esac
 done
 
-# Export the possibly overridden values
+# Set required project path if not provided
+if [[ -z "$PROJECT_PATH" ]]; then
+  PROJECT_PATH="$HOME/$PROJECT_NAME"
+  echo "[INFO] No --project-path provided, defaulting to: $PROJECT_PATH"
+fi
+
+# Conditional user/env settings for Vagrant+VirtualBox
+if [[ "$CHECK_VBOX_VAGRANT" == true ]]; then
+  export VAGRANT_USER="vagrant"
+  export VAGRANT_USER_PATH="/home/vagrant"
+else
+  export VAGRANT_USER="${USER}"
+  export VAGRANT_USER_PATH="${HOME}"
+fi
+
 export PROJECT_NAME
 export PROJECT_PATH
-export VAGRANT_USER_PATH
-export VAGRANT_USER
 
-# Validate required directories
-validate_path "$PROJECT_PATH"
-validate_path "$VAGRANT_USER_PATH"
-# -----  End of this stuff  ---------------------------------------------------
+# -----  Run as root check ----------------------------------------------------
+if [[ $EUID -ne 0 ]]; then
+  echo "This script must be run as root."
+  exit 1
+fi
 
+# ---------------- VirtualBox + Vagrant Verification ----------------
+
+verify_virtualbox_and_vagrant() {
+  echo "[INFO] Running VirtualBox + Vagrant check..."
+
+  # Detect Windows via WSL or Git Bash
+  if grep -qi microsoft /proc/version 2>/dev/null || [[ "$(uname -o 2>/dev/null)" == "Msys" ]]; then
+    echo "[INFO] Detected Windows-based environment."
+  else
+    echo "[ERROR] This flag is intended for Windows systems only. Exiting."
+    exit 1
+  fi
+
+  # Check for VirtualBox
+  if ! command -v VBoxManage &>/dev/null; then
+    echo "[WARN] VirtualBox not found."
+    VBoxFound=false
+  else
+    VBoxVersion=$(VBoxManage --version | cut -d'r' -f1)
+    echo "[INFO] VirtualBox version detected: $VBoxVersion"
+    VBoxFound=true
+  fi
+
+  # Check for Vagrant
+  if ! command -v vagrant &>/dev/null; then
+    echo "[WARN] Vagrant not found."
+    VagrantFound=false
+  else
+    VagrantVersion=$(vagrant --version | awk '{print $2}')
+    echo "[INFO] Vagrant version detected: $VagrantVersion"
+    VagrantFound=true
+  fi
+
+  # Evaluate next steps
+  if [[ "$VBoxFound" = false || "$VagrantFound" = false ]]; then
+    echo ""
+    echo "Required software is missing:"
+    [[ "$VBoxFound" = false ]] && echo " - VirtualBox"
+    [[ "$VagrantFound" = false ]] && echo " - Vagrant"
+    echo ""
+
+    read -rp "Would you like to attempt installation now? [Y/n]: " response
+    case "$response" in
+      [nN]*) echo "Exiting by user choice."; exit 1 ;;
+    esac
+
+    echo "Please install supported versions:"
+    echo " - VirtualBox: https://www.virtualbox.org/wiki/Downloads"
+    echo " - Vagrant: https://developer.hashicorp.com/vagrant/downloads"
+
+    if command -v xdg-open &>/dev/null; then
+      xdg-open "https://www.virtualbox.org/wiki/Downloads"
+      xdg-open "https://developer.hashicorp.com/vagrant/downloads"
+    elif command -v powershell.exe &>/dev/null; then
+      powershell.exe start https://www.virtualbox.org/wiki/Downloads
+      powershell.exe start https://developer.hashicorp.com/vagrant/downloads
+    fi
+
+    echo "[INFO] Please install manually and re-run the script after installation."
+    exit 1
+  fi
+}
+
+# Run validation if flag passed
+if [[ "$CHECK_VBOX_VAGRANT" == true ]]; then
+  verify_virtualbox_and_vagrant
+fi
+# ==============================================================================
+# DIY Buildserver Lab Environment Setup Script
+#
+# This script sets up your environment by:
+#   - Displaying a banner and updating .bashrc
+#   - Creating necessary directories and copying profile files
+#   - Configuring hostname and hosts file entries
+#   - Installing preflight, spectral, docker, helm, k3d, and more
+#   - Setting up repositories, cloning demo repos, and installing packages
+#   - Modifying bashrc, generating an initial SBOM, and cleaning up
+#
+# ====================== USECASE 2 =============================================
+# If you plan to run the provisioning on your own linux server modify the below 
+# env vars with your env settings. Otherwise leave these unmodified.
+# ==============================================================================
+#
+# project name or folder, should match your project folder, example buildserver
+#
+#==============================================================================
+#
 # -----  Run as root check ----------------------------------------------------
 #
 if [[ $EUID -ne 0 ]]; then
@@ -159,8 +304,6 @@ import_menu_aliases() {
 }
 #
 touch $PROJECT_PATH/provisioning.log
-touch $PROJECT_PATH/success.log
-touch $PROJECT_PATH/error.log
 #
 # --------- Logging Functions ------------------------------------------------
 
@@ -172,21 +315,12 @@ log_info() {
 log_success() {
   local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
   echo "[$timestamp] [SUCCESS] $1" >> $PROJECT_PATH/provisioning.log
-  echo "[$timestamp] [SUCCESS] $1" >> $PROJECT_PATH/success.log
 }
 
 log_error() {
   local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
   echo "[$timestamp] [ERROR] $1" >> $PROJECT_PATH/provisioning.log
-  echo "[$timestamp] [ERROR] $1" >> $PROJECT_PATH/error.log
 }
-
-# used to clear out error.logs when using vagrant up --provision
-touch $PROJECT_PATH/error.log
-> "$PROJECT_PATH/error.log"
-# used to clear out success.logs when using vagrant up --provision
-touch $PROJECT_PATH/success.log
-> "$PROJECT_PATH/success.log"
 
 # ------ Helper Function for Sudo ----------------------------------------------
 # run_with_sudo: Executes a command with sudo if not already running as root.
@@ -230,14 +364,14 @@ add_custom_motd() {
 # ----- Update .bashrc with PATH ----------------------------------------------
 update_bashrc_path() {
   log_info "Updating .bashrc to include local bin in PATH..."
-  sudo su -l $VAGRANT_USER -c 'echo $PATH' echo "export PATH=\$PATH:$VAGRANT_USER_PATH/.local/bin" >> "$VAGRANT_USER_PATH/.bashrc" && \
+  sudo su -l $USER -c 'echo $PATH' echo "export PATH=\$PATH:$HOME/.local/bin" >> "$HOME/.bashrc" && \
     log_success ".bashrc updated." || log_error "FATAL: Failed to update .bashrc."
 }
 
 # ----- Create Kube and Local Bin Directories ----------------------------------
 create_directories() {
   log_info "Creating necessary directories..."
-  run_with_sudo mkdir -p "$VAGRANT_USER_PATH/.local/bin" "$VAGRANT_USER_PATH/.kube" && \
+  run_with_sudo mkdir -p "$HOME/.local/bin" "$HOME/.kube" && \
     log_success "Directories created." || log_error "FATAL: Failed to create directories."
 }
 
@@ -245,8 +379,8 @@ create_directories() {
 copy_profile_files() {
   log_info "Copying profile files..."
 
-  local bash_aliases_path="$VAGRANT_USER_PATH/.bash_aliases"
-  local env_file_path="$VAGRANT_USER_PATH/.env"
+  local bash_aliases_path="$HOME/.bash_aliases"
+  local env_file_path="$HOME/.env"
 
   cp "$PROJECT_PATH/profile/bash_aliases" "$bash_aliases_path" && \
     log_success "bash_aliases copied." || log_error "FATAL: Failed to copy bash_aliases."
@@ -254,11 +388,11 @@ copy_profile_files() {
   cp "$PROJECT_PATH/profile/env.example" "$env_file_path" && \
     log_success "env.example copied." || log_error "FATAL: Failed to copy env.example."
 
-  touch "$VAGRANT_USER_PATH/.Xauthority" && \
+  touch "$HOME/.Xauthority" && \
     log_success "Xauthority created." || log_error "NON-FATAL: Failed to create Xauthority."
 
   # Apply .bash_aliases if running in an interactive shell
-  if [[ $- == *i* && "$VAGRANT_USER_PATH" == "$HOME" ]]; then
+  if [[ $- == *i* && "$HOME" == "$HOME" ]]; then
     log_info "Sourcing bash_aliases for current session..."
     source "$bash_aliases_path"
   else
@@ -283,7 +417,7 @@ configure_hostname_hosts() {
     log_success "Hostname set to buildserver." || log_error "FATAL: Hostname update failed."
   
   for host in "rancher.buildserver.local" "waf.buildserver.local" "web.buildserver.local" "demo.buildserver.local" "repo.buildserver.local" "api.buildserver.local" "buildserver.local"; do
-    run_with_sudo sh -c "echo '192.168.56.10  $host' >> /etc/hosts" && \
+    run_with_sudo sh -c "echo '$(ip route get 1.1.1.1 | awk '{print $7}' | head -1)  $host' >> /etc/hosts" && \
       log_success "Added $host to /etc/hosts." || log_error "FATAL: Failed to add $host to /etc/hosts."
   done
 }
@@ -309,14 +443,14 @@ install_docker() {
 
 # ----- Add User to Docker Group ----------------------------------------------
 add_user_to_docker() {
-  log_info "Adding user $VAGRANT_USER to the Docker group..."
-  run_with_sudo usermod -aG docker $VAGRANT_USER | newgrp docker && \
-    log_success "User $VAGRANT_USER added to Docker group." || log_error "FATAL: Failed to add user $VAGRANT_USER to Docker group."
+  log_info "Adding user $USER to the Docker group..."
+  run_with_sudo usermod -aG docker $USER | newgrp docker && \
+    log_success "User $USER added to Docker group." || log_error "FATAL: Failed to add user $USER to Docker group."
 }
 # ----- Install NVM -----------------------------------------------------------
 install_nvm() {
   log_info "Installing NVM..."
-  sudo -i -u "$VAGRANT_USER" "$PROJECT_PATH/scripts/deploy_nvm.sh" && \
+  sudo -i -u "$USER" "$PROJECT_PATH/scripts/deploy_nvm.sh" && \
     log_success "NVM installed." || log_error "NON-FATAL: NVM installation failed. If this was a --provision you can likely ignore"
 }
 
@@ -418,12 +552,12 @@ configure_kubectl_repo() {
   fi
 }
 
-# ----- Update Home Directory Permissions -------------------------------------
+# ----- Update Preoject Directory Permissions ---------------------------------
 update_home_permissions() {
-  log_info "Updating home directory permissions..."
-  run_with_sudo chgrp -R "$VAGRANT_USER" "$VAGRANT_USER_PATH" && \
-    run_with_sudo chown -R "$VAGRANT_USER" "$VAGRANT_USER_PATH" && \
-    log_success "Home directory permissions updated." || log_error "FATAL: Failed to update home directory permissions."
+  log_info "Updating project directory permissions..."
+  run_with_sudo chgrp -R "$USER" "$PROJECT_PATH" && \
+    run_with_sudo chown -R "$USER" "$PROJECT_PATH" && \
+    log_success "Project directory permissions updated." || log_error "FATAL: Failed to update Project directory permissions."
 }
 
 # ----- Update and Upgrade System ---------------------------------------------
@@ -436,9 +570,9 @@ update_system() {
 # ----- Configure Git ---------------------------------------------------------
 configure_git() {
   log_info "Configuring Git global settings..."
-  git config --global user.email "$VAGRANT_USER@buildserver.local" && \
-    git config --global --add safe.directory "$VAGRANT_USER_PATH/repos" && \
-    git config --global user.name "$VAGRANT_USER" && \
+  git config --global user.email "$USER@buildserver.local" && \
+    git config --global --add safe.directory "$HOME/repos" && \
+    git config --global user.name "$USER" && \
     git config --global init.defaultBranch main && \
     log_success "Git configured." || log_error "NON-FATAL: Git configuration failed."
 }
@@ -446,12 +580,12 @@ configure_git() {
 # ----- Clone Repositories ----------------------------------------------------
 clone_repositories() {
   log_info "Cloning demo repositories..."
-  mkdir -p "$VAGRANT_USER_PATH/repos"
-  git clone https://github.com/chkp-altrevin/datacenter-objects-k8s.git "$VAGRANT_USER_PATH/repos/datacenter-objects-k8s" && \
+  mkdir -p "$HOME/repos"
+  git clone https://github.com/chkp-altrevin/datacenter-objects-k8s.git "$HOME/repos/datacenter-objects-k8s" && \
     log_success "Cloned datacenter-objects-k8s." || log_error "NON-FATAL: Failed to clone datacenter-objects-k8. If this was a --provision you can likely ignore"
-  git clone https://github.com/SpectralOps/spectral-goat.git "$VAGRANT_USER_PATH/repos/spectral-goat" && \
+  git clone https://github.com/SpectralOps/spectral-goat.git "$HOME/repos/spectral-goat" && \
     log_success "Cloned spectral-goat." || log_error "NON-FATAL: Failed to clone spectral-goat. If this was a --provision you can likely ignore"
-  git clone https://github.com/openappsec/waf-comparison-project.git "$VAGRANT_USER_PATH/repos/waf-comparison-project" && \
+  git clone https://github.com/openappsec/waf-comparison-project.git "$HOME/repos/waf-comparison-project" && \
     log_success "Cloned waf-comparison-project." || log_error "NON-FATAL: Failed to clone waf-comparison-project. If this was a --provision you can likely ignore"
 }
 
@@ -493,11 +627,11 @@ cleanup() {
 # Use Case 1  = All functions below are required for Use Case 1 Vagrant and VirtualBox automated full deployment
 # Use Case 2  = Comments that start with a 2, are optional review comments below for more info
 main() {
-  check_vagrant_user # 2 responsible for checking if we are a vagrant user and if so, we notify first
-  make_scripts_executable # 2 chmod .sh +x the script folder, you need to do this manually if disabled
-  install_dependencies  # 2 mainly to support extractions, utilities to automate and help run commands used for automation, disable for manual cycles
-  display_banner # 2 fun stuff
-  add_custom_motd # 2 more fun stuff but also the motd
+  install_required_dependencies
+  check_vagrant_user
+  make_scripts_executable
+  display_banner # fun stuff
+  add_custom_motd # the motd
   import_menu_aliases # if you plan to use cli menu and automation these are required
   create_directories # 2 create custom directories needed for use case 1
   copy_profile_files # 2 alias and bash stuff needed for use case 1
@@ -514,7 +648,7 @@ main() {
   install_gcloudcli # 2 install the google cloud repository
   install_azurecli # 2 install the azure cli repository
   configure_kubectl_repo # 2 install the kubectl repository used for use case 1
-  update_home_permissions # 2 updates anything copied over to the $USER and $HOME paths used for use case 1 and 2
+  update_home_permissions # 2 updates anything copied over to the vagrant and $HOME paths used for use case 1 and 2
   update_system # 2 apt update upgrade used for use case 1
   configure_git # 2 configures git common configurations feel free to modify but used for use case 1
   clone_repositories # 2 install a few repos modify any as needed or remove your call
@@ -539,11 +673,12 @@ echo "| Software Packages    | exported to $PROJECT_PATH/initial_sbom           
 echo "| Provision Error Logs | exported to $PROJECT_PATH/error.log              "
 echo "=========================================================================="
 sleep 6
-echo "Summarizing errors if any"
-echo ""
-cat "$PROJECT_PATH/success.log"
+echo -e "\\n\033[1;31m[✖] Errors Detected:\033[0m"
+grep --color=always ERROR "$PROJECT_PATH/provisioning.log"
 echo "=========================================================================="
-cat "$PROJECT_PATH/error.log"
+echo -e "\\n\033[1;32m[✔] Successful Tasks:\033[0m"
+grep --color=always SUCCESS "$PROJECT_PATH/provisioning.log"
+
 echo ""
 echo "If errors, fix and reprovision using, vagrant up --provision. If this is a"
 echo "custom install using provision.sh, you can likely ignore NON-FATAL errors."
@@ -552,3 +687,13 @@ echo "SSH with vagrant ssh or your terminal of choice                           
 echo "Login: vagrant:privatekey port:2222"
 echo "=========================================================================="
 echo "If you manually ran provision.sh - Logout and log back in to see changes  "
+
+# Safe argument parsing (override project vars)
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --project-name) PROJECT_NAME="$2"; shift 2 ;;
+    --project-path) PROJECT_PATH="$2"; shift 2 ;;
+    --test) TEST_MODE=true; shift ;;
+    *) shift ;;
+  esac
+done
