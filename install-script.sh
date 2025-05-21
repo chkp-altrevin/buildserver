@@ -24,8 +24,8 @@ Usage: $0 [OPTIONS]
 
 Options:
   --install                 Download and provision the project
-  --repo-download           Only download the repository
   --install-custom          Run provision.sh with optional project path override
+  --repo-download           Only download the repository
   --project-path=PATH       Set custom project path
   --restore=FILENAME        Restore from a previous backup
   --cleanup                 Remove created files and reset state
@@ -39,8 +39,8 @@ parse_args() {
   for arg in "$@"; do
     case "$arg" in
       --install) INSTALL=true ;;
-      --install-custom) INSTALL_CUSTOM=true ;;
       --repo-download) REPO_DOWNLOAD=true ;;
+      --install-custom) INSTALL_CUSTOM=true ;;
       --cleanup) CLEANUP=true ;;
       --test) TEST_MODE=true ;;
       --project-path=*) export PROJECT_PATH="${arg#*=}" ;;
