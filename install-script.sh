@@ -39,8 +39,8 @@ parse_args() {
   for arg in "$@"; do
     case "$arg" in
       --install) INSTALL=true ;;
-      --repo-download) REPO_DOWNLOAD=true ;;
       --install-custom) INSTALL_CUSTOM=true ;;
+      --repo-download) REPO_DOWNLOAD=true ;;
       --cleanup) CLEANUP=true ;;
       --test) TEST_MODE=true ;;
       --project-path=*) export PROJECT_PATH="${arg#*=}" ;;
