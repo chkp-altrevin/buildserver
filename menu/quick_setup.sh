@@ -42,7 +42,17 @@ display_menu() {
     echo "==================================================="
     echo -n "choose an option [1-9,a-z]: (x)  Exit "
 }
-
+# Function to refresh repo
+refresh_repo() {
+    local script_path="$PROJECT_PATH/menu/refresh_repo3.sh"
+    if [ -f "$script_path" ]; then
+        echo "refreshing repo using $script_path"
+        bash "$script_path"
+    else
+        echo "Failed refreshing repo script does not exist at $script_path."
+    fi
+    pause
+}
 # Function to display motd
 run_motd() {
     local script_path="$PROJECT_PATH/menu/run_motd.sh"
