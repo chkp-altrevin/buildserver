@@ -666,6 +666,17 @@ main() {
   generate_initial_sbom # 2 generate the package list we installed used for use case 1 and 1
   cleanup # 2 cleanup install and temp content used for usecase 1 and 2
   fix_ownership_in_home
+# Final messaging based on user type
+if [[ "${SUDO_USER:-$USER}" == "vagrant" ]]; then
+  echo "If errors, fix and reprovision using, vagrant up --provision. If this is a"
+  echo "custom install using provision.sh, you can likely ignore NON-FATAL errors."
+  echo "=========================================================================="
+  echo "SSH with vagrant ssh or your terminal of choice                           "
+  echo "Login: vagrant:privatekey port:2222"
+  echo "=========================================================================="
+else
+  echo "If you manually ran provision.sh - Logout and log back in to see changes  "
+fi
 }
 main
 
