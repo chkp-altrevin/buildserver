@@ -23,7 +23,13 @@ display_menu() {
     echo ""
     echo "Buildserver Info =================================="
     echo "Path: $PROJECT_PATH | User: $USER"
-    echo "Provisioned: 05-21-2025 09:37 | Q. Update $PROJECT_NAME"
+if [[ -f "$HOME/.buildserver_meta" ]]; then
+  source "$HOME/.buildserver_meta"
+else
+  Provisioned="Unknown"
+  Version="Unknown"
+fi
+    echo "Provisioned: $Provisioned | Version: $(egrep '^v' "$PROJECT_PATH/version.txt") | Q. Update $PROJECT_NAME
     # echo "Current commit is: $(cd "$PROJECT_PATH" && git rev-parse --short HEAD) | Q. Update Project"
     echo "8. INSTALL APPLICATIONS"
     echo "==================================================="
