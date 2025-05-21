@@ -220,15 +220,6 @@ Above is a good indicator we are seeing crlf, did you set `git config --global c
    ```bash
    ./provision.sh
    ```
----
-
-## 🖥️ Forgot a step or need to level set?
-
-### Start Over | Use Case 1
-**Download Latest Release**: [buildserver-main.zip](https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip)
-
-### Start Over | Use Case 2
-**Download Latest Release**: [buildserver-main.zip](https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip)
 
 ---
 
