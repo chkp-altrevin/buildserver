@@ -82,17 +82,16 @@ download_repo() {
   log_success "Repository installed to $PROJECT_PATH"
 }
 
-
 ensure_project_env_export() {
   if ! grep -q "export PROJECT_PATH=" "$HOME/.bashrc"; then
-    echo "export PROJECT_PATH=\"$PROJECT_PATH\"" >> "$HOME/.bashrc"
-    echo "export PROJECT_NAME=\"$PROJECT_NAME\"" >> "$HOME/.bashrc"
+    echo "export PROJECT_PATH="$PROJECT_PATH"" >> "$HOME/.bashrc"
+    echo "export PROJECT_NAME="$PROJECT_NAME"" >> "$HOME/.bashrc"
     log_info "Added PROJECT_PATH and PROJECT_NAME to .bashrc"
+  fi
+
   if ! grep -q "$PROJECT_PATH/scripts" "$HOME/.bashrc"; then
     echo 'export PATH="$PROJECT_PATH/scripts:$PATH"' >> "$HOME/.bashrc"
     log_info "Updated PATH to include $PROJECT_PATH/scripts"
-  fi
-
   fi
 }
 
@@ -113,7 +112,12 @@ run_provision() {
   if [[ "$TEST_MODE" == "true" ]]; then
     ARGS+=(--test)
   fi
-  TEST_MODE="$TEST_MODE" PROJECT_NAME="$PROJECT_NAME" PROJECT_PATH="$PROJECT_PATH" $SUDO -E bash "$PROJECT_PATH/provision.sh" "${ARGS[@]}"
+
+  if [[ -n "$SUDO" ]]; then
+    $SUDO -E TEST_MODE="$TEST_MODE" PROJECT_NAME="$PROJECT_NAME" PROJECT_PATH="$PROJECT_PATH" bash "$PROJECT_PATH/provision.sh" "${ARGS[@]}"
+  else
+    TEST_MODE="$TEST_MODE" PROJECT_NAME="$PROJECT_NAME" PROJECT_PATH="$PROJECT_PATH" bash "$PROJECT_PATH/provision.sh" "${ARGS[@]}"
+  fi
 }
 
 check_dependencies() {
@@ -132,13 +136,6 @@ check_dependencies() {
 
 main() {
   check_dependencies
-command -v curl >/dev/null 2>&1 || { log_error "curl is required but not installed."; exit 1; }
-command -v unzip >/dev/null 2>&1 || { log_error "unzip is required but not installed."; exit 1; }
-  INSTALL=false
-  INSTALL_CUSTOM=false
-  REPO_DOWNLOAD=false
-  CLEANUP=false
-  RESTORE=""
   INSTALL=false
   INSTALL_CUSTOM=false
   REPO_DOWNLOAD=false
