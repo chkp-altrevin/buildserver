@@ -123,7 +123,7 @@ Install using a script or download and extract your self.
 ```bash
 curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh && chmod +x install-script.sh && ./install-script.sh --install
 ```
-- Downloads repo, extract and backup if exists:
+- Download Only:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh && chmod +x install-script.sh && ./install-script.sh --repo-download
 ```
