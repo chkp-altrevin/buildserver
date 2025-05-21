@@ -7,6 +7,14 @@ if ! cd "$PWD" 2>/dev/null; then
   cd "$PROJECT_PATH" || { log_error "Failed to change to fallback PROJECT_PATH: $PROJECT_PATH"; exit 1; }
 fi
 
+# Ensure all files under CALLER_HOME are owned by the original user
+fix_ownership_in_home() {
+  log_info "Ensuring proper ownership for all files in $CALLER_HOME"
+  find "$CALLER_HOME" -user root -exec chown "$ORIGINAL_USER" {} +
+  find "$CALLER_HOME" -group root -exec chgrp "$ORIGINAL_USER" {} +
+  log_success "Ownership corrected for user: $ORIGINAL_USER"
+}
+
 : "${PROJECT_NAME:="buildserver"}"
 : "${PROJECT_PATH:="$HOME/$PROJECT_NAME"}"
 : "${TEST_MODE:=false}"
@@ -657,6 +665,7 @@ main() {
   update_home_permissions  # 2 apply permissions used for use case 1
   generate_initial_sbom # 2 generate the package list we installed used for use case 1 and 1
   cleanup # 2 cleanup install and temp content used for usecase 1 and 2
+  fix_ownership_in_home
 }
 main
 
