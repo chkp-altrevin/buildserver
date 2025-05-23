@@ -105,9 +105,9 @@ ensure_project_env_export() {
     log_info "Added PROJECT_PATH and PROJECT_NAME to .bashrc"
   fi
 
-  if ! grep -q "$PROJECT_PATH/scripts" "$HOME/.bashrc"; then
-    echo 'export PATH="$PROJECT_PATH/scripts:$PATH"' >> "$HOME/.bashrc"
-    log_info "Updated PATH to include $PROJECT_PATH/scripts"
+  if ! grep -q "$PROJECT_PATH/common/scripts" "$HOME/.bashrc"; then
+    echo 'export PATH="$PROJECT_PATH/common/scripts:$PATH"' >> "$HOME/.bashrc"
+    log_info "Updated PATH to include $PROJECT_PATH/common/scripts"
   fi
 }
 
