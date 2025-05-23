@@ -1,10 +1,10 @@
 # demo menu required aliases
-alias quick-setup='$PROJECT_PATH/menu/quick_setup.sh'
-# alias pass-setup='$PROJECT_PATH/menu/pass_setup.sh'
-alias motd='$PROJECT_PATH/scripts/run_motd.sh'
+alias quick-setup='$PROJECT_PATH/common/menu/quick_setup.sh'
+# alias pass-setup='$PROJECT_PATH/common/menu/pass_setup.sh'
+alias motd='$PROJECT_PATH/common/scripts/run_motd.sh'
 # source between removing and adding env vars
 alias renv='source $HOME/.env'
-alias denv='source $PROJECT_PATH/profile/env.example'
+alias denv='source $PROJECT_PATH/common/profile/env.example'
 # quick update alias
 alias upgrade='sudo apt update && sudo apt upgrade -y'
 
