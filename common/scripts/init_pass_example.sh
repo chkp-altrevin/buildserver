@@ -4,9 +4,9 @@ cat >password-setup <<EOF
      Key-Length: 3072
      Subkey-Type: RSA
      Subkey-Length: 3072
-     Name-Real: vagrant
+     Name-Real: $USER
      Name-Comment: default password
-     Name-Email: vagrant@buildserver
+     Name-Email: $USER@$HOSTNAME
      Expire-Date: 0
      Passphrase: changeme!
      %pubring password-setup.pub
@@ -20,4 +20,4 @@ gpg2 --batch --gen-key password-setup
 gpg2 --no-default-keyring --secret-keyring ./password-setup.sec \
        --keyring ./password-setup.pub --list-secret-keys
 
-pass init vagrant@buildserver
+pass init $USER@$HOSTNAME
