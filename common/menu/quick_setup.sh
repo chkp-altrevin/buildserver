@@ -44,7 +44,7 @@ display_menu() {
 }
 # Function to refresh repo
 refresh_repo() {
-    local script_path="$PROJECT_PATH/scripts/refresh_repo3.sh"
+    local script_path="$PROJECT_PATH/common/scripts/refresh_repo3.sh"
     if [ -f "$script_path" ]; then
         echo "refreshing repo using $script_path"
         bash "$script_path"
@@ -66,7 +66,7 @@ run_motd() {
 }
 
 cgns_menu() {
-    local script_path="$PROJECT_PATH/menu/cgns_menu.sh"
+    local script_path="$PROJECT_PATH/common/menu/cgns_menu.sh"
     if [ -f "$script_path" ]; then
         echo "Launching CGNS Menu using $script_path"
         bash "$script_path"
@@ -78,7 +78,7 @@ cgns_menu() {
 
 # Function to manage applications
 manage_applications() {
-    local script_path="$PROJECT_PATH/menu/import_backup.sh"
+    local script_path="$PROJECT_PATH/common/menu/import_backup.sh"
     if [ -f "$script_path" ]; then
         echo "Importing Backup Env Vars using $script_path"
         bash "$script_path"
@@ -90,7 +90,7 @@ manage_applications() {
 
 # Function to open demo menu
 demo_menu() {
-    local script_path="$PROJECT_PATH/menu/demo_menu.sh"
+    local script_path="$PROJECT_PATH/common/menu/demo_menu.sh"
     if [ -f "$script_path" ]; then
         echo "Opening Demo Menu using $script_path"
         bash "$script_path"
@@ -102,7 +102,7 @@ demo_menu() {
 
 # Function to open app menu
 app_menu() {
-    local script_path="$PROJECT_PATH/menu/app_menu.sh"
+    local script_path="$PROJECT_PATH/common/menu/app_menu.sh"
     if [ -f "$script_path" ]; then
         echo "Opening App Menu using $script_path"
         bash "$script_path"
@@ -113,7 +113,7 @@ app_menu() {
 }
 # Function to setup env vars
 setup_env_vars() {
-    local script_path="$PROJECT_PATH/scripts/setup_env_vars.sh"
+    local script_path="$PROJECT_PATH/common/scripts/setup_env_vars.sh"
     if [ -f "$script_path" ]; then
         echo "Edit using $script_path"
         bash "$script_path"
@@ -124,7 +124,7 @@ setup_env_vars() {
 }
 # Function to import env backups
 import_env() {
-    local script_path="$PROJECT_PATH/scripts/import_env.sh"
+    local script_path="$PROJECT_PATH/common/scripts/import_env.sh"
     if [ -f "$script_path" ]; then
         echo "Looking for $PROJECT_PATH/profile/backup.env using $script_path"
         bash "$script_path"
@@ -136,7 +136,7 @@ import_env() {
 
 # Function to reset env
 reset_env() {
-    local script_path="$PROJECT_PATH/scripts/reset_env.sh"
+    local script_path="$PROJECT_PATH/common/scripts/reset_env.sh"
     if [ -f "$script_path" ]; then
         echo "Resetting Env Vars using $script_path"
         bash "$script_path"
@@ -147,7 +147,7 @@ reset_env() {
 }
 # Function to export env vars
 export_env() {
-    local script_path="$PROJECT_PATH/scripts/export_env.sh"
+    local script_path="$PROJECT_PATH/common/scripts/export_env.sh"
     if [ -f "$script_path" ]; then
         echo "Backuping up ENV VARS using $script_path"
         echo "location c:\(project-path)\profile\backup.env"
@@ -159,7 +159,7 @@ export_env() {
 }
 # Function to deploy Kubernetes Cluster
 deploy_kubernetes_cluster() {
-    local script_path="$PROJECT_PATH/scripts/deploy_k3d_cluster.sh"
+    local script_path="$PROJECT_PATH/common/scripts/deploy_k3d_cluster.sh"
     if [ -f "$script_path" ]; then
         echo "Deploying Kubernetes Cluster with LB using $script_path"
         bash "$script_path"
@@ -170,7 +170,7 @@ deploy_kubernetes_cluster() {
 }
 # Function to remove Kubernetes Cluster
 remove_kubernetes_cluster() {
-    local script_path="$PROJECT_PATH/scripts/delete_k3d_cluster.sh"
+    local script_path="$PROJECT_PATH/common/scripts/delete_k3d_cluster.sh"
     if [ -f "$script_path" ]; then
         echo "Deleting K3D Demo Cluster using $script_path"
         bash "$script_path"
@@ -181,7 +181,7 @@ remove_kubernetes_cluster() {
 }
 # Function to check k3d cluster status
 k3d_clusterinfo() {
-    local script_path="$PROJECT_PATH/scripts/k3d_clusterinfo.sh"
+    local script_path="$PROJECT_PATH/common/scripts/k3d_clusterinfo.sh"
     if [ -f "$script_path" ]; then
         echo "Kubernetes Cluster Status using $script_path"
         bash "$script_path"
@@ -192,7 +192,7 @@ k3d_clusterinfo() {
 }
 # Function to run kubectl cluster-info
 kubectl_clusterinfo() {
-    local script_path="$PROJECT_PATH/scripts/kubectl_clusterinfo.sh"
+    local script_path="$PROJECT_PATH/common/scripts/kubectl_clusterinfo.sh"
     if [ -f "$script_path" ]; then
         echo "kubectl cluster-info using $script_path"
         bash "$script_path"
@@ -203,7 +203,7 @@ kubectl_clusterinfo() {
 }
 # Function to check docker status
 docker_status() {
-    local script_path="$PROJECT_PATH/scripts/docker_status.sh"
+    local script_path="$PROJECT_PATH/common/scripts/docker_status.sh"
     if [ -f "$script_path" ]; then
         echo "Docker Status using $script_path"
         bash "$script_path"
@@ -214,7 +214,7 @@ docker_status() {
 }
 # docker ps
 docker_ps() {
-    local script_path="$PROJECT_PATH/scripts/docker_ps.sh"
+    local script_path="$PROJECT_PATH/common/scripts/docker_ps.sh"
     if [ -f "$script_path" ]; then
         echo "Docker Running Containers using $script_path"
         bash "$script_path"
@@ -226,7 +226,7 @@ docker_ps() {
 #
 # Function to run top
 top_run() {
-    local script_path="$PROJECT_PATH/scripts/top_run.sh"
+    local script_path="$PROJECT_PATH/common/scripts/top_run.sh"
     if [ -f "$script_path" ]; then
         echo "Top using $script_path"
         bash "$script_path"
@@ -237,7 +237,7 @@ top_run() {
 }
 # Function to check docker info
 docker_info() {
-    local script_path="$PROJECT_PATH/scripts/docker_info.sh"
+    local script_path="$PROJECT_PATH/common/scripts/docker_info.sh"
     if [ -f "$script_path" ]; then
         echo "Docker info using $script_path"
         bash "$script_path"
@@ -249,7 +249,7 @@ docker_info() {
 
 # Function to run kubectl cluster-info
 kubectl_clusterinfo() {
-    local script_path="$PROJECT_PATH/scripts/kubectl_clusterinfo.sh"
+    local script_path="$PROJECT_PATH/common/scripts/kubectl_clusterinfo.sh"
     if [ -f "$script_path" ]; then
         echo "Kubectl cluster-info using $script_path"
         bash "$script_path"
@@ -261,7 +261,7 @@ kubectl_clusterinfo() {
 
 # Function to run kubectl get nodes
 kubectl_get_nodes() {
-    local script_path="$PROJECT_PATH/scripts/kubectl_get_nodes.sh"
+    local script_path="$PROJECT_PATH/common/scripts/kubectl_get_nodes.sh"
     if [ -f "$script_path" ]; then
         echo "Getting Nodes using $script_path"
         bash "$script_path"
@@ -272,7 +272,7 @@ kubectl_get_nodes() {
 }
 # Function to run kubectl get pods all
 kubectl_get_podsall() {
-    local script_path="$PROJECT_PATH/scripts/kubectl_get_podsall.sh"
+    local script_path="$PROJECT_PATH/common/scripts/kubectl_get_podsall.sh"
     if [ -f "$script_path" ]; then
         echo "Getting Nodes using $script_path"
         bash "$script_path"
@@ -283,7 +283,7 @@ kubectl_get_podsall() {
 }
 # Function to update packages
 package_updates() {
-    local script_path="$PROJECT_PATH/scripts/package_updates.sh"
+    local script_path="$PROJECT_PATH/common/scripts/package_updates.sh"
     if [ -f "$script_path" ]; then
         echo "Package updates using $script_path"
         bash "$script_path"

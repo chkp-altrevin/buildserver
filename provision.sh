@@ -144,6 +144,7 @@ fi
 if [[ "$CHECK_VBOX_VAGRANT" == true ]]; then
   export VAGRANT_USER="vagrant"
   export VAGRANT_USER_PATH="/home/vagrant"
+  # export PROJECT_PATH="/home/vagrant/$PROJECT_NAME"
 else
   export VAGRANT_USER="${USER}"
   export VAGRANT_USER_PATH="${HOME}"
@@ -290,8 +291,12 @@ import_menu_aliases() {
   local aliases_file="$HOME/.bash_aliases"
   local -A menu_aliases=(
     ["cls"]="clear"
-    ["dps"]="docker ps"
+    ["quick-setup"]="docker ps"
     ["motd"]="/etc/update-motd.d/99-custom-motd"
+    ["renv"]="source $HOME/.env"
+    ["denv"]="source $PROJECT_PATH/common/profile/env.example"
+    ["python"]="python3"
+    ["clusters"]="kubectl config get-clusters"
     ["kci"]="kubernetes cluster-info"
   )
 
@@ -353,7 +358,7 @@ run_with_sudo() {
 # ----------Function to set execute permissions to scripts folder ------------
 make_scripts_executable() {
   log_info "Setting +x on sh files in scripts folder..."
-  find $PROJECT_PATH/scripts -type f -name "*.sh" -exec chmod +x {} \; && \
+  find $PROJECT_PATH/common/scripts -type f -name "*.sh" -exec chmod +x {} \; && \
     log_success "Permissions set successfully." || log_error "FATAL: Setting permissions failed."
 }
 
@@ -374,7 +379,7 @@ display_banner() {
 # ----- Add custom motd -------------------------------------------------------
 add_custom_motd() {
   log_info "Adding custom file 99-custom-motd..."
-  run_with_sudo cp "$PROJECT_PATH/profile/99-custom-motd" "/etc/update-motd.d/99-custom-motd" && \
+  run_with_sudo cp "$PROJECT_PATH/common/profile/99-custom-motd" "/etc/update-motd.d/99-custom-motd" && \
   run_with_sudo chmod +x "/etc/update-motd.d/99-custom-motd" && \
     log_success "99-custom-motd file copied." || log_error "FATAL: Failed to copy 99-custom-motd."
 }
@@ -400,10 +405,10 @@ copy_profile_files() {
   local bash_aliases_path="$HOME/.bash_aliases"
   local env_file_path="$HOME/.env"
 
-  cp "$PROJECT_PATH/profile/bash_aliases" "$bash_aliases_path" && \
+  cp "$PROJECT_PATH/common/profile/bash_aliases" "$bash_aliases_path" && \
     log_success "bash_aliases copied." || log_error "FATAL: Failed to copy bash_aliases."
 
-  cp "$PROJECT_PATH/profile/env.example" "$env_file_path" && \
+  cp "$PROJECT_PATH/common/profile/env.example" "$env_file_path" && \
     log_success "env.example copied." || log_error "FATAL: Failed to copy env.example."
 
   touch "$HOME/.Xauthority" && \
@@ -468,7 +473,7 @@ add_user_to_docker() {
 # ----- Install NVM -----------------------------------------------------------
 install_nvm() {
   log_info "Installing NVM..."
-  sudo -i -u "$USER" "$PROJECT_PATH/scripts/deploy_nvm.sh" && \
+  sudo -i -u "$USER" "$PROJECT_PATH/common/scripts/deploy_nvm.sh" && \
     log_success "NVM installed." || log_error "NON-FATAL: NVM installation failed. If this was a --provision you can likely ignore"
 }
 
@@ -619,14 +624,14 @@ install_packages() {
 # ----- Modify bashrc ---------------------------------------------------------
 modify_bashrc() {
   log_info "Modifying bashrc to source .env..."
-  "$PROJECT_PATH/scripts/insert_bashrc.sh" && \
+  "$PROJECT_PATH/common/scripts/insert_bashrc.sh" && \
     log_success "bashrc modified." || log_error "FATAL: bashrc modification failed."
 }
 
 # ----- Generate Initial SBOM -------------------------------------------------
 generate_initial_sbom() {
   log_info "Generating initial SBOM..."
-  "$PROJECT_PATH/scripts/initial_sbom.sh" && \
+  "$PROJECT_PATH/common/scripts/initial_sbom.sh" && \
     log_success "Initial SBOM generated." || log_error "NON-FATAL: Initial SBOM generation failed."
 }
 
