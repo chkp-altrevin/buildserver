@@ -72,16 +72,6 @@ Upon execution, `provision.sh` automates the installation and configuration of:
 ...
 [2025-03-12 04:13:07] [SUCCESS] Initial SBOM generated.
 ```
-## ⚙️ VirtualBox Optional Customizations
-
-### 🖥️ Terminal Configuration
-
-Applicable for Vagrant & VirtualBox deployments, configure your preferred terminal (e.g., MobaXterm) with the following:
-
-* **Username**: `vagrant`
-* **Private Key**: Located in your Windows host folder for VirtualBox (e.g., `C:\Users\YourName\Documents\Virtual Machines\buildserver\`)
-* **Host IP**: `192.168.56.10`
-* **Port**: `2222`
 
 ### 🌐 Environment Variables
 
@@ -198,6 +188,17 @@ An SBOM is generated post-provisioning and located in the root path. Installed p
    ```
    Example: C:\buildserver\vagrant ssh
 Upon SSH login, you'll be greeted with a custom MOTD and available commands to assist with further setup.
+
+## ⚙️ Customizations
+
+### 🖥️ Terminal Configuration
+
+Applicable for Vagrant & VirtualBox deployments, configure your preferred terminal (e.g., MobaXterm) with the following:
+
+* **Username**: `vagrant`
+* **Private Key**: Located in your Windows host folder for VirtualBox (e.g., `C:\Users\YourName\Documents\Virtual Machines\buildserver\`)
+* **Host IP**: `192.168.56.10`
+* **Port**: `2222`
 
 ---
 
@@ -358,16 +359,6 @@ Please ensure your code adheres to the existing style and includes relevant test
 
 * **File**: `.github/workflows/release.yml`
 * Automatically zips and uploads `buildserver-release.zip` when you push a tag like `v1.0.0`
-
----
-
-### 📦 Next Steps – Precompiled `.exe` Installer
-
-* Installs `provision.ps1` and shortcut to Desktop
-* Optional checkbox to run the script after install
-
-
-
 
 ---
 
