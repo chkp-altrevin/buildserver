@@ -72,6 +72,105 @@ Upon execution, `provision.sh` automates the installation and configuration of:
 ...
 [2025-03-12 04:13:07] [SUCCESS] Initial SBOM generated.
 ```
+## ⚙️ VirtualBox Optional Customizations
+
+### 🖥️ Terminal Configuration
+
+Applicable for Vagrant & VirtualBox deployments, configure your preferred terminal (e.g., MobaXterm) with the following:
+
+* **Username**: `vagrant`
+* **Private Key**: Located in your Windows host folder for VirtualBox (e.g., `C:\Users\YourName\Documents\Virtual Machines\buildserver\`)
+* **Host IP**: `192.168.56.10`
+* **Port**: `2222`
+
+### 🌐 Environment Variables
+
+A sample `.env` file is provided at `/home/vagrant/.env` to assist with environment configuration.
+
+### 📁 Folder Structure
+
+```
+- common/menu         # System menu scripts
+- common/profile      # Alias, bashrc, system scripts
+- common/resources    # Additional resource files and examples
+- common/scripts      # Simple scripts used by the demos
+- Vagrantfile         # Main deployment file
+- install-script.sh   # Online installer, calls provision.sh
+- provision.sh        # Primary provisioning script
+- reboot.sh           # Only for Vagrant/VirtualBox deployments
+```
+
+### 🖥️ DNS and Hostname Configuration
+
+During provisioning, the Vagrant host is configured to use `buildserver.local`. Plan on using long-term, modify as needed:
+
+```bash
+sudo hostnamectl set-hostname buildserver.local
+```
+
+**Host Entries**:
+
+```bash
+sudo -- sh -c "echo '192.168.56.10  rancher.buildserver.local' >> /etc/hosts"
+sudo -- sh -c "echo '192.168.56.10  nginxproxymgr.buildserver.local' >> /etc/hosts"
+sudo -- sh -c "echo '192.168.56.10  api.buildserver.local' >> /etc/hosts"
+sudo -- sh -c "echo '192.168.56.10  buildserver.buildserver.local' >> /etc/hosts"
+```
+
+---
+
+### 🖥️ CLI Menu
+
+A cli menu (quick-setup) is created during provisioning. Sample capabilities below:
+Use or modify and make your own.
+
+```bash
+quick-setup
+```
+### 📁 Menu Dependancy Structure
+```
+- menu/         # System menu scripts
+- profile/      # Alias, bashrc, system scripts
+- scripts/      # Simple scripts used by the demos
+```
+#### Menu Sample below:
+```  
+                                        QUICK-SETUP
+===================================================
+SETUP ENV VARS=====================================
+1. EDIT 2. BACKUP 3. IMPORT 4. RESET  |   x. renv
+===================================================
+PACKAGE UPDATES-OS RELATED=========================
+```
+
+## 📦 Package Installations
+
+An SBOM is generated post-provisioning and located in the root path. Installed packages include:
+
+* `apt-transport-https`
+* `base-files`
+* `bash`
+* `build-essential`
+* `ca-certificates`
+* `cloud-init`
+* `containerd.io`
+* `curl`
+* `docker-ce`
+* `docker-compose-plugin`
+* `git`
+* `kubectl`
+* `nodejs`
+* `npm`
+* `openssh-server`
+* `python3`
+* `terraform`
+* ...and more.
+
+---
+
+## 🐞 Known Issues
+
+* **Vagrant Compatibility**: Vagrant v2.4.3 is compatible with VirtualBox versions 4.0.x through 7.1.x. Ensure installations are performed in order: VirtualBox first, then Vagrant. Refer to the [official support guide](https://developer.hashicorp.com/vagrant/docs/providers/virtualbox) for more details.
 
 ---
 
@@ -226,108 +325,6 @@ Above is a good indicator we are seeing crlf, did you set `git config --global c
    ```bash
    ./provision.sh
    ```
-
----
-
-## ⚙️ Optional Customizations
-
-### 🖥️ Terminal Configuration
-
-Applicable for Vagrant & VirtualBox deployments, configure your preferred terminal (e.g., MobaXterm) with the following:
-
-* **Username**: `vagrant`
-* **Private Key**: Located in your Windows host folder for VirtualBox (e.g., `C:\Users\YourName\Documents\Virtual Machines\buildserver\`)
-* **Host IP**: `192.168.56.10`
-* **Port**: `2222`
-
-### 🌐 Environment Variables
-
-A sample `.env` file is provided at `/home/vagrant/.env` to assist with environment configuration.
-
-### 📁 Folder Structure
-
-```
-- common/menu         # System menu scripts
-- common/profile      # Alias, bashrc, system scripts
-- common/resources    # Additional resource files and examples
-- common/scripts      # Simple scripts used by the demos
-- Vagrantfile         # Main deployment file
-- install-script.sh   # Online installer, calls provision.sh
-- provision.sh        # Primary provisioning script
-- reboot.sh           # Only for Vagrant/VirtualBox deployments
-```
-
-### 🖥️ DNS and Hostname Configuration
-
-During provisioning, the Vagrant host is configured to use `buildserver.local`. Plan on using long-term, modify as needed:
-
-```bash
-sudo hostnamectl set-hostname buildserver.local
-```
-
-**Host Entries**:
-
-```bash
-sudo -- sh -c "echo '192.168.56.10  rancher.buildserver.local' >> /etc/hosts"
-sudo -- sh -c "echo '192.168.56.10  nginxproxymgr.buildserver.local' >> /etc/hosts"
-sudo -- sh -c "echo '192.168.56.10  api.buildserver.local' >> /etc/hosts"
-sudo -- sh -c "echo '192.168.56.10  buildserver.buildserver.local' >> /etc/hosts"
-```
-
----
-
-### 🖥️ CLI Menu
-
-A cli menu (quick-setup) is created during provisioning. Sample capabilities below:
-Use or modify and make your own.
-
-```bash
-quick-setup
-```
-### 📁 Menu Dependancy Structure
-```
-- menu/         # System menu scripts
-- profile/      # Alias, bashrc, system scripts
-- scripts/      # Simple scripts used by the demos
-```
-#### Menu Sample below:
-```  
-                                        QUICK-SETUP
-===================================================
-SETUP ENV VARS=====================================
-1. EDIT 2. BACKUP 3. IMPORT 4. RESET  |   x. renv
-===================================================
-PACKAGE UPDATES-OS RELATED=========================
-```
-
-## 📦 Package Installations
-
-An SBOM is generated post-provisioning and located in the root path. Installed packages include:
-
-* `apt-transport-https`
-* `base-files`
-* `bash`
-* `build-essential`
-* `ca-certificates`
-* `cloud-init`
-* `containerd.io`
-* `curl`
-* `docker-ce`
-* `docker-compose-plugin`
-* `git`
-* `kubectl`
-* `nodejs`
-* `npm`
-* `openssh-server`
-* `python3`
-* `terraform`
-* ...and more.
-
----
-
-## 🐞 Known Issues
-
-* **Vagrant Compatibility**: Vagrant v2.4.3 is compatible with VirtualBox versions 4.0.x through 7.1.x. Ensure installations are performed in order: VirtualBox first, then Vagrant. Refer to the [official support guide](https://developer.hashicorp.com/vagrant/docs/providers/virtualbox) for more details.
 
 ---
 
