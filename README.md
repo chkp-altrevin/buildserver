@@ -136,7 +136,7 @@ After provisioning is complete logut/login. You will be greeted with a custom MO
 
 
 
-## 🆕 Optional Windows Powershell Install
+## 🆕 Windows Powershell Install
 
 ### 🔁 Automated Download and Install Script:
 
@@ -180,6 +180,12 @@ if (Get-Command "wsl.exe" -ErrorAction SilentlyContinue) {
 Write-Host "❌ ERROR: Neither Git Bash nor WSL found."
 Write-Host "Please install Git for Windows (https://gitforwindows.org/) or WSL."
 exit 1
+```
+
+### Download Only
+
+```powershell
+Invoke-WebRequest -Uri "https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip" -OutFile "$env:USERPROFILE\Downloads\buildserver-main.zip"
 ```
 ---
 
@@ -241,13 +247,14 @@ A sample `.env` file is provided at `/home/vagrant/.env` to assist with environm
 ### 📁 Folder Structure
 
 ```
-- menu/         # System menu scripts
-- profile/      # Alias, bashrc, system scripts
-- resources/    # Additional resource files and examples
-- scripts/      # Simple scripts used by the demos
-- Vagrantfile   # Main deployment file
-- provision.sh  # Primary provisioning script
-- reboot.sh     # Secondary provisioning script
+- common/menu         # System menu scripts
+- common/profile      # Alias, bashrc, system scripts
+- common/resources    # Additional resource files and examples
+- common/scripts      # Simple scripts used by the demos
+- Vagrantfile         # Main deployment file
+- install-script.sh   # Online installer, calls provision.sh
+- provision.sh        # Primary provisioning script
+- reboot.sh           # Only for Vagrant/VirtualBox deployments
 ```
 
 ### 🖥️ DNS and Hostname Configuration
