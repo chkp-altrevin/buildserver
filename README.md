@@ -174,24 +174,24 @@ An SBOM is generated post-provisioning and located in the root path. Installed p
 2. **Install Vagrant**: [Download Vagrant](https://developer.hashicorp.com/vagrant/install?product_intent=vagrant)
 3. **Install VirtualBox**: [Download VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 4. **Download Latest Release**: [buildserver-main.zip](https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip).
-5. **Extract**: buildserver-main.zip rename to folder **buildserver** Example Structure: **C:\buildserver\Vagrantfile**
-6. **Start Vagrant/VirtualBox Provisioning**:
+  a. **Extract**: buildserver-main.zip rename to folder **buildserver** Example Structure: **C:\buildserver\Vagrantfile**
 
+5. **Start Vagrant/VirtualBox Provisioning** (ensure you are in your buildserver directory:
+  **Example:** C:\buildserver\vagrant up
    ```bash
    vagrant up # this is always ran in the root of the project folder where Vagrantfile is located
    ```
-   Example: C:\buildserver\vagrant up
-7. **Access the VM**:
 
+6. **Access the VM**:
    ```bash
    vagrant ssh
    ```
    Example: C:\buildserver\vagrant ssh
 Upon SSH login, you'll be greeted with a custom MOTD and available commands to assist with further setup.
 
-## ⚙️ Customizations
+### ⚙️ Customizations
 
-### 🖥️ Terminal Configuration
+#### 🖥️ Terminal Configuration
 
 Applicable for Vagrant & VirtualBox deployments, configure your preferred terminal (e.g., MobaXterm) with the following:
 
