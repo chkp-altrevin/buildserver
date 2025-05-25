@@ -252,8 +252,9 @@ When you are done, you can set the policy back to its default value with:
 
 `Set-ExecutionPolicy Restricted`
 
-**Guided Installer Script** [Download](https://raw.githubusercontent.com/chkp-altrevin/buildserver/refs/heads/main/deploy-to-windows/downloader.bat)
-**Download Repo**
+**Guided Installer Script** [Download](https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/deploy-to-windows/downloader.bat). Good Idea to [review prior to deploying](https://raw.githubusercontent.com/chkp-altrevin/buildserver/refs/heads/main/deploy-to-windows/downloader.bat) before running.
+
+**Download, simple, no fuss**
 
 ```powershell
 powershell Invoke-WebRequest -Uri "https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip" -OutFile "$env:USERPROFILE\Downloads\buildserver-main.zip"
