@@ -174,9 +174,13 @@ An SBOM is generated post-provisioning and located in the root path. Installed p
 2. **Install Vagrant**: [Download Vagrant](https://developer.hashicorp.com/vagrant/install?product_intent=vagrant)
 3. **Install VirtualBox**: [Download VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 4. **Download Latest Release**: [buildserver-main.zip](https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip).
-5. **Extract**: buildserver-main.zip rename to folder **buildserver** Example Structure: **C:\buildserver\Vagrantfile**
-6. **Start Vagrant/VirtualBox Provisioning** (ensure you are in your buildserver directory:
-- **Example:** C:\buildserver\vagrant up
+   - **Optional** one-liner download:
+     ```powershell
+     Invoke-WebRequest -Uri "https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip" -OutFile "$env:USERPROFILE\Downloads\buildserver-main.zip"
+     ```
+6. **Extract**: buildserver-main.zip rename to folder **buildserver** Example Structure: **C:\buildserver\Vagrantfile**
+7. **Start Vagrant/VirtualBox Provisioning** (ensure you are in your buildserver directory:
+- **Example**: C:\buildserver\vagrant up
 
     ```bash
    vagrant up # this is always ran in the root of the project folder where Vagrantfile is located
