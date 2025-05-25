@@ -192,7 +192,7 @@ An SBOM is generated post-provisioning and located in the root path. Installed p
    ```bash
    vagrant ssh
    ```
-Upon SSH login, you'll be greeted with a custom MOTD and available commands to assist with further setup.
+Upon SSH login, you'll be greeted with a custom MOTD and available commands (quick-setup) to assist with further setups or installs.
 
 ### ⚙️ Customizations
 
