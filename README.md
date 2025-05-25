@@ -244,12 +244,10 @@ After provisioning is complete logut/login. You will be greeted with a custom MO
 ## 🆕 Windows Powershell Install
 
 ### 🔁 Automated Download and Install Script:
+**WSL users**  Use the installer link above or download and unzip: `chmod +x ./provision`, run `./provision.sh --install`
 
 **Winows and WSL Powershell Install**
-
-PowerShell will likely need it's execution policies set. Did you set the execution policy?
-
-As an Administrator, you can set the execution policy by typing this into your PowerShell window:
+PowerShell will likely need it's execution policies set. As an Administrator, you can set the execution policy by typing this into your PowerShell window:
 
 `Set-ExecutionPolicy RemoteSigned`
 For more information, see Using the Set-ExecutionPolicy Cmdlet.
@@ -258,7 +256,7 @@ When you are done, you can set the policy back to its default value with:
 
 `Set-ExecutionPolicy Restricted`
 
-**WSL users**  be able to use the installer link above or download and unzip, chmod +x ./provision
+**Auto Provisioning Script** (Download)[https://raw.githubusercontent.com/chkp-altrevin/buildserver/refs/heads/main/deploy-to-windows/downloader.bat]
 
 ### Download Repo
 
