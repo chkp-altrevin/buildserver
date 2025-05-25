@@ -236,7 +236,6 @@ curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/inst
 ```bash
 curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh && chmod +x install-script.sh && ./install-script.sh --help
 ```
-
 After provisioning is complete logut/login. You will be greeted with a custom MOTD and available commands to assist with further setup.
 
 
@@ -244,7 +243,7 @@ After provisioning is complete logut/login. You will be greeted with a custom MO
 ## 🆕 Windows Powershell Install
 
 ### 🔁 Automated Download and Install Script:
-**WSL users**  Use the installer link above or download and unzip: `chmod +x ./provision`, run `./provision.sh --install`
+**WSL users Use the installer link above** 
 
 **Winows and WSL Powershell Install**
 PowerShell will likely need it's execution policies set. As an Administrator, you can set the execution policy by typing this into your PowerShell window:
@@ -256,7 +255,7 @@ When you are done, you can set the policy back to its default value with:
 
 `Set-ExecutionPolicy Restricted`
 
-**Auto Provisioning Script** (Download)[https://raw.githubusercontent.com/chkp-altrevin/buildserver/refs/heads/main/deploy-to-windows/downloader.bat]
+**Auto Provisioning Script** [Download](https://raw.githubusercontent.com/chkp-altrevin/buildserver/refs/heads/main/deploy-to-windows/downloader.bat)
 
 ### Download Repo
 
