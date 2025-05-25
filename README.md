@@ -213,7 +213,7 @@ Install using a script or download and extract your self.
 **Download and Extract, chmod**
 
 1. **Download Latest Release**: [buildserver-main.zip](https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip)
-2. **Extract**: buildserver-main.zip rename to folder **buildserver** Example Structure: **/home/$USER/buildserver**
+2. **Extract**: buildserver-main.zip rename to folder **buildserver** Example Path: **$HOME/buildserver**
    ```bash
    chdmod +x ./provision.sh
    ```
