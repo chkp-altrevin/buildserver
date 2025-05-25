@@ -173,21 +173,23 @@ An SBOM is generated post-provisioning and located in the root path. Installed p
 1. **Internet Connection**: Required for downloading packages during provisioning.
 2. **Install Vagrant**: [Download Vagrant](https://developer.hashicorp.com/vagrant/install?product_intent=vagrant)
 3. **Install VirtualBox**: [Download VirtualBox](https://www.virtualbox.org/wiki/Downloads)
-4. **Download Latest Release**: [buildserver-main.zip](https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip).
-   - **or** one-liner download:
-     ```powershell
-     powershell Invoke-WebRequest -Uri "https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip" -OutFile "$env:USERPROFILE\Downloads\buildserver-main.zip"
-     ```
+4. **Download Latest Release**:
+   - [buildserver-main.zip](https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip).
+   - **or** Download [downloader.bat](https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/deploy-to-windows/downloader.bat). Right click on the link, save as `downloader.bat` Run, follow prompts.
+   - **or** copy and paste the one-liner that downloads only and you extract manually to a location your provide, done
+   ```powershell
+   powershell Invoke-WebRequest -Uri "https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip" -OutFile "$env:USERPROFILE\Downloads\buildserver-main.zip"
+   ```
 6. **Extract**: buildserver-main.zip rename to folder **buildserver** Example Structure: **C:\buildserver\Vagrantfile**
 7. **Start Vagrant/VirtualBox Provisioning** (ensure you are in your buildserver directory:
-- **Example**: C:\buildserver\vagrant up
+   - **Example**: C:\buildserver\vagrant up
 
-    ```bash
+   ```bash
    vagrant up # this is always ran in the root of the project folder where Vagrantfile is located
    ```
 
-7. **Access the VM**:
-- **Example:** C:\buildserver\vagrant ssh
+8. **Access the VM**:
+   - **Example:** C:\buildserver\vagrant ssh
 
    ```bash
    vagrant ssh
