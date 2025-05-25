@@ -176,7 +176,7 @@ An SBOM is generated post-provisioning and located in the root path. Installed p
 4. **Download Latest Release**: [buildserver-main.zip](https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip).
    - **or** one-liner download:
      ```powershell
-     Invoke-WebRequest -Uri "https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip" -OutFile "$env:USERPROFILE\Downloads\buildserver-main.zip"
+     powershell Invoke-WebRequest -Uri "https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip" -OutFile "$env:USERPROFILE\Downloads\buildserver-main.zip"
      ```
 6. **Extract**: buildserver-main.zip rename to folder **buildserver** Example Structure: **C:\buildserver\Vagrantfile**
 7. **Start Vagrant/VirtualBox Provisioning** (ensure you are in your buildserver directory:
@@ -290,7 +290,7 @@ exit 1
 ### Download Only
 
 ```powershell
-Invoke-WebRequest -Uri "https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip" -OutFile "$env:USERPROFILE\Downloads\buildserver-main.zip"
+powershell Invoke-WebRequest -Uri "https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip" -OutFile "$env:USERPROFILE\Downloads\buildserver-main.zip"
 ```
 ---
 
