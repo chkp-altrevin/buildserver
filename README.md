@@ -221,6 +221,7 @@ Install using a script or download and extract your self.
    ```bash
    sudo ./provision.sh
    ```
+**or try the Installer Script**
 
 **Installer Script** for Linux, WSL, GitBash, etc.
 
@@ -239,14 +240,10 @@ curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/inst
 After provisioning is complete logut/login. You will be greeted with a custom MOTD and available commands to assist with further setup.
 
 
-
-## 🆕 Windows Powershell Install
+## 🆕 Windows and Powershell Installs
 
 ### 🔁 Automated Download and Install Script:
-**WSL users Use the installer link above** 
-
-**Winows and WSL Powershell Install**
-PowerShell will likely need it's execution policies set. As an Administrator, you can set the execution policy by typing this into your PowerShell window:
+Running these scripts in a windows environment will not install any other software other than downloading the public repo and extracting to a location you provide. PowerShell will likely need it's execution policies set. As an Administrator, you can set the execution policy by typing this into your **PowerShell** window:
 
 `Set-ExecutionPolicy RemoteSigned`
 For more information, see Using the Set-ExecutionPolicy Cmdlet.
@@ -255,9 +252,8 @@ When you are done, you can set the policy back to its default value with:
 
 `Set-ExecutionPolicy Restricted`
 
-**Auto Provisioning Script** [Download](https://raw.githubusercontent.com/chkp-altrevin/buildserver/refs/heads/main/deploy-to-windows/downloader.bat)
-
-### Download Repo
+**Guided Installer Script** [Download](https://raw.githubusercontent.com/chkp-altrevin/buildserver/refs/heads/main/deploy-to-windows/downloader.bat)
+**Download Repo**
 
 ```powershell
 powershell Invoke-WebRequest -Uri "https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip" -OutFile "$env:USERPROFILE\Downloads\buildserver-main.zip"
