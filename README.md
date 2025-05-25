@@ -222,7 +222,7 @@ Install using a script or download and extract your self.
    sudo ./provision.sh
    ```
 
-**Install Script**
+**Installer Script** for Linux, WSL, GitBash, etc.
 
 - Install Script - Downloads repo, extract and backup if exists and installs dependencies (all-in-one):
 ```bash
@@ -258,36 +258,9 @@ When you are done, you can set the policy back to its default value with:
 
 `Set-ExecutionPolicy Restricted`
 
-Copy the below and save as `install-script.ps1`. Runas: `PS C:\Users\user\install-secret.ps1`
+**WSL users**  be able to use the installer link above or download and unzip, chmod +x ./provision
 
-```bash
-# PowerShell Wrapper for Buildserver Install
-# This script detects Git Bash or WSL, falls back if needed
-
-$ErrorActionPreference = "Stop"
-
-Write-Host "🔍 Checking for Git Bash..."
-$gitBash = "${env:ProgramFiles}\Git\bin\bash.exe"
-
-if (Test-Path $gitBash) {
-    Write-Host "✅ Git Bash found. Running install-script.sh..."
-    & "$gitBash" -c "curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh | bash -s -- --repo-download"
-    exit 0
-}
-
-Write-Host "🔍 Checking for WSL..."
-if (Get-Command "wsl.exe" -ErrorAction SilentlyContinue) {
-    Write-Host "✅ WSL found. Running install-script.sh..."
-    wsl curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh | wsl bashbash -s -- --repo-download
-    exit 0
-}
-
-Write-Host "❌ ERROR: Neither Git Bash nor WSL found."
-Write-Host "Please install Git for Windows (https://gitforwindows.org/) or WSL."
-exit 1
-```
-
-### Download Only
+### Download Repo
 
 ```powershell
 powershell Invoke-WebRequest -Uri "https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip" -OutFile "$env:USERPROFILE\Downloads\buildserver-main.zip"
