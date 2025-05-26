@@ -31,6 +31,11 @@ install.bat --refresh
 ```
 That’s handled properly — the .bat wrapper passes arguments to powershell.exe -File
 
+---
+
+### Vagrant
+Vagrant Downloads: https://developer.hashicorp.com/vagrant/downloads
+
 ### How to use multiple hypervisors
 Hypervisors often do not allow you to bring up virtual machines if you have more than one hypervisor in use.
 
