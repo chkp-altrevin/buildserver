@@ -30,3 +30,13 @@ If you run install.bat inside the extracted folder:
 install.bat --refresh
 ```
 That’s handled properly — the .bat wrapper passes arguments to powershell.exe -File
+
+### How to use multiple hypervisors
+Hypervisors often do not allow you to bring up virtual machines if you have more than one hypervisor in use.
+
+Below are a couple of examples to allow you to use Vagrant and VirtualBox if another hypervisor is present.
+
+### Linux, VirtualBox, and KVM
+If you see error messages because another hypervisor, like KVM, is in use etc.
+
+Reference: https://developer.hashicorp.com/vagrant/docs/installation
