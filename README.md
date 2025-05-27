@@ -255,7 +255,7 @@ When you are done, you can set the policy back to its default value with:
 
 `Set-ExecutionPolicy Restricted`
 
-**Guided Installer Script** [Download](https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/deploy-to-windows/downloader.bat). Good Idea to [review prior to deploying](https://raw.githubusercontent.com/chkp-altrevin/buildserver/refs/heads/main/deploy-to-windows/downloader.bat) before running.
+**Guided Installer Script** [Download](https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/common/vagrant/windows/downloader.bat). Good Idea to [review prior to deploying](https://raw.githubusercontent.com/chkp-altrevin/buildserver/refs/heads/main/common/windows/downloader.bat) before running.
 
 **Download, simple, no fuss**
 
