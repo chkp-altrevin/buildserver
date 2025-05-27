@@ -1,6 +1,7 @@
 ## Configuration
 This provider exposes quite a few provider-specific configuration options:
 
+#### 
 access_key_id - The access key for accessing AWS
 ami - The AMI id to boot, such as "ami-12345678"
 availability_zone - The availability zone within the region to launch the instance. If nil, it will use the default set by Amazon.
