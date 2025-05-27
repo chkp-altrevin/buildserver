@@ -1,6 +1,5 @@
-## Ubuntu
-
-## CentOS/RHEL
+## Linux Deployments
+These are the currently supported deployment methods.
 
 ## Amazon Linux
 This provider exposes quite a few provider-specific configuration options:
@@ -177,5 +176,9 @@ Vagrant.configure("2") do |config|
 end
 ```
 
+## Ubuntu
 
+## CentOS/RHEL
+
+### References
 Vagrant Downloads: https://developer.hashicorp.com/vagrant/downloads
