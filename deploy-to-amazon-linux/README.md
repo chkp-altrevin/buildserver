@@ -1,7 +1,6 @@
 ## Configuration
 This provider exposes quite a few provider-specific configuration options:
 
-```
 access_key_id - The access key for accessing AWS
 ami - The AMI id to boot, such as "ami-12345678"
 availability_zone - The availability zone within the region to launch the instance. If nil, it will use the default set by Amazon.
@@ -33,7 +32,7 @@ elb - The ELB name to attach to the instance.
 unregister_elb_from_az - Removes the ELB from the AZ on removal of the last instance if true (default). In non default VPC this has to be false.
 terminate_on_shutdown - Indicates whether an instance stops or terminates when you initiate shutdown from the instance.
 endpoint - The endpoint URL for connecting to AWS (or an AWS-like service). Only required for non AWS clouds, such as eucalyptus.
-```
+
 
 These can be set like typical provider-specific configuration:
 
@@ -52,7 +51,7 @@ Note that you do not have to hard code your aws.access_key_id or aws.secret_acce
 
 In addition to the above top-level configs, you can use the region_config method to specify region-specific overrides within your Vagrantfile. Note that the top-level region config must always be specified to choose which region you want to actually use, however. This looks like this:
 
-```
+```bash
 Vagrant.configure("2") do |config|
   # ... other stuff
 
@@ -81,12 +80,13 @@ Networking features in the form of config.vm.network are not supported with vagr
 ### Synced Folders
 There is minimal support for synced folders. Upon vagrant up, vagrant reload, and vagrant provision, the AWS provider will use rsync (if available) to uni-directionally sync the folder to the remote machine over SSH.
 
-See Vagrant Synced folders: rsync
+**See Vagrant Synced folders: rsync**
 
-Other Examples
-Tags
+## Other Examples
+### Tags
 To use tags, simply define a hash of key/value for the tags you want to associate to your instance, like:
-```
+
+```bash
 Vagrant.configure("2") do |config|
   # ... other stuff
 
@@ -97,11 +97,12 @@ Vagrant.configure("2") do |config|
     }
   end
 end
+```
 
 ### User data
 You can specify user data for the instance being booted.
 
-```
+```bash
 Vagrant.configure("2") do |config|
   # ... other stuff
 
@@ -117,7 +118,8 @@ end
 
 ### Disk size
 Need more space on your instance disk? Increase the disk size.
-```
+
+```bash
 Vagrant.configure("2") do |config|
   # ... other stuff
 
@@ -130,7 +132,7 @@ end
 ### ELB (Elastic Load Balancers)
 You can automatically attach an instance to an ELB during boot and detach on destroy.
 
-```
+```bash
 Vagrant.configure("2") do |config|
   # ... other stuff
 
