@@ -1,4 +1,5 @@
- # 🛠️ BuildServer: Rapid DevOps Lab Provisioning
+# 🛠️ BuildServer: Rapid DevOps Lab Provisioning
+Mileage will vary. Official release tbd.
 
 **Automated, repeatable, and customizable environments for DevOps workflows.**
 
