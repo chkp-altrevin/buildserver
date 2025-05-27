@@ -1,4 +1,5 @@
 ## Docker Images
+
 The first method that Vagrant can use to source a Docker container is via an image. This image can be from any Docker registry. An example is shown below:
 
 ```
