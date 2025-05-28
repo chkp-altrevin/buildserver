@@ -11,7 +11,6 @@ REPO_URL="https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.z
 CREATED_FILES=()
 SUDO=""
 
-fi
 
 # Determine shell profile for persistent exports
 case "$SHELL" in
