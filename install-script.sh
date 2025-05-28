@@ -11,10 +11,6 @@ REPO_URL="https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.z
 CREATED_FILES=()
 SUDO=""
 
-# Validate we are in the expected project directory
-if [[ "$(basename "$PROJECT_PATH")" != "$PROJECT_NAME" ]]; then
-  echo "[FATAL] Expected to be in project directory named '$PROJECT_NAME', but found '$(basename "$PROJECT_PATH")'."
-  exit 1
 fi
 
 # Determine shell profile for persistent exports
@@ -42,18 +38,13 @@ usage() {
 Usage: $0 [OPTIONS]
 
 Options:
-  --install                 Download, backup and provision the project
+  --install                 Download and provision the project
   --repo-download           Only download the repository
-  --install-provision       Re-provision locally, no backup, no download
+  --install-custom          Run provision.sh with optional override
   --restore=FILENAME        Restore from a previous backup
   --cleanup                 Remove created files and reset state
-  --dryrun                  Dry-run mode (no changes made)
+  --test                    Dry-run mode (no changes made)
   --help                    Show this help message
-
-  Example: install-script.sh --install (recommended)
-  Example: --install-provision Re-provision of local modifications
-  Example: --restore=05272025_backup_buildserver.zip
-  
 EOF
   exit 0
 }
@@ -63,9 +54,9 @@ parse_args() {
     case "$arg" in
       --install) INSTALL=true ;;
       --repo-download) REPO_DOWNLOAD=true ;;
-      --install-provision) INSTALL_CUSTOM=true ;;
+      --install-custom) INSTALL_CUSTOM=true ;;
       --cleanup) CLEANUP=true ;;
-      --dryrun) TEST_MODE=true ;;
+      --test) TEST_MODE=true ;;
       --restore=*) RESTORE="${arg#*=}" ;;
       --help) usage ;;
       *) log_error "Unknown flag: $arg"; usage ;;
@@ -138,7 +129,7 @@ run_provision() {
 
   log_info "Running provision.sh..."
   ARGS=(--project-name "$PROJECT_NAME")
-  [[ "$TEST_MODE" == "true" ]] && ARGS+=(--dryrun)
+  [[ "$TEST_MODE" == "true" ]] && ARGS+=(--test)
 
   if [[ -n "$SUDO" ]]; then
     $SUDO -E bash "$PROJECT_PATH/provision.sh" "${ARGS[@]}"
