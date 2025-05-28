@@ -42,13 +42,18 @@ usage() {
 Usage: $0 [OPTIONS]
 
 Options:
-  --install                 Download and provision the project
+  --install                 Download, backup and provision the project
   --repo-download           Only download the repository
-  --install-custom          Run provision.sh with optional override
+  --install-provision       Re-provision locally, no backup, no download
   --restore=FILENAME        Restore from a previous backup
   --cleanup                 Remove created files and reset state
-  --test                    Dry-run mode (no changes made)
+  --dryrun                  Dry-run mode (no changes made)
   --help                    Show this help message
+
+  Example: install-script.sh --install (recommended)
+  Example: --install-provision Re-provision of local modifications
+  Example: --restore=05272025_backup_buildserver.zip
+  
 EOF
   exit 0
 }
@@ -58,9 +63,9 @@ parse_args() {
     case "$arg" in
       --install) INSTALL=true ;;
       --repo-download) REPO_DOWNLOAD=true ;;
-      --install-custom) INSTALL_CUSTOM=true ;;
+      --install-provision) INSTALL_CUSTOM=true ;;
       --cleanup) CLEANUP=true ;;
-      --test) TEST_MODE=true ;;
+      --dryrun) TEST_MODE=true ;;
       --restore=*) RESTORE="${arg#*=}" ;;
       --help) usage ;;
       *) log_error "Unknown flag: $arg"; usage ;;
@@ -133,7 +138,7 @@ run_provision() {
 
   log_info "Running provision.sh..."
   ARGS=(--project-name "$PROJECT_NAME")
-  [[ "$TEST_MODE" == "true" ]] && ARGS+=(--test)
+  [[ "$TEST_MODE" == "true" ]] && ARGS+=(--dryrun)
 
   if [[ -n "$SUDO" ]]; then
     $SUDO -E bash "$PROJECT_PATH/provision.sh" "${ARGS[@]}"
