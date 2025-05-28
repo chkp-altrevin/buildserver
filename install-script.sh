@@ -93,7 +93,7 @@ backup_existing_project() {
 download_repo() {
   TMP_DIR=$(mktemp -d)
   log_info "Downloading repository to temporary directory..."
-  curl -fsSL "$REPO_URL" -o "$TMP_DIR/project.zip"
+  curl -L "$REPO_URL" -o "$TMP_DIR/project.zip"
   unzip -t "$TMP_DIR/project.zip" || { log_error "Corrupted zip file."; exit 1; }
   unzip -q "$TMP_DIR/project.zip" -d "$TMP_DIR"
   EXTRACTED_DIR=$(find "$TMP_DIR" -mindepth 1 -maxdepth 1 -type d)
