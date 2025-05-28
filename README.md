@@ -230,11 +230,11 @@ Install using a script or download and extract your self.
 
 - Install Script - Downloads repo, extract and backup if exists and installs dependencies (all-in-one):
 ```bash
-curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh && chmod +x install-script.sh && sudo ./install-script.sh --install
+curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh -f && chmod +x install-script.sh && sudo ./install-script.sh --install
 ```
 - Download Only:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh && chmod +x install-script.sh && sudo ./install-script.sh --repo-download
+curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh -f && chmod +x install-script.sh && sudo ./install-script.sh --repo-download
 ```
 - Displays Help Menu:
 ```bash
