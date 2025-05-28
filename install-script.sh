@@ -10,7 +10,7 @@ export TEST_MODE=false
 REPO_URL="https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip"
 CREATED_FILES=()
 SUDO=""
-
+DEBUG=false
 
 # Determine shell profile for persistent exports
 case "$SHELL" in
@@ -36,14 +36,29 @@ usage() {
   cat <<EOF
 Usage: $0 [OPTIONS]
 
-Options:
-  --install                 Download and provision the project
-  --repo-download           Only download the repository
-  --install-custom          Run provision.sh with optional override
-  --restore=FILENAME        Restore from a previous backup
-  --cleanup                 Remove created files and reset state
-  --test                    Dry-run mode (no changes made)
-  --help                    Show this help message
+Main Operations:
+  --install                 Download the repository and provision the project (recommended)
+  --provision-only          Re-provision using the local folder (no download or backup)
+  --repo-download           Download the repository only (no provision)
+
+Maintenance:
+  --restore=FILENAME        Restore project from a previous backup ZIP
+  --cleanup                 Remove created files and reset environment
+
+Modes:
+  --test                    Dry-run mode (no actual changes made)
+  --debug                   Enable verbose debug output (equivalent to 'set -x')
+
+Help:
+  --help                    Show this help message and exit
+
+Examples:
+  $0 --install                         # Full install: download + provision
+  $0 --provision-only                 # Re-run provision.sh in current folder
+  $0 --restore=backup_20240527.zip    # Restore from a specific backup file
+  $0 --install --debug                # Install with verbose command trace
+  $0 --repo-download                  # Download project archive only
+
 EOF
   exit 0
 }
@@ -51,9 +66,10 @@ EOF
 parse_args() {
   for arg in "$@"; do
     case "$arg" in
+      --debug) DEBUG=true ;;
       --install) INSTALL=true ;;
       --repo-download) REPO_DOWNLOAD=true ;;
-      --install-custom) INSTALL_CUSTOM=true ;;
+      --provision-only) PROVISION_ONLY=true ;;
       --cleanup) CLEANUP=true ;;
       --test) TEST_MODE=true ;;
       --restore=*) RESTORE="${arg#*=}" ;;
@@ -152,14 +168,16 @@ check_dependencies() {
 }
 
 main() {
+  parse_args "$@"
+  [[ "$DEBUG" == true ]] && set -x
   check_dependencies
+
   INSTALL=false
-  INSTALL_CUSTOM=false
+  PROVISION_ONLY=false
   REPO_DOWNLOAD=false
   CLEANUP=false
   RESTORE=""
 
-  parse_args "$@"
   require_root_or_sudo
 
   if [ -n "$RESTORE" ]; then
@@ -186,7 +204,7 @@ main() {
     exit 0
   fi
 
-  if [ "$INSTALL_CUSTOM" = true ]; then
+  if [ "$PROVISION_ONLY" = true ]; then
     run_provision
     ensure_project_env_export
     exit 0
