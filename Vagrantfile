@@ -25,3 +25,4 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 #    fwmgw.vm.box = "cloudguard/cg-fwm-gw"
 #  end
 end
+
