@@ -138,7 +138,8 @@ download_repo() {
   if [ "$TEST_MODE" = false ]; then
     rm -rf "$PROJECT_PATH"
     mkdir -p "$HOME"
-    mv "$EXTRACTED_DIR" "$PROJECT_PATH"
+    mkdir -p "$PROJECT_PATH"
+    cp -a "$EXTRACTED_DIR/." "$PROJECT_PATH"
     find "$PROJECT_PATH" -type f -name "*.sh" -exec chmod +x {} \;
 
     INVOKING_USER="${SUDO_USER:-$USER}"
