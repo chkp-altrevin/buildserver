@@ -69,6 +69,7 @@ EOF
 parse_args() {
   for arg in "$@"; do
     case "$arg" in
+    --) ;;  # Ignore -- used for separating arguments
       --debug) DEBUG=true ;;
       --install) INSTALL=true ;;
       --repo-download) REPO_DOWNLOAD=true ;;
