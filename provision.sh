@@ -4,7 +4,7 @@ set -euo pipefail
 # === SUDO-SAFE ENV SETUP ===
 SUDO_USER="${SUDO_USER:-}"
 ORIGINAL_USER="${SUDO_USER:-$USER}"
-CALLER_HOME="${CALLER_HOME}"
+CALLER_HOME="${HOME}"
 
 if [[ -n "$SUDO_USER" ]]; then
   CALLER_HOME="$(getent passwd "$SUDO_USER" | cut -d: -f6)"
@@ -26,7 +26,7 @@ fix_ownership_in_home() {
 }
 
 : "${PROJECT_NAME:="buildserver"}"
-: "${PROJECT_PATH:="$CALLER_HOME/$PROJECT_NAME"}"
+: "${PROJECT_PATH:="$HOME/$PROJECT_NAME"}"
 : "${TEST_MODE:=false}"
 
 mkdir -p "$PROJECT_PATH"
@@ -98,7 +98,7 @@ show_help() {
   echo ""
   echo "Options:"
   echo "  --project-name NAME        Optional: Project name (default: buildserver)"
-  echo "  --project-path PATH        Required*: Path to install (default: $CALLER_HOME/<project-name> if omitted)"
+  echo "  --project-path PATH        Required*: Path to install (default: $HOME/<project-name> if omitted)"
   echo "  --virtualbox-vagrant-win   Enable Vagrant/VirtualBox Windows setup flow"
   echo "  -h, --help                 Show this help message"
   exit 0
@@ -106,7 +106,7 @@ show_help() {
 
 # Defaults
 PROJECT_NAME="${PROJECT_NAME:-buildserver}"
-PROJECT_PATH="${PROJECT_PATH:-$CALLER_HOME/$PROJECT_NAME}"
+PROJECT_PATH="${PROJECT_PATH:-$HOME/$PROJECT_NAME}"
 CHECK_VBOX_VAGRANT=false
 
 # Parse args
@@ -136,7 +136,7 @@ done
 
 # Set required project path if not provided
 if [[ -z "$PROJECT_PATH" ]]; then
-  PROJECT_PATH="$CALLER_HOME/$PROJECT_NAME"
+  PROJECT_PATH="$HOME/$PROJECT_NAME"
   echo "[INFO] No --project-path provided, defaulting to: $PROJECT_PATH"
 fi
 
@@ -144,14 +144,14 @@ fi
 if [[ "$CHECK_VBOX_VAGRANT" == true ]]; then
   export VAGRANT_USER="vagrant"
   export VAGRANT_USER_PATH="/home/vagrant"
-  export PROJECT_PATH="/home/vagrant/$PROJECT_NAME"
+  # export PROJECT_PATH="/home/vagrant/$PROJECT_NAME"
 else
   export VAGRANT_USER="${USER}"
-  export VAGRANT_USER_PATH="${CALLER_HOME}"
+  export VAGRANT_USER_PATH="${HOME}"
 fi
 
-export PROJECT_NAME="${PROJECT_NAME:-buildserver}"
-export PROJECT_PATH="${PROJECT_PATH:-$CALLER_HOME/$PROJECT_NAME}"
+export PROJECT_NAME
+export PROJECT_PATH
 
 # -----  Run as root check ----------------------------------------------------
 if [[ $EUID -ne 0 ]]; then
@@ -288,12 +288,12 @@ echo "$VERSION_ID" >> "$PROJECT_PATH/version.txt"
 
 # --------- Function to add optional aliases ---------------------------------
 import_menu_aliases() {
-  local aliases_file="$CALLER_HOME/.bash_aliases"
+  local aliases_file="$HOME/.bash_aliases"
   local -A menu_aliases=(
     ["cls"]="clear"
     ["quick-setup"]="docker ps"
     ["motd"]="/etc/update-motd.d/99-custom-motd"
-    ["renv"]="source $CALLER_HOME/.env"
+    ["renv"]="source $HOME/.env"
     ["denv"]="source $PROJECT_PATH/common/profile/env.example"
     ["python"]="python3"
     ["clusters"]="kubectl config get-clusters"
@@ -387,14 +387,14 @@ add_custom_motd() {
 # ----- Update .bashrc with PATH ----------------------------------------------
 update_bashrc_path() {
   log_info "Updating .bashrc to include local bin in PATH..."
-  sudo su -l $USER -c 'echo $PATH' echo "export PATH=\$PATH:$CALLER_HOME/.local/bin" >> "$CALLER_HOME/.bashrc" && \
+  sudo su -l $USER -c 'echo $PATH' echo "export PATH=\$PATH:$HOME/.local/bin" >> "$HOME/.bashrc" && \
     log_success ".bashrc updated." || log_error "FATAL: Failed to update .bashrc."
 }
 
 # ----- Create Kube and Local Bin Directories ----------------------------------
 create_directories() {
   log_info "Creating necessary directories..."
-  run_with_sudo mkdir -p "$CALLER_HOME/.local/bin" "$CALLER_HOME/.kube" && \
+  run_with_sudo mkdir -p "$HOME/.local/bin" "$HOME/.kube" && \
     log_success "Directories created." || log_error "FATAL: Failed to create directories."
 }
 
@@ -402,8 +402,8 @@ create_directories() {
 copy_profile_files() {
   log_info "Copying profile files..."
 
-  local bash_aliases_path="$CALLER_HOME/.bash_aliases"
-  local env_file_path="$CALLER_HOME/.env"
+  local bash_aliases_path="$HOME/.bash_aliases"
+  local env_file_path="$HOME/.env"
 
   cp "$PROJECT_PATH/common/profile/bash_aliases" "$bash_aliases_path" && \
     log_success "bash_aliases copied." || log_error "FATAL: Failed to copy bash_aliases."
@@ -411,11 +411,11 @@ copy_profile_files() {
   cp "$PROJECT_PATH/common/profile/env.example" "$env_file_path" && \
     log_success "env.example copied." || log_error "FATAL: Failed to copy env.example."
 
-  touch "$CALLER_HOME/.Xauthority" && \
+  touch "$HOME/.Xauthority" && \
     log_success "Xauthority created." || log_error "NON-FATAL: Failed to create Xauthority."
 
   # Apply .bash_aliases if running in an interactive shell
-  if [[ $- == *i* && "$CALLER_HOME" == "$CALLER_HOME" ]]; then
+  if [[ $- == *i* && "$HOME" == "$HOME" ]]; then
     log_info "Sourcing bash_aliases for current session..."
     source "$bash_aliases_path"
   else
@@ -594,7 +594,7 @@ update_system() {
 configure_git() {
   log_info "Configuring Git global settings..."
   git config --global user.email "$USER@buildserver.local" && \
-    git config --global --add safe.directory "$CALLER_HOME/repos" && \
+    git config --global --add safe.directory "$HOME/repos" && \
     git config --global user.name "$USER" && \
     git config --global init.defaultBranch main && \
     log_success "Git configured." || log_error "NON-FATAL: Git configuration failed."
@@ -603,12 +603,12 @@ configure_git() {
 # ----- Clone Repositories ----------------------------------------------------
 clone_repositories() {
   log_info "Cloning demo repositories..."
-  mkdir -p "$CALLER_HOME/repos"
-  git clone https://github.com/chkp-altrevin/datacenter-objects-k8s.git "$CALLER_HOME/repos/datacenter-objects-k8s" && \
+  mkdir -p "$HOME/repos"
+  git clone https://github.com/chkp-altrevin/datacenter-objects-k8s.git "$HOME/repos/datacenter-objects-k8s" && \
     log_success "Cloned datacenter-objects-k8s." || log_error "NON-FATAL: Failed to clone datacenter-objects-k8. If this was a --provision you can likely ignore"
-  git clone https://github.com/SpectralOps/spectral-goat.git "$CALLER_HOME/repos/spectral-goat" && \
+  git clone https://github.com/SpectralOps/spectral-goat.git "$HOME/repos/spectral-goat" && \
     log_success "Cloned spectral-goat." || log_error "NON-FATAL: Failed to clone spectral-goat. If this was a --provision you can likely ignore"
-  git clone https://github.com/openappsec/waf-comparison-project.git "$CALLER_HOME/repos/waf-comparison-project" && \
+  git clone https://github.com/openappsec/waf-comparison-project.git "$HOME/repos/waf-comparison-project" && \
     log_success "Cloned waf-comparison-project." || log_error "NON-FATAL: Failed to clone waf-comparison-project. If this was a --provision you can likely ignore"
 }
 
@@ -671,7 +671,7 @@ main() {
   install_gcloudcli # 2 install the google cloud repository
   install_azurecli # 2 install the azure cli repository
   configure_kubectl_repo # 2 install the kubectl repository used for use case 1
-  update_home_permissions # 2 updates anything copied over to the vagrant and $CALLER_HOME paths used for use case 1 and 2
+  update_home_permissions # 2 updates anything copied over to the vagrant and $HOME paths used for use case 1 and 2
   update_system # 2 apt update upgrade used for use case 1
   configure_git # 2 configures git common configurations feel free to modify but used for use case 1
   clone_repositories # 2 install a few repos modify any as needed or remove your call
@@ -704,8 +704,9 @@ echo "Script Version: $VERSION_ID (Saved to ${PROJECT_PATH}/version.txt)"
 echo ""
 echo "=========================================================================="
 echo "========================================================================= "
-echo "| Provisioning Log     | saved to ${PROJECT_PATH}/provisioning.log        "
+echo "| Provisioning Log     | saved to ${PROJECT_PATH}/provisioning.log          "
 echo "| Software Packages    | exported to $PROJECT_PATH/initial_sbom           "
+echo "| Provision Error Logs | exported to $PROJECT_PATH/error.log              "
 echo "=========================================================================="
 sleep 6
 echo -e "\\n\033[1;31m[✖] Errors Detected:\033[0m"
