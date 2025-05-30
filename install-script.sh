@@ -3,9 +3,7 @@ set -euo pipefail
 
 # === Constants ===
 export PROJECT_NAME="buildserver"
-INVOKING_USER="${SUDO_USER:-$USER}"
-INVOKING_HOME=$(eval echo "~$INVOKING_USER")
-export PROJECT_PATH="${INVOKING_HOME}/${PROJECT_NAME}"
+export PROJECT_PATH="$(pwd)"
 export BACKUP_DIR="${HOME}/backup"
 export LOG_FILE="${HOME}/install-script.log"
 export TEST_MODE=false
@@ -14,59 +12,56 @@ CREATED_FILES=()
 SUDO=""
 DEBUG=false
 
+# Determine shell profile for persistent exports
+INVOKING_USER="${SUDO_USER:-$USER}"
+INVOKING_HOME=$(eval echo "~$INVOKING_USER")
+
+case "$SHELL" in
+  */zsh) PROFILE="$INVOKING_HOME/.zshrc" ;;
+  */bash) PROFILE="$INVOKING_HOME/.bashrc" ;;
+  *) PROFILE="$INVOKING_HOME/.profile" ;;
+esac
+
+# === Logging ===
 log_info()    { echo -e "[INFO]    $(date '+%F %T') - $*" | tee -a "$LOG_FILE"; }
 log_success() { echo -e "[SUCCESS] $(date '+%F %T') - $*" | tee -a "$LOG_FILE"; }
 log_error()   { echo -e "[ERROR]   $(date '+%F %T') - $*" | tee -a "$LOG_FILE" >&2; }
 log_warn()    { echo -e "[WARN]    $(date '+%F %T') - $*" | tee -a "$LOG_FILE"; }
 
-log_info "Resolved PROJECT_PATH=$PROJECT_PATH (USER=$USER, SUDO_USER=$SUDO_USER)"
-
-# === Flags ===
-INSTALL=false
-PROVISION_ONLY=false
-REPO_DOWNLOAD=false
-CLEANUP=false
-RESTORE=""
-CUSTOM_REPO_URL=""
-
-case "$SHELL" in
-  */zsh) PROFILE="$HOME/.zshrc" ;;
-  */bash) PROFILE="$HOME/.bashrc" ;;
-  *) PROFILE="$HOME/.profile" ;;
-esac
-
+# === Cleanup Handler ===
 cleanup() {
   [[ -d "${TMP_DIR:-}" ]] && rm -rf "$TMP_DIR"
 }
 trap cleanup EXIT
 
+# === Flags and Usage ===
 usage() {
   cat <<EOF
 Usage: $0 [OPTIONS]
 
 Main Operations:
-  --install                     Download the repository and provision the project
-  --repo-url=URL                Override the default repository zip URL
-  --repo-download               Download the repository only (no provision)
-  --provision-only              Re-provision using the local folder
+  --install                 Download the repository and provision the project (recommended)
+  --provision-only          Re-provision using the local folder (no download or backup)
+  --repo-download           Download the repository only (no provision)
 
 Maintenance:
-  --restore=FILENAME            Restore project from backup ZIP
-  --cleanup                     Remove created files and reset environment
+  --restore=FILENAME        Restore project from a previous backup ZIP
+  --cleanup                 Remove created files and reset environment
 
 Modes:
-  --test                        Dry-run mode (no changes made)
-  --debug                       Enable verbose debug output
+  --test                    Dry-run mode (no actual changes made)
+  --debug                   Enable verbose debug output (equivalent to 'set -x')
 
 Help:
-  --help                        Show this help message
+  --help                    Show this help message and exit
 
 Examples:
-  $0 --install
-  $0 --repo-download
-  $0 --repo-download --repo-url=https://...
-  $0 --provision-only
-  $0 --restore=backup_20240527.zip
+  $0 --install                         # Full install: download + provision
+  $0 --provision-only                 # Re-run provision.sh in current folder
+  $0 --restore=backup_20240527.zip    # Restore from a specific backup file
+  $0 --install --debug                # Install with verbose command trace
+  $0 --repo-download                  # Download project archive only
+
 EOF
   exit 0
 }
@@ -81,21 +76,10 @@ parse_args() {
       --cleanup) CLEANUP=true ;;
       --test) TEST_MODE=true ;;
       --restore=*) RESTORE="${arg#*=}" ;;
-      --repo-url=*) CUSTOM_REPO_URL="${arg#*=}" ;;
       --help) usage ;;
       *) log_error "Unknown flag: $arg"; usage ;;
     esac
   done
-
-  if [[ -n "$CUSTOM_REPO_URL" ]]; then
-    if [[ "$CUSTOM_REPO_URL" =~ ^https?://.*\.zip$ ]]; then
-      REPO_URL="$CUSTOM_REPO_URL"
-      log_info "Using custom REPO_URL: $REPO_URL"
-    else
-      log_error "Invalid URL format for --repo-url: $CUSTOM_REPO_URL"
-      usage
-    fi
-  fi
 }
 
 require_root_or_sudo() {
@@ -110,7 +94,7 @@ backup_existing_project() {
     local backup_file="${BACKUP_DIR}/${PROJECT_NAME}_$(date +%Y%m%d%H%M%S).zip"
 
     if ! command -v zip >/dev/null 2>&1; then
-      log_error "zip command not found."
+      log_error "zip command not found. Cannot backup $PROJECT_PATH."
       exit 1
     fi
 
@@ -119,7 +103,7 @@ backup_existing_project() {
       zipinfo "$backup_file" | tee -a "$LOG_FILE"
       CREATED_FILES+=("$backup_file")
     } || {
-      log_error "Backup failed."
+      log_error "Backup failed. Aborting before deleting $PROJECT_PATH."
       exit 1
     }
   fi
@@ -135,16 +119,10 @@ download_repo() {
 
   if [ "$TEST_MODE" = false ]; then
     rm -rf "$PROJECT_PATH"
-    mkdir -p "$PROJECT_PATH"
-    cp -a "$EXTRACTED_DIR/." "$PROJECT_PATH"
+    mv "$EXTRACTED_DIR" "$PROJECT_PATH"
     find "$PROJECT_PATH" -type f -name "*.sh" -exec chmod +x {} \;
-
-    if [[ -n "$SUDO" ]]; then
-      chown -R "$INVOKING_USER:$INVOKING_USER" "$PROJECT_PATH"
-      log_info "Ownership set to $INVOKING_USER for $PROJECT_PATH"
-    fi
   else
-    log_info "[TEST MODE] Would place contents in $PROJECT_PATH"
+    log_info "[TEST MODE] Would replace $PROJECT_PATH with extracted contents."
   fi
 
   log_success "Repository installed to $PROJECT_PATH"
@@ -184,7 +162,7 @@ check_dependencies() {
     if ! command -v "$cmd" >/dev/null 2>&1; then
       log_info "Installing missing dependency: $cmd"
       $SUDO apt-get update -y && $SUDO apt-get install -y "$cmd" || {
-        log_error "Failed to install $cmd"
+        log_error "FATAL: Failed to install $cmd"
         exit 1
       }
     fi
@@ -195,10 +173,14 @@ check_dependencies() {
 main() {
   parse_args "$@"
   [[ "$DEBUG" == true ]] && set -x
-
-  log_info "INSTALL=$INSTALL, REPO_DOWNLOAD=$REPO_DOWNLOAD, PROVISION_ONLY=$PROVISION_ONLY, CLEANUP=$CLEANUP, TEST_MODE=$TEST_MODE"
-
   check_dependencies
+
+  INSTALL=false
+  PROVISION_ONLY=false
+  REPO_DOWNLOAD=false
+  CLEANUP=false
+  RESTORE=""
+
   require_root_or_sudo
 
   if [ -n "$RESTORE" ]; then
@@ -208,11 +190,6 @@ main() {
       exit 1
     fi
     unzip -q "$backup_file" -d "$(dirname "$PROJECT_PATH")" >> "$LOG_FILE" 2>&1
-    RESTORED_DIR="$(dirname "$PROJECT_PATH")/$(basename "$PROJECT_PATH")"
-    if [[ -d "$RESTORED_DIR" && -n "$SUDO" ]]; then
-      chown -R "$INVOKING_USER:$INVOKING_USER" "$RESTORED_DIR"
-      log_info "Ownership set to $INVOKING_USER for $RESTORED_DIR"
-    fi
     log_success "Restored from $backup_file"
     exit 0
   fi
