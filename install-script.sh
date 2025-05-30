@@ -315,7 +315,6 @@ main() {
 }
 
 main "$@"
-esac
 done
 }
 done
