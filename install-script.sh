@@ -18,6 +18,7 @@ PROVISION_ONLY=false
 REPO_DOWNLOAD=false
 CLEANUP=false
 RESTORE=""
+CUSTOM_REPO_URL=""
 
 # === Shell Profile Detection ===
 case "$SHELL" in
@@ -44,27 +45,28 @@ usage() {
 Usage: $0 [OPTIONS]
 
 Main Operations:
-  --install                 Download the repository and provision the project (recommended)
-  --provision-only          Re-provision using the local folder (no download or backup)
-  --repo-download           Download the repository only (no provision)
+  --install                     Download the repository and provision the project (recommended)
+  --repo-url=URL                Override the default repository zip URL
+  --repo-download               Download the repository only (no provision)
+  --provision-only              Re-provision using the local folder (no download or backup)
 
 Maintenance:
-  --restore=FILENAME        Restore project from a previous backup ZIP
-  --cleanup                 Remove created files and reset environment
+  --restore=FILENAME            Restore project from a previous backup ZIP
+  --cleanup                     Remove created files and reset environment
 
 Modes:
-  --test                    Dry-run mode (no actual changes made)
-  --debug                   Enable verbose debug output (equivalent to 'set -x')
+  --test                        Dry-run mode (no actual changes made)
+  --debug                       Enable verbose debug output (equivalent to 'set -x')
 
 Help:
-  --help                    Show this help message and exit
+  --help                        Show this help message and exit
 
 Examples:
-  $0 --install                         # Full install: download + provision
-  $0 --provision-only                 # Re-run provision.sh in current folder
-  $0 --restore=backup_20240527.zip    # Restore from a specific backup file
-  $0 --install --debug                # Install with verbose command trace
-  $0 --repo-download                  # Download project archive only
+  $0 --install                                 # Full install: download + provision
+  $0 --repo-download                           # Download only
+  $0 --repo-download --repo-url=https://...    # Download custom archive
+  $0 --provision-only                          # Re-run provision.sh in current folder
+  $0 --restore=backup_20240527.zip             # Restore from a specific backup file
 EOF
   exit 0
 }
@@ -80,10 +82,21 @@ parse_args() {
       --cleanup) CLEANUP=true ;;
       --test) TEST_MODE=true ;;
       --restore=*) RESTORE="${arg#*=}" ;;
+      --repo-url=*) CUSTOM_REPO_URL="${arg#*=}" ;;
       --help) usage ;;
       *) log_error "Unknown flag: $arg"; usage ;;
     esac
   done
+
+  if [[ -n "$CUSTOM_REPO_URL" ]]; then
+    if [[ "$CUSTOM_REPO_URL" =~ ^https?://.*\.zip$ ]]; then
+      REPO_URL="$CUSTOM_REPO_URL"
+      log_info "Using custom REPO_URL: $REPO_URL"
+    else
+      log_error "Invalid URL format for --repo-url: $CUSTOM_REPO_URL"
+      usage
+    fi
+  fi
 }
 
 # === Core Functions ===
