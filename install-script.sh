@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# === Preflight Validation ===
+if ! command -v shellcheck &>/dev/null; then
+  echo "[WARN] shellcheck is not installed. Skipping script linting."
+else
+  echo "[INFO] Running shellcheck validation..."
+  shellcheck "$0" || echo "[WARN] shellcheck found issues. Proceeding anyway..."
+fi
+
 # === Constants ===
 export PROJECT_NAME="buildserver"
 export PROJECT_PATH="$(pwd)"
@@ -171,6 +179,7 @@ check_dependencies() {
   log_success "All dependencies verified."
 }
 
+: "${RESTORE:=}"
 main() {
   parse_args "$@"
   [[ "$DEBUG" == true ]] && set -x
