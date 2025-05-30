@@ -174,8 +174,8 @@ An SBOM is generated post-provisioning and located in the root path. Installed p
 3. **Install VirtualBox**: [Download VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 4. **Download Latest Release**:
    - [buildserver-main.zip](https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip).
-   - **or** Download [downloader.bat](https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/common/vagrant/windows/downloader.bat). Right click on the link, save as `downloader.bat` Run, follow prompts.
-   - **or** copy and paste the one-liner that downloads only and you extract manually to a location your provide, done
+   - **or** Download using a guided install [downloader.bat](https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/common/vagrant/windows/downloader.bat). Right click on the link, save as `downloader.bat` Run `downloader.bat` follow the prompts. Next `cd buildserver`, `vagrant up`, `vagrant ssh`.
+   - **or** copy and paste the one-liner that downloads the zip you extract manually to a location your provide
    ```powershell
    powershell Invoke-WebRequest -Uri "https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip" -OutFile "$env:USERPROFILE\Downloads\buildserver-main.zip"
    ```
