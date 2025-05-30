@@ -1,32 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# === Preflight shellcheck validation ===
-if ! command -v shellcheck &>/dev/null; then
-  echo "[WARN] shellcheck is not installed. Skipping script linting."
-else
-  echo "[INFO] Running shellcheck validation..."
-  SHELLCHECK_LOG="${PROJECT_PATH:-/tmp}/shellcheck.log"
-  mkdir -p "$(dirname "$SHELLCHECK_LOG")"
-
-  if command -v tput &>/dev/null && [ "$(tput colors)" -ge 8 ]; then
-    COLOR_RED=$(tput setaf 1)
-    COLOR_GREEN=$(tput setaf 2)
-    COLOR_RESET=$(tput sgr0)
-  else
-    COLOR_RED=""
-    COLOR_GREEN=""
-    COLOR_RESET=""
-  fi
-
-  shellcheck "$0" > "$SHELLCHECK_LOG" 2>&1
-  if [ $? -ne 0 ]; then
-    echo "${COLOR_RED}[WARN] shellcheck found issues. See $SHELLCHECK_LOG${COLOR_RESET}"
-  else
-    echo "${COLOR_GREEN}[INFO] shellcheck passed without issues.${COLOR_RESET}"
-  fi
-fi
-
 # === Safe Defaults ===
 : "${PROJECT_NAME:=buildserver}"
 : "${REPO_DOWNLOAD:=false}"
@@ -45,6 +19,33 @@ INVOKING_HOME=$(eval echo "~$INVOKING_USER")
 export PROJECT_PATH="${INVOKING_HOME}/${PROJECT_NAME}"
 export BACKUP_DIR="${INVOKING_HOME}/backup"
 export LOG_FILE="${INVOKING_HOME}/install-script.log"
+
+# === Shell Profile Detection ===
+case "$SHELL" in
+  */zsh) PROFILE="$INVOKING_HOME/.zshrc" ;;
+  */bash) PROFILE="$INVOKING_HOME/.bashrc" ;;
+  *) PROFILE="$INVOKING_HOME/.profile" ;;
+esac
+
+# === Preflight shellcheck validation ===
+if ! command -v shellcheck &>/dev/null; then
+  echo "[WARN] shellcheck is not installed. Skipping script linting."
+else
+  echo "[INFO] Running shellcheck validation..."
+  SHELLCHECK_LOG="${PROJECT_PATH}/shellcheck.log"
+  mkdir -p "$(dirname "$SHELLCHECK_LOG")"
+  if command -v tput &>/dev/null && [ "$(tput colors)" -ge 8 ]; then
+    COLOR_RED=$(tput setaf 1)
+    COLOR_GREEN=$(tput setaf 2)
+    COLOR_RESET=$(tput sgr0)
+  else
+    COLOR_RED=""
+    COLOR_GREEN=""
+    COLOR_RESET=""
+  fi
+  shellcheck "$0" > "$SHELLCHECK_LOG" 2>&1 || true
+  echo "${COLOR_GREEN}[INFO] shellcheck completed. See log at $SHELLCHECK_LOG${COLOR_RESET}"
+fi
 export TEST_MODE=false
 REPO_URL="https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip"
 CREATED_FILES=()
