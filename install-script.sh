@@ -20,34 +20,32 @@ export PROJECT_PATH="${INVOKING_HOME}/${PROJECT_NAME}"
 export BACKUP_DIR="${INVOKING_HOME}/backup"
 export LOG_FILE="${INVOKING_HOME}/install-script.log"
 
+# === ShellCheck Validation ===
+echo "[INFO] Running shellcheck validation..."
+SHELLCHECK_LOG="${PROJECT_PATH}/shellcheck.log"
+mkdir -p "$(dirname "$SHELLCHECK_LOG")"
+if command -v shellcheck &>/dev/null; then
+  if command -v tput &>/dev/null && [ "$(tput colors)" -ge 8 ]; then
+    COLOR_RED=$(tput setaf 1)
+    COLOR_GREEN=$(tput setaf 2)
+    COLOR_RESET=$(tput sgr0)
+  else
     COLOR_RED=""
     COLOR_GREEN=""
     COLOR_RESET=""
   fi
   shellcheck "$0" > "$SHELLCHECK_LOG" 2>&1 || true
   echo "${COLOR_GREEN}[INFO] shellcheck completed. See log at $SHELLCHECK_LOG${COLOR_RESET}"
-
-# === Shell Profile Detection ===
-case "$SHELL" in
-  */zsh) PROFILE="$INVOKING_HOME/.zshrc" ;;
-  */bash) PROFILE="$INVOKING_HOME/.bashrc" ;;
-  *) PROFILE="$INVOKING_HOME/.profile" ;;
-esac
-
-# === Preflight shellcheck validation ===
-if ! command -v shellcheck &>/dev/null; then
-  echo "[WARN] shellcheck is not installed. Skipping script linting."
 else
-export TEST_MODE=false
+  echo "[WARN] shellcheck is not installed. Skipping script linting."
+fi
+
 REPO_URL="https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip"
 CREATED_FILES=()
 SUDO=""
 DEBUG=false
 
-# Determine shell profile for persistent exports
-INVOKING_USER="${SUDO_USER:-$USER}"
-INVOKING_HOME=$(eval echo "~$INVOKING_USER")
-
+# === Shell Profile Detection ===
 case "$SHELL" in
   */zsh) PROFILE="$INVOKING_HOME/.zshrc" ;;
   */bash) PROFILE="$INVOKING_HOME/.bashrc" ;;
@@ -93,7 +91,6 @@ Examples:
   $0 --restore=backup_20240527.zip    # Restore from a specific backup file
   $0 --install --debug                # Install with verbose command trace
   $0 --repo-download                  # Download project archive only
-
 EOF
   exit 0
 }
@@ -101,7 +98,7 @@ EOF
 parse_args() {
   for arg in "$@"; do
     case "$arg" in
-    --) ;;  # Ignore -- used for separating arguments
+      --) ;;  # Ignore -- used for separating arguments
       --debug) DEBUG=true ;;
       --install) INSTALL=true ;;
       --repo-download) REPO_DOWNLOAD=true ;;
@@ -162,9 +159,9 @@ download_repo() {
 }
 
 ensure_project_env_export() {
-  grep -q "export PROJECT_NAME=" "$PROFILE" || echo "export PROJECT_NAME=\"$PROJECT_NAME\"" >> "$PROFILE"
-  grep -q "$PROJECT_PATH/common/scripts" "$PROFILE" || echo "export PATH=\"$PROJECT_PATH/common/scripts:\$PATH\"" >> "$PROFILE"
-  grep -q "cd \$HOME/$PROJECT_NAME" "$PROFILE" || echo "cd \"$PROJECT_PATH\"" >> "$PROFILE"
+  grep -q "export PROJECT_NAME=" "$PROFILE" || echo "export PROJECT_NAME="$PROJECT_NAME"" >> "$PROFILE"
+  grep -q "$PROJECT_PATH/common/scripts" "$PROFILE" || echo "export PATH="$PROJECT_PATH/common/scripts:\$PATH"" >> "$PROFILE"
+  grep -q "cd \$HOME/$PROJECT_NAME" "$PROFILE" || echo "cd "$PROJECT_PATH"" >> "$PROFILE"
   log_info "Environment variables and project path exported to $PROFILE"
 }
 
@@ -203,40 +200,11 @@ check_dependencies() {
   log_success "All dependencies verified."
 }
 
-: "${RESTORE:=}"
-: "${REPO_DOWNLOAD:=false}"
-: "${INSTALL:=false}"
-: "${PROVISION_ONLY:=false}"
-: "${CLEANUP:=false}"
-: "${DEBUG:=false}"
-: "${TEST_MODE:=false}"
-: "${RESTORE:=}"
-
-echo "[INFO] Running shellcheck validation..."
-SHELLCHECK_LOG="${PROJECT_PATH}/shellcheck.log"
-mkdir -p "$(dirname "$SHELLCHECK_LOG")"
-if command -v shellcheck &>/dev/null; then
-  if command -v tput &>/dev/null && [ "$(tput colors)" -ge 8 ]; then
-    COLOR_RED=$(tput setaf 1)
-    COLOR_GREEN=$(tput setaf 2)
-    COLOR_RESET=$(tput sgr0)
-  else
-    COLOR_RED=""
-    COLOR_GREEN=""
-    COLOR_RESET=""
-  fi
-  shellcheck "$0" > "$SHELLCHECK_LOG" 2>&1 || true
-  echo "${COLOR_GREEN}[INFO] shellcheck completed. See log at $SHELLCHECK_LOG${COLOR_RESET}"
-else
-  echo "[WARN] shellcheck is not installed. Skipping script linting."
-fi
 main() {
   log_info "main() invoked with args: $*"
   parse_args "$@"
   [[ "$DEBUG" == true ]] && set -x
   check_dependencies
-
-          
   require_root_or_sudo
 
   if [ -n "$RESTORE" ]; then
@@ -266,7 +234,7 @@ main() {
   if [ "$PROVISION_ONLY" = true ]; then
     run_provision
     ensure_project_env_export
-  log_success "Installation script completed."
+    log_success "Installation script completed."
     exit 0
   fi
 
