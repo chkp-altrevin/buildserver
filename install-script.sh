@@ -315,7 +315,5 @@ main() {
 }
 
 main "$@"
-done
 }
-done
 fi
