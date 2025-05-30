@@ -220,6 +220,7 @@ check_dependencies() {
 : "${RESTORE:=}"
 
 main() {
+  log_info "main() invoked with args: $*"
   parse_args "$@"
   [[ "$DEBUG" == true ]] && set -x
   check_dependencies
