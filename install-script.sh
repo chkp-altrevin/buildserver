@@ -254,6 +254,7 @@ main() {
   if [ "$PROVISION_ONLY" = true ]; then
     run_provision
     ensure_project_env_export
+  log_success "Installation script completed."
     exit 0
   fi
 
