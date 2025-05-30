@@ -34,8 +34,6 @@ export LOG_FILE="${INVOKING_HOME}/install-script.log"
   fi
   shellcheck "$0" > "$SHELLCHECK_LOG" 2>&1 || true
   echo "${COLOR_GREEN}[INFO] shellcheck completed. See log at $SHELLCHECK_LOG${COLOR_RESET}"
-fi
-
 
 # === Shell Profile Detection ===
 case "$SHELL" in
@@ -222,6 +220,24 @@ check_dependencies() {
 : "${TEST_MODE:=false}"
 : "${RESTORE:=}"
 
+echo "[INFO] Running shellcheck validation..."
+SHELLCHECK_LOG="${PROJECT_PATH}/shellcheck.log"
+mkdir -p "$(dirname "$SHELLCHECK_LOG")"
+if command -v shellcheck &>/dev/null; then
+  if command -v tput &>/dev/null && [ "$(tput colors)" -ge 8 ]; then
+    COLOR_RED=$(tput setaf 1)
+    COLOR_GREEN=$(tput setaf 2)
+    COLOR_RESET=$(tput sgr0)
+  else
+    COLOR_RED=""
+    COLOR_GREEN=""
+    COLOR_RESET=""
+  fi
+  shellcheck "$0" > "$SHELLCHECK_LOG" 2>&1 || true
+  echo "${COLOR_GREEN}[INFO] shellcheck completed. See log at $SHELLCHECK_LOG${COLOR_RESET}"
+else
+  echo "[WARN] shellcheck is not installed. Skipping script linting."
+fi
 main() {
   log_info "main() invoked with args: $*"
   parse_args "$@"
