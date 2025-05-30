@@ -150,8 +150,8 @@ else
   export VAGRANT_USER_PATH="${HOME}"
 fi
 
-export PROJECT_NAME
-export PROJECT_PATH
+export PROJECT_NAME="${PROJECT_NAME:-buildserver}"
+export PROJECT_PATH="${PROJECT_PATH:-$HOME/$PROJECT_NAME}"
 
 # -----  Run as root check ----------------------------------------------------
 if [[ $EUID -ne 0 ]]; then
