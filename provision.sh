@@ -144,7 +144,7 @@ fi
 if [[ "$CHECK_VBOX_VAGRANT" == true ]]; then
   export VAGRANT_USER="vagrant"
   export VAGRANT_USER_PATH="/home/vagrant"
-  # export PROJECT_PATH="/home/vagrant/$PROJECT_NAME"
+  export PROJECT_PATH="/home/vagrant/$PROJECT_NAME"
 else
   export VAGRANT_USER="${USER}"
   export VAGRANT_USER_PATH="${HOME}"
@@ -704,9 +704,8 @@ echo "Script Version: $VERSION_ID (Saved to ${PROJECT_PATH}/version.txt)"
 echo ""
 echo "=========================================================================="
 echo "========================================================================= "
-echo "| Provisioning Log     | saved to ${PROJECT_PATH}/provisioning.log          "
+echo "| Provisioning Log     | saved to ${PROJECT_PATH}/provisioning.log        "
 echo "| Software Packages    | exported to $PROJECT_PATH/initial_sbom           "
-echo "| Provision Error Logs | exported to $PROJECT_PATH/error.log              "
 echo "=========================================================================="
 sleep 6
 echo -e "\\n\033[1;31m[✖] Errors Detected:\033[0m"
