@@ -140,6 +140,12 @@ download_repo() {
     mkdir -p "$HOME"
     mv "$EXTRACTED_DIR" "$PROJECT_PATH"
     find "$PROJECT_PATH" -type f -name "*.sh" -exec chmod +x {} \;
+
+    INVOKING_USER="${SUDO_USER:-$USER}"
+    if [[ -n "$SUDO" ]]; then
+      chown -R "$INVOKING_USER:$INVOKING_USER" "$PROJECT_PATH"
+      log_info "Ownership set to $INVOKING_USER for $PROJECT_PATH"
+    fi
   else
     log_info "[TEST MODE] Would replace $PROJECT_PATH with extracted contents."
   fi
@@ -206,6 +212,13 @@ main() {
       exit 1
     fi
     unzip -q "$backup_file" -d "$(dirname "$PROJECT_PATH")" >> "$LOG_FILE" 2>&1
+    # Ensure ownership is correct after restore
+    RESTORED_DIR="$(dirname "$PROJECT_PATH")/$(basename "$PROJECT_PATH")"
+    INVOKING_USER="${SUDO_USER:-$USER}"
+    if [[ -d "$RESTORED_DIR" && -n "$SUDO" ]]; then
+      chown -R "$INVOKING_USER:$INVOKING_USER" "$RESTORED_DIR"
+      log_info "Ownership set to $INVOKING_USER for $RESTORED_DIR"
+    fi
     log_success "Restored from $backup_file"
     exit 0
   fi
