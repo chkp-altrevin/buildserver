@@ -12,7 +12,14 @@ CREATED_FILES=()
 SUDO=""
 DEBUG=false
 
-# Determine shell profile for persistent exports
+# === Flags ===
+INSTALL=false
+PROVISION_ONLY=false
+REPO_DOWNLOAD=false
+CLEANUP=false
+RESTORE=""
+
+# === Shell Profile Detection ===
 case "$SHELL" in
   */zsh) PROFILE="$HOME/.zshrc" ;;
   */bash) PROFILE="$HOME/.bashrc" ;;
@@ -31,7 +38,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# === Flags and Usage ===
+# === Usage ===
 usage() {
   cat <<EOF
 Usage: $0 [OPTIONS]
@@ -58,11 +65,11 @@ Examples:
   $0 --restore=backup_20240527.zip    # Restore from a specific backup file
   $0 --install --debug                # Install with verbose command trace
   $0 --repo-download                  # Download project archive only
-
 EOF
   exit 0
 }
 
+# === Flag Parser ===
 parse_args() {
   for arg in "$@"; do
     case "$arg" in
@@ -79,6 +86,7 @@ parse_args() {
   done
 }
 
+# === Core Functions ===
 require_root_or_sudo() {
   if [ "$(id -u)" -ne 0 ]; then
     SUDO="sudo"
@@ -167,17 +175,14 @@ check_dependencies() {
   log_success "All dependencies verified."
 }
 
+# === Entrypoint ===
 main() {
   parse_args "$@"
   [[ "$DEBUG" == true ]] && set -x
+
+  log_info "INSTALL=$INSTALL, REPO_DOWNLOAD=$REPO_DOWNLOAD, PROVISION_ONLY=$PROVISION_ONLY, CLEANUP=$CLEANUP, TEST_MODE=$TEST_MODE"
+
   check_dependencies
-
-  INSTALL=false
-  PROVISION_ONLY=false
-  REPO_DOWNLOAD=false
-  CLEANUP=false
-  RESTORE=""
-
   require_root_or_sudo
 
   if [ -n "$RESTORE" ]; then
