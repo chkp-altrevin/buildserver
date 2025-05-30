@@ -3,6 +3,9 @@ set -euo pipefail
 
 # === Constants ===
 export PROJECT_NAME="buildserver"
+INVOKING_USER="${SUDO_USER:-$USER}"
+INVOKING_HOME=$(eval echo "~$INVOKING_USER")
+export PROJECT_PATH="${INVOKING_HOME}/${PROJECT_NAME}"
 export PROJECT_PATH="${HOME}/${PROJECT_NAME}"
 export BACKUP_DIR="${HOME}/backup"
 export LOG_FILE="${HOME}/install-script.log"
