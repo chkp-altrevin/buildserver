@@ -176,12 +176,7 @@ main() {
   [[ "$DEBUG" == true ]] && set -x
   check_dependencies
 
-  INSTALL=false
-  PROVISION_ONLY=false
-  REPO_DOWNLOAD=false
-  CLEANUP=false
-  RESTORE=""
-
+          
   require_root_or_sudo
 
   if [ -n "$RESTORE" ]; then
