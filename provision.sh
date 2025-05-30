@@ -30,7 +30,7 @@ fix_ownership_in_home() {
 : "${TEST_MODE:=false}"
 
 mkdir -p "$PROJECT_PATH"
-LOG="$PROJECT_PATH/provisioning.log"
+LOG="${PROJECT_PATH}/provisioning.log"
 touch "$LOG"
 # --- Log Rotation ---
 MAX_LOG_SIZE=1048576  # 1MB
@@ -700,11 +700,11 @@ sleep 6
 echo "=========================================================================="
 # Print version ID
 echo ""
-echo "Script Version: $VERSION_ID (Saved to $PROJECT_PATH/version.txt)"
+echo "Script Version: $VERSION_ID (Saved to ${PROJECT_PATH}/version.txt)"
 echo ""
 echo "=========================================================================="
 echo "========================================================================= "
-echo "| Provisioning Log     | saved to $PROJECT_PATH/provisioning.log          "
+echo "| Provisioning Log     | saved to ${PROJECT_PATH}/provisioning.log          "
 echo "| Software Packages    | exported to $PROJECT_PATH/initial_sbom           "
 echo "| Provision Error Logs | exported to $PROJECT_PATH/error.log              "
 echo "=========================================================================="
