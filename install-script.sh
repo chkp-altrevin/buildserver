@@ -3,7 +3,7 @@ set -euo pipefail
 
 # === Constants ===
 export PROJECT_NAME="buildserver"
-export PROJECT_PATH="$(pwd)"
+export PROJECT_PATH="${HOME}/${PROJECT_NAME}"
 export BACKUP_DIR="${HOME}/backup"
 export LOG_FILE="${HOME}/install-script.log"
 export TEST_MODE=false
@@ -124,6 +124,7 @@ download_repo() {
 
   if [ "$TEST_MODE" = false ]; then
     rm -rf "$PROJECT_PATH"
+    mkdir -p "$HOME"
     mv "$EXTRACTED_DIR" "$PROJECT_PATH"
     find "$PROJECT_PATH" -type f -name "*.sh" -exec chmod +x {} \;
   else
