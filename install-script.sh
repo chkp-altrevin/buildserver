@@ -20,14 +20,6 @@ export PROJECT_PATH="${INVOKING_HOME}/${PROJECT_NAME}"
 export BACKUP_DIR="${INVOKING_HOME}/backup"
 export LOG_FILE="${INVOKING_HOME}/install-script.log"
 
-  echo "[INFO] Running shellcheck validation..."
-  SHELLCHECK_LOG="${PROJECT_PATH}/shellcheck.log"
-  mkdir -p "$(dirname "$SHELLCHECK_LOG")"
-  if command -v tput &>/dev/null && [ "$(tput colors)" -ge 8 ]; then
-    COLOR_RED=$(tput setaf 1)
-    COLOR_GREEN=$(tput setaf 2)
-    COLOR_RESET=$(tput sgr0)
-  else
     COLOR_RED=""
     COLOR_GREEN=""
     COLOR_RESET=""
