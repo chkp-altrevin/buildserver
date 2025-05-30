@@ -20,17 +20,6 @@ export PROJECT_PATH="${INVOKING_HOME}/${PROJECT_NAME}"
 export BACKUP_DIR="${INVOKING_HOME}/backup"
 export LOG_FILE="${INVOKING_HOME}/install-script.log"
 
-# === Shell Profile Detection ===
-case "$SHELL" in
-  */zsh) PROFILE="$INVOKING_HOME/.zshrc" ;;
-  */bash) PROFILE="$INVOKING_HOME/.bashrc" ;;
-  *) PROFILE="$INVOKING_HOME/.profile" ;;
-esac
-
-# === Preflight shellcheck validation ===
-if ! command -v shellcheck &>/dev/null; then
-  echo "[WARN] shellcheck is not installed. Skipping script linting."
-else
   echo "[INFO] Running shellcheck validation..."
   SHELLCHECK_LOG="${PROJECT_PATH}/shellcheck.log"
   mkdir -p "$(dirname "$SHELLCHECK_LOG")"
@@ -46,6 +35,19 @@ else
   shellcheck "$0" > "$SHELLCHECK_LOG" 2>&1 || true
   echo "${COLOR_GREEN}[INFO] shellcheck completed. See log at $SHELLCHECK_LOG${COLOR_RESET}"
 fi
+
+
+# === Shell Profile Detection ===
+case "$SHELL" in
+  */zsh) PROFILE="$INVOKING_HOME/.zshrc" ;;
+  */bash) PROFILE="$INVOKING_HOME/.bashrc" ;;
+  *) PROFILE="$INVOKING_HOME/.profile" ;;
+esac
+
+# === Preflight shellcheck validation ===
+if ! command -v shellcheck &>/dev/null; then
+  echo "[WARN] shellcheck is not installed. Skipping script linting."
+else
 export TEST_MODE=false
 REPO_URL="https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip"
 CREATED_FILES=()
@@ -258,6 +260,39 @@ main() {
     ensure_project_env_export
   log_success "Installation script completed."
     exit 0
+  fi
+
+  if [ "$CLEANUP" = true ]; then
+    echo -e "\n[WARN] You are about to delete the buildserver project, backup files, and logs."
+    read -rp "Are you sure you want to proceed? (yes/no): " CONFIRM_CLEANUP
+    if [[ "$CONFIRM_CLEANUP" != "yes" ]]; then
+      log_info "Cleanup aborted by user."
+      exit 0
+    fi
+
+    log_info "Performing cleanup tasks..."
+    FAILED_ITEMS=()
+    for item in "$PROJECT_PATH" "$BACKUP_DIR" "$LOG_FILE"; do
+      if [[ -e "$item" ]]; then
+        if rm -rf "$item"; then
+          log_info "Deleted: $item"
+        else
+          log_warn "Failed to delete: $item"
+          FAILED_ITEMS+=("$item")
+        fi
+      fi
+    done
+
+    if [[ ${#FAILED_ITEMS[@]} -gt 0 ]]; then
+      log_warn "Cleanup completed with some issues. Could not delete:"
+      for f in "${FAILED_ITEMS[@]}"; do
+        echo " - $f"
+      done
+      exit 1
+    else
+      log_success "Cleanup completed successfully."
+      exit 0
+    fi
   fi
 
   usage
