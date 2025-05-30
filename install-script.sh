@@ -6,7 +6,9 @@ if ! command -v shellcheck &>/dev/null; then
   echo "[WARN] shellcheck is not installed. Skipping script linting."
 else
   echo "[INFO] Running shellcheck validation..."
-  shellcheck "$0" || echo "[WARN] shellcheck found issues. Proceeding anyway..."
+  mkdir -p "$PROJECT_PATH"
+  SHELLCHECK_LOG="$PROJECT_PATH/shellcheck.log"
+  shellcheck "$0" > "$SHELLCHECK_LOG" 2>&1 || echo "[WARN] shellcheck found issues. See $SHELLCHECK_LOG"
 fi
 
 # === Constants ===
@@ -180,6 +182,14 @@ check_dependencies() {
 }
 
 : "${RESTORE:=}"
+: "${REPO_DOWNLOAD:=false}"
+: "${INSTALL:=false}"
+: "${PROVISION_ONLY:=false}"
+: "${CLEANUP:=false}"
+: "${DEBUG:=false}"
+: "${TEST_MODE:=false}"
+: "${RESTORE:=}"
+
 main() {
   parse_args "$@"
   [[ "$DEBUG" == true ]] && set -x
