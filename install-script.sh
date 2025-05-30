@@ -34,8 +34,6 @@ export LOG_FILE="${INVOKING_HOME}/install-script.log"
   fi
   shellcheck "$0" > "$SHELLCHECK_LOG" 2>&1 || true
   echo "${COLOR_GREEN}[INFO] shellcheck completed. See log at $SHELLCHECK_LOG${COLOR_RESET}"
-fi
-
 
 # === Shell Profile Detection ===
 case "$SHELL" in
