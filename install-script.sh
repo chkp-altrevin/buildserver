@@ -9,6 +9,9 @@ set -euo pipefail
 : "${CLEANUP:=false}"
 : "${DEBUG:=false}"
 : "${TEST_MODE:=false}"
+: "${BRANCH:=main}"
+: "${REPO_URL:=https://github.com/chkp-altrevin/buildserver/archive/refs/heads/${BRANCH}.zip}"
+
 : "${RESTORE:=}"
 
 # === User Context ===
@@ -98,6 +101,9 @@ EOF
 parse_args() {
   for arg in "$@"; do
     case "$arg" in
+  --repo-url=*) REPO_URL="${arg#*=}" ;;
+  --branch=*) BRANCH="${arg#*=}" ;;
+
       --) ;;  # Ignore -- used for separating arguments
       --debug) DEBUG=true ;;
       --install) INSTALL=true ;;
