@@ -9,9 +9,6 @@ set -euo pipefail
 : "${CLEANUP:=false}"
 : "${DEBUG:=false}"
 : "${TEST_MODE:=false}"
-: "${BRANCH:=main}"
-: "${REPO_URL:=https://github.com/chkp-altrevin/buildserver/archive/refs/heads/${BRANCH}.zip}"
-
 : "${RESTORE:=}"
 
 # === User Context ===
@@ -88,10 +85,6 @@ Modes:
 Help:
   --help                    Show this help message and exit
 
-
-  --repo-url=URL            Use a custom repository ZIP URL
-  --branch=BRANCH           Download a specific Git branch (default: main)
-
 Examples:
   $0 --install                         # Full install: download + provision
   $0 --provision-only                 # Re-run provision.sh in current folder
@@ -105,9 +98,6 @@ EOF
 parse_args() {
   for arg in "$@"; do
     case "$arg" in
-      --repo-url=*) REPO_URL="${arg#*=}" ;;
-      --branch=*) BRANCH="${arg#*=}" ;;
-
       --) ;;  # Ignore -- used for separating arguments
       --debug) DEBUG=true ;;
       --install) INSTALL=true ;;
@@ -129,33 +119,6 @@ require_root_or_sudo() {
 }
 
 backup_existing_project() {
-  if [ "$USER" = "vagrant" ] && mount | grep -q "$PROJECT_PATH.*vboxsf"; then
-    log_warn "Detected VirtualBox synced folder for user 'vagrant'. Will backup instead of delete: $PROJECT_PATH"
-    mkdir -p "$BACKUP_DIR"
-    local backup_file="${BACKUP_DIR}/${PROJECT_NAME}_vagrant_overwrite_$(date +%Y%m%d%H%M%S).zip"
-
-    if ! command -v zip >/dev/null 2>&1; then
-      log_error "zip command not found. Cannot backup $PROJECT_PATH."
-      exit 1
-    fi
-
-    zip -rq "$backup_file" "$PROJECT_PATH" >> "$LOG_FILE" 2>&1 && {
-      log_info "Backup created before overwrite: $backup_file"
-      zipinfo "$backup_file" | tee -a "$LOG_FILE"
-      CREATED_FILES+=("$backup_file")
-    } || {
-      log_error "Backup before overwrite failed. Aborting overwrite of $PROJECT_PATH."
-      exit 1
-    }
-
-    return 0
-  fi
-
-  if [ "$USER" = "vagrant" ] && mount | grep -q "$PROJECT_PATH.*vboxsf"; then
-    log_warn "Detected VirtualBox synced folder for user 'vagrant'. Skipping deletion of $PROJECT_PATH."
-    return 0
-  fi
-
   if [ -d "$PROJECT_PATH" ]; then
     mkdir -p "$BACKUP_DIR"
     local backup_file="${BACKUP_DIR}/${PROJECT_NAME}_$(date +%Y%m%d%H%M%S).zip"
