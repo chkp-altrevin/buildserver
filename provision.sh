@@ -153,12 +153,11 @@ fi
 export PROJECT_NAME
 export PROJECT_PATH
 
-# ----- Run as root check ----------------------------------------------------
+# -----  Run as root check ----------------------------------------------------
 if [[ $EUID -ne 0 ]]; then
-  log_error "This script must be run as root. Exiting."
+  echo "This script must be run as root."
   exit 1
 fi
-
 
 # ---------------- VirtualBox + Vagrant Verification ----------------
 
@@ -245,7 +244,12 @@ fi
 #
 # project name or folder, should match your project folder, example buildserver
 #
-#===================================================================."
+#==============================================================================
+#
+# -----  Run as root check ----------------------------------------------------
+#
+if [[ $EUID -ne 0 ]]; then
+  echo "This script must be run as root."
   exit 1
 fi
 #
@@ -253,7 +257,7 @@ fi
 #
 check_vagrant_user() {
   if id "vagrant" &>/dev/null; then
-    echo "Existing deployment found, continuing to update will upgrade packages and project folder content? [Y/n]"
+    echo "Manual provisioning, continue to update? [Y/n]"
     read -r response
     case "$response" in
       [nN][oO]|[nN])
