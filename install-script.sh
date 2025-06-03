@@ -4,11 +4,11 @@ set -euo pipefail
 # === Enforce Linux or WSL Only (Warn on macOS) ===
 OS_TYPE="$(uname -s)"
 if [[ "$OS_TYPE" == "Darwin" ]]; then
-  echo "âš ï¸  macOS detected. This environment is untested â€” proceed with caution."
+  echo "⚠️  macOS detected. This environment is untested — proceed with caution."
   log_warn "macOS environment detected. Proceeding with caution (not officially supported)."
 elif [[ "$OS_TYPE" != "Linux" ]]; then
-  echo "âŒ This script can only be run in a Linux environment."
-  echo "ðŸ’¡ Please use a native Linux system or WSL."
+  echo "❌ This script can only be run in a Linux environment."
+  echo "💡 Please use a native Linux system or WSL."
   log_error "Incompatible OS: $OS_TYPE. Exiting."
   exit 1
 fi
@@ -17,6 +17,15 @@ fi
 if grep -qi microsoft /proc/version 2>/dev/null; then
   echo "[INFO] WSL environment detected. Proceeding..."
   log_info "WSL environment detected. Proceeding..."
+
+# === Detect Vagrant Environment ===
+if id "vagrant" &>/dev/null && [[ -d "/home/vagrant/buildserver" ]]; then
+  echo "⚠️  Vagrant environment detected at /home/vagrant/buildserver."
+  echo "💡 Please exit this session and re-run using: vagrant up --provision"
+  log_warn "Vagrant user and environment detected. Aborting to avoid conflict."
+  exit 0
+fi
+
 fi
 
 
