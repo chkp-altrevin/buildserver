@@ -45,7 +45,6 @@ if exist "%DEST_DIR%\%FINAL_FOLDER%" (
     echo [%DATE% %TIME%] Existing buildserver found, backing up... >> "%LOG_FILE%"
     if not exist "%BACKUP_DIR%" mkdir "%BACKUP_DIR%"
     powershell -Command "Compress-Archive -Path '%DEST_DIR%\%FINAL_FOLDER%' -DestinationPath '%BACKUP_DIR%\buildserver_backup_%DATE:/=-%_%TIME::=-%.zip'"
-    rmdir /s /q "%DEST_DIR%\%FINAL_FOLDER%"
 )
 
 :: Extract
@@ -55,12 +54,13 @@ tar -xf "%ZIP_FILE%" -C "%DEST_DIR%" || (
     exit /b 1
 )
 
-:: Rename
-echo [%DATE% %TIME%] Renaming extracted folder... >> "%LOG_FILE%"
-move "%DEST_DIR%\%EXTRACT_FOLDER%" "%DEST_DIR%\%FINAL_FOLDER%" >nul 2>&1
-if errorlevel 1 (
-    echo [%DATE% %TIME%] ERROR: Failed to rename folder. >> "%LOG_FILE%"
-    exit /b 1
+:: Copy extracted contents into existing or new buildserver folder
+echo [%DATE% %TIME%] Merging extracted folder contents... >> "%LOG_FILE%"
+if not exist "%DEST_DIR%\%FINAL_FOLDER%" (
+    move "%DEST_DIR%\%EXTRACT_FOLDER%" "%DEST_DIR%\%FINAL_FOLDER%" >nul 2>&1
+) else (
+    powershell -Command "Copy-Item -Path '%DEST_DIR%\%EXTRACT_FOLDER%\*' -Destination '%DEST_DIR%\%FINAL_FOLDER%' -Recurse -Force"
+    rmdir /s /q "%DEST_DIR%\%EXTRACT_FOLDER%"
 )
 
 :: Change directory
