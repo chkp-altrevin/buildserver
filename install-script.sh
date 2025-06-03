@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# === Environment Compatibility Check ===
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" || "$OSTYPE" == "cygwin" ]]; then
+  echo "âŒ This script must be run in a Unix-like shell (WSL, Git Bash, Linux, or macOS)."
+  echo "ðŸ’¡ Tip: Install WSL (https://aka.ms/wsl) or Git Bash (https://gitforwindows.org)"
+  exit 1
+fi
+
 # === Safe Defaults ===
 : "${PROJECT_NAME:=buildserver}"
 : "${REPO_DOWNLOAD:=false}"
@@ -200,47 +207,8 @@ check_dependencies() {
   log_success "All dependencies verified."
 }
 
-
-validate_environment() {
-  unameOut="$(uname -s)"
-  case "${unameOut}" in
-    Linux*)     MACHINE=Linux;;
-    Darwin*)    MACHINE=Mac;;
-    CYGWIN*)    MACHINE=Windows;;
-    MINGW*)     MACHINE=Windows;;
-    MSYS*)      MACHINE=Windows;;
-    *)          MACHINE="UNKNOWN"
-  esac
-
-  # Check for WSL
-  if grep -qi microsoft /proc/version 2>/dev/null; then
-    log_info "Running inside WSL environment. Proceeding..."
-    return 0
-  fi
-
-  # Check for Git Bash
-  if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
-    if [[ "$SHELL" == */bash ]]; then
-      log_info "Git Bash detected on Windows. Proceeding..."
-      return 0
-    fi
-  fi
-
-  if [[ "$MACHINE" == "Linux" || "$MACHINE" == "Mac" ]]; then
-    log_info "Running in a supported Unix-like environment: $MACHINE"
-    return 0
-  fi
-
-  log_error "Unsupported environment detected: $MACHINE"
-  echo -e "❌ This script must be run in:\n  - Linux\n  - macOS\n  - WSL\n  - Git Bash on Windows"
-  echo "Please install WSL (https://aka.ms/wsl) or Git Bash (https://gitforwindows.org) and try again."
-  exit 1
-}
-
-
 main() {
   log_info "main() invoked with args: $*"
-  validate_environment
   parse_args "$@"
   [[ "$DEBUG" == true ]] && set -x
   check_dependencies
