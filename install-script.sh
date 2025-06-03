@@ -1,12 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# === Environment Compatibility Check ===
-if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" || "$OSTYPE" == "cygwin" ]]; then
-  echo "âŒ This script must be run in a Unix-like shell (WSL, Git Bash, Linux, or macOS)."
-  echo "ðŸ’¡ Tip: Install WSL (https://aka.ms/wsl) or Git Bash (https://gitforwindows.org)"
+# === Enforce Linux or WSL Only (Warn on macOS) ===
+OS_TYPE="$(uname -s)"
+if [[ "$OS_TYPE" == "Darwin" ]]; then
+  echo "âš ï¸  macOS detected. This environment is untested â€” proceed with caution."
+  log_warn "macOS environment detected. Proceeding with caution (not officially supported)."
+elif [[ "$OS_TYPE" != "Linux" ]]; then
+  echo "âŒ This script can only be run in a Linux environment."
+  echo "ðŸ’¡ Please use a native Linux system or WSL."
+  log_error "Incompatible OS: $OS_TYPE. Exiting."
   exit 1
 fi
+
+# Check for WSL if Linux is reported
+if grep -qi microsoft /proc/version 2>/dev/null; then
+  echo "[INFO] WSL environment detected. Proceeding..."
+  log_info "WSL environment detected. Proceeding..."
+fi
+
 
 # === Safe Defaults ===
 : "${PROJECT_NAME:=buildserver}"
