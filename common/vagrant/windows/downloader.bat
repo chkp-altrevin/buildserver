@@ -65,6 +65,7 @@ if not exist "%DEST_DIR%\%FINAL_FOLDER%" (
 
 :: Change directory
 cd /d "%DEST_DIR%\%FINAL_FOLDER%"
+cd "%DEST_DIR%\%FINAL_FOLDER%"
 echo [%DATE% %TIME%] Changed directory to %DEST_DIR%\%FINAL_FOLDER% >> "%LOG_FILE%"
 
 echo DONE. Folder ready at: %DEST_DIR%\%FINAL_FOLDER%
