@@ -242,8 +242,11 @@ After provisioning is complete logut/login. You will be greeted with a custom MO
 2. **Download Zip, Extract, chmod** for Linux, WSL, GitBash, etc.
 
    a. **Download Latest Release**: [buildserver-main.zip](https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip)
+   
    b. **Extract**: Use your extraction app to extract buildserver-main.zip rename to folder **buildserver** Example Path: **$HOME/buildserver**
+   
    c. **Set Permissions and Install**:
+   
     ```bash
    chmod +x ./provision.sh
    ./provision.sh
