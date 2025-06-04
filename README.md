@@ -25,7 +25,7 @@ Ideal for users without a pre-existing server setup. This method allows for rapi
 
 ![Linux Installs on hypervisors or cloud compute running Linux](https://github.com/user-attachments/assets/13a454ec-e6be-40ed-9c6e-c2229ea9313a)
 
-For those with existing Linux servers or virtual machines, utilize the provisioning scripts directly.
+For those with existing Linux servers or virtual machines, WSL, macOS, utilize the provisioning scripts directly.
 
 **Start Here - Install Option**: [Jump to Use Case 2](https://github.com/chkp-altrevin/buildserver/blob/main/README.md#-use-case-2-bring-your-own-linux-1)
 
