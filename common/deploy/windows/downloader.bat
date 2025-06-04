@@ -12,7 +12,7 @@ set EXTRACT_FOLDER=buildserver-main
 set FINAL_FOLDER=buildserver
 set BACKUP_DIR=%USERPROFILE%\buildserver_backups
 
-:: ====== FLAGS ======
+:: Handle command-line flags
 if "%~1"=="--help" goto :help
 if "%~1"=="--cleanup" goto :cleanup
 if "%~1"=="--refresh" (
@@ -20,77 +20,95 @@ if "%~1"=="--refresh" (
     exit /b
 )
 
-
 :: Prompt user for extraction path
 set /p DEST_DIR=Enter extract destination path (default is %USERPROFILE%): 
 if "%DEST_DIR%"=="" set DEST_DIR=%USERPROFILE%
-echo [INFO] Extract path set to: %DEST_DIR% >> "%LOG_FILE%"
-
-:: Download ZIP
-echo [INFO] Downloading latest buildserver ZIP...
-powershell -Command "Invoke-WebRequest -Uri '%ZIP_URL%' -OutFile '%ZIP_FILE%'"
-if errorlevel 1 (
-    echo [ERROR] Failed to download ZIP file. >> "%LOG_FILE%"
-    exit /b 1
-)
 
 :: Ensure backup directory exists
-mkdir "%BACKUP_DIR%" >nul 2>&1
+if not exist "%BACKUP_DIR%" (
+    mkdir "%BACKUP_DIR%"
+)
 
-:: Backup existing folder if it exists
+:: Download the ZIP
+echo [INFO] Downloading latest buildserver ZIP...
+powershell -Command "Invoke-WebRequest -Uri '%ZIP_URL%' -OutFile '%ZIP_FILE%' -UseBasicParsing"
+
+:: Backup existing buildserver directory if it exists
 if exist "%DEST_DIR%\%FINAL_FOLDER%" (
-    :: Generate a safe timestamp using delayed expansion
-    for /f "tokens=1-4 delims=/:-. " %%a in ("%DATE% %TIME%") do (
-        set TS_DATE=%%d%%b%%c
-        set TS_TIME=%%e%%f%%g
-        set TIMESTAMP=!TS_DATE!_!TS_TIME!
-        set BACKUP_NAME=buildserver_backup_!TIMESTAMP!
-        set BACKUP_PATH=%BACKUP_DIR%\!BACKUP_NAME!.zip
-
-        echo [INFO] Backing up existing %FINAL_FOLDER% to !BACKUP_PATH!
-        powershell -Command "Compress-Archive -Path '%DEST_DIR%\%FINAL_FOLDER%\*' -DestinationPath '!BACKUP_PATH!' -Force"
-    )
+    set BACKUP_FILENAME=buildserver_backup_%RANDOM%.zip
+    set BACKUP_FILE=%BACKUP_DIR%\%BACKUP_FILENAME%
+    setlocal EnableDelayedExpansion
+    echo [INFO] Backing up existing buildserver to: !BACKUP_FILE!
+    echo [DEBUG] BACKUP_FILE = !BACKUP_FILE! >> "%LOG_FILE%"
+    powershell -Command "Compress-Archive -Path '%DEST_DIR%\%FINAL_FOLDER%\*' -DestinationPath '!BACKUP_FILE!' -Force"
+    endlocal
+    rd /s /q "%DEST_DIR%\%FINAL_FOLDER%"
 )
 
-:: Extract without deleting target folder
+:: Extract ZIP
 echo [INFO] Extracting ZIP to: %DEST_DIR%
-tar -xf "%ZIP_FILE%" -C "%DEST_DIR%"
+powershell -Command "Expand-Archive -Path '%ZIP_FILE%' -DestinationPath '%DEST_DIR%' -Force"
 
-:: Move extracted contents into FINAL_FOLDER
+:: Rename extracted folder
 if exist "%DEST_DIR%\%EXTRACT_FOLDER%" (
-    echo [INFO] Merging contents into %FINAL_FOLDER%...
-    xcopy /E /Y /H "%DEST_DIR%\%EXTRACT_FOLDER%\*" "%DEST_DIR%\%FINAL_FOLDER%\" >nul
-    rd /s /q "%DEST_DIR%\%EXTRACT_FOLDER%"
+    ren "%DEST_DIR%\%EXTRACT_FOLDER%" "%FINAL_FOLDER%"
 )
 
-:: Change to project directory
-cd /d "%DEST_DIR%\%FINAL_FOLDER%"
-echo [INFO] Moved into project directory: %CD% >> "%LOG_FILE%"
-
-echo ✅ Installation complete. Project folder: %CD%
-exit /b 0
-
-:help
-echo.
-echo ===========================
-echo   Buildserver Downloader
-echo ===========================
-echo.
-echo --help       Show this help message.
-echo --cleanup    Remove downloaded files and extracted folders.
-echo --refresh    Restart the script (fresh execution).
-echo.
-echo If run with no flags, the script will:
-echo - Prompt for a destination path.
-echo - Download and extract the buildserver ZIP archive.
-echo - Backup existing 'buildserver' folder if it exists.
-echo - Launch a new CMD window in the extracted folder.
-echo.
+:: Completion message
+echo ╬▒ Installation complete. Project folder: %DEST_DIR%\%FINAL_FOLDER%
+echo [INFO] Installation complete at %DEST_DIR%\%FINAL_FOLDER% >> "%LOG_FILE%"
 exit /b
 
+:: HELP SECTION
+:help
+echo --------------------------------------------------
+echo               BuildServer Installer
+echo --------------------------------------------------
+echo Usage:
+echo    downloader.bat  (Installs, Backups, Verifies)
+echo    downloader.bat  [--help] [--refresh] [--cleanup]
+echo.
+echo Flags:
+echo    --help      Show this help message
+echo    --refresh   Re-fresh the project folder
+echo    --cleanup   Remove buildserver, backups, and zip
+echo.
+echo Examples:
+echo    downloader.bat
+echo    downloader.bat --cleanup
+echo.
+echo Logs stored at: %LOG_FILE%
+exit /b
+
+:: CLEANUP SECTION
 :cleanup
 echo [INFO] Running cleanup...
-del /q "%ZIP_FILE%" >nul 2>&1
-rd /s /q "%DEST_DIR%\%FINAL_FOLDER%" >nul 2>&1
-echo ✅ Cleanup complete.
-exit /b 0
+
+set BUILD_DIR=%USERPROFILE%\buildserver
+set BACKUP_DIR=%USERPROFILE%\buildserver_backups
+set ZIP_FILE=%TEMP%\buildserver-main.zip
+
+if exist "%BUILD_DIR%" (
+    echo [INFO] Deleting %BUILD_DIR%...
+    rd /s /q "%BUILD_DIR%"
+) else (
+    echo [INFO] No buildserver directory found at %BUILD_DIR%.
+)
+
+if exist "%BACKUP_DIR%" (
+    echo [INFO] Deleting %BACKUP_DIR%...
+    rd /s /q "%BACKUP_DIR%"
+) else (
+    echo [INFO] No backup directory found at %BACKUP_DIR%.
+)
+
+if exist "%ZIP_FILE%" (
+    echo [INFO] Deleting ZIP archive %ZIP_FILE%...
+    del /q "%ZIP_FILE%"
+) else (
+    echo [INFO] No ZIP archive found at %ZIP_FILE%.
+)
+
+echo ╬▒ Cleanup complete.
+echo [INFO] Cleanup complete. >> "%LOG_FILE%"
+exit /b
