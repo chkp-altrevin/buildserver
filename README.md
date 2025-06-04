@@ -174,7 +174,7 @@ An SBOM is generated post-provisioning and located in the root path. Installed p
 2. **Install Vagrant**: [Download Vagrant](https://developer.hashicorp.com/vagrant/install?product_intent=vagrant)
 3. **Install VirtualBox**: [Download VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 4. **Download Latest Release**:
-   - Download using a guided install [downloader.bat](https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/common/deploy/windows/downloader.bat). Right click on the link, save as `downloader.bat`.
+   - Download using a guided install (good idea to [review prior to deploying](https://raw.githubusercontent.com/chkp-altrevin/buildserver/refs/heads/main/common/deploy/windows/downloader.bat) before running. Right click on the link, save as `downloader.bat`.[downloader.bat](https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/common/deploy/windows/downloader.bat). 
    - Run `downloader.bat` follow the prompts. Pick location, extracts buildserver.  `cd buildserver`, `vagrant up`, `vagrant ssh`.
    - **or** [buildserver-main.zip](https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip). Download the zip to your folder of choice. Extract the contents `buildserver-main`, rename to `buildserver` `cd buildserver` `vagrant up` `vagrant ssh`
    - **or** copy and paste the one-liner below.
@@ -268,7 +268,7 @@ When you are done, you can set the policy back to its default value with:
 
 `Set-ExecutionPolicy Restricted`
 
-**Guided Installer Script** [Download](https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/common/vagrant/windows/downloader.bat). Good Idea to [review prior to deploying](https://raw.githubusercontent.com/chkp-altrevin/buildserver/refs/heads/main/common/windows/downloader.bat) before running.
+**Guided Installer Script** [Download](https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/common/deploy/windows/downloader.bat). Good Idea to [review prior to deploying](https://raw.githubusercontent.com/chkp-altrevin/buildserver/refs/heads/main/common/deploy/windows/downloader.bat) before running.
 
 **Download, simple, no fuss**
 
