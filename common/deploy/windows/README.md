@@ -6,6 +6,7 @@
 Usage:
 -------
 Run from cmd window:
+
     downloader.bat              # Default fresh install
     downloader.bat --refresh    # Updates your existing install
     downloader.bat --cleanup    # Removes your project
@@ -41,7 +42,7 @@ If you run install.bat inside the extracted folder:
 ```cmd
 install.bat --refresh
 ```
-That’s handled properly — the .bat wrapper passes arguments to powershell.exe -File
+Thatâ€™s handled properly â€” the .bat wrapper passes arguments to powershell.exe -File
 
 ---
 
