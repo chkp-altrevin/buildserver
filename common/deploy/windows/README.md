@@ -1,5 +1,17 @@
-## Buildserver Installer for Windows
+## Buildserver Installers for Windows
 =================================
+
+**Using downloader.bat**
+
+Usage:
+-------
+Run from cmd window:
+    downloader.bat              # Default fresh install
+    downloader.bat --refresh    # Updates your existing install
+    downloader.bat --cleanup    # Removes your project
+    downloader.bat --help       # this menu
+
+**Using install.bat / install.ps1**
 
 Usage:
 -------
