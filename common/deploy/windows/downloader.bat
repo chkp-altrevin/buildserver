@@ -12,12 +12,14 @@ set EXTRACT_FOLDER=buildserver-main
 set FINAL_FOLDER=buildserver
 set BACKUP_DIR=%USERPROFILE%\buildserver_backups
 
-:: Command-line flags
+:: ====== FLAGS ======
+if "%~1"=="--help" goto :help
 if "%~1"=="--cleanup" goto :cleanup
 if "%~1"=="--refresh" (
     call "%~f0"
     exit /b
 )
+
 
 :: Prompt user for extraction path
 set /p DEST_DIR=Enter extract destination path (default is %USERPROFILE%): 
@@ -67,6 +69,24 @@ echo [INFO] Moved into project directory: %CD% >> "%LOG_FILE%"
 
 echo ✅ Installation complete. Project folder: %CD%
 exit /b 0
+
+:help
+echo.
+echo ===========================
+echo   Buildserver Downloader
+echo ===========================
+echo.
+echo --help       Show this help message.
+echo --cleanup    Remove downloaded files and extracted folders.
+echo --refresh    Restart the script (fresh execution).
+echo.
+echo If run with no flags, the script will:
+echo - Prompt for a destination path.
+echo - Download and extract the buildserver ZIP archive.
+echo - Backup existing 'buildserver' folder if it exists.
+echo - Launch a new CMD window in the extracted folder.
+echo.
+exit /b
 
 :cleanup
 echo [INFO] Running cleanup...
