@@ -178,9 +178,11 @@ An SBOM is generated post-provisioning and located in the root path. Installed p
    - Run `downloader.bat` follow the prompts. Pick location, extracts buildserver.  `cd buildserver`, `vagrant up`, `vagrant ssh`.
    - **or** [buildserver-main.zip](https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip). Download the zip to your folder of choice. Extract the contents `buildserver-main`, rename to `buildserver` `cd buildserver` `vagrant up` `vagrant ssh`
    - **or** copy and paste the one-liner below.
-   - Below will download the zip to your `Download` folder. It will need to be extracted, renamed to "buildserver" `cd buildserver` `vagrant up` `vagrant ssh`.
-     `powershell Invoke-WebRequest -Uri "https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip" -OutFile "$env:USERPROFILE\Downloads\buildserver-main.zip`
-     - Example Structure: **C:\buildserver\Vagrantfile**
+   - **or** use the below snippet which will download the zip to your `Download` folder. It will need to be extracted, renamed to "buildserver" `cd buildserver` `vagrant up` `vagrant ssh`.
+
+```powershell
+powershell Invoke-WebRequest -Uri "https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip" -OutFile "$env:USERPROFILE\Downloads\buildserver-main.zip`
+```
 
 **Start Vagrant/VirtualBox Provisioning**
    ```bash
@@ -221,20 +223,7 @@ Applicable for Vagrant & VirtualBox deployments, configure your preferred termin
 ### 🧰 Use Case 2: Bring Your Own Linux
 Install using a script or download and extract your self.
 
-**Download and Extract, chmod**
-
-1. **Download Latest Release**: [buildserver-main.zip](https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip)
-2. **Extract**: buildserver-main.zip rename to folder **buildserver** Example Path: **$HOME/buildserver**
-   ```bash
-   chdmod +x ./provision.sh
-   ```
-
-   ```bash
-   sudo ./provision.sh
-   ```
-**or try the Installer Script**
-
-**Installer Script** for Linux, WSL, GitBash, etc.
+1. **Installer Script** for Linux, WSL, GitBash, etc.
 
 - Install Script - Downloads repo, extract and backup if exists and installs dependencies (all-in-one):
 ```bash
@@ -250,6 +239,19 @@ curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/inst
 ```
 After provisioning is complete logut/login. You will be greeted with a custom MOTD and available commands to assist with further setup.
 
+2. **Download Zip, Extract, chmod**
+
+   a. **Download Latest Release**: [buildserver-main.zip](https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip)
+   b. **Extract**: buildserver-main.zip rename to folder **buildserver** Example Path: **$HOME/buildserver**
+   c. **Set Permissions and Install**:
+    ```bash
+   chmod +x ./provision.sh
+   ./provision.sh
+   ```
+   **Additional Options**: Usage Menu
+   ```bash
+   ./provision.sh --help
+   ```
 
 ## 🆕 Windows and Powershell Installs
 
