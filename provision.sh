@@ -144,7 +144,7 @@ fi
 if [[ "$CHECK_VBOX_VAGRANT" == true ]]; then
   export VAGRANT_USER="vagrant"
   export VAGRANT_USER_PATH="/home/vagrant"
-  # export PROJECT_PATH="/home/vagrant/$PROJECT_NAME"
+  export PROJECT_PATH="/home/vagrant/$PROJECT_NAME"
 else
   export VAGRANT_USER="${USER}"
   export VAGRANT_USER_PATH="${HOME}"
