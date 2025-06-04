@@ -221,11 +221,11 @@ Applicable for Vagrant & VirtualBox deployments, configure your preferred termin
 ---
 
 ### 🧰 Use Case 2: Bring Your Own Linux
-Install using a script or download and extract your self.
+Install using option (1) script or (2) download and extract manually.
 
 1. **Installer Script** for Linux, WSL, GitBash, etc.
+Downloads repo, extract and backup if exists and installs dependencies (all-in-one):
 
-- Install Script - Downloads repo, extract and backup if exists and installs dependencies (all-in-one):
 ```bash
 curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh -f && chmod +x install-script.sh && sudo ./install-script.sh --install
 ```
@@ -239,16 +239,16 @@ curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/inst
 ```
 After provisioning is complete logut/login. You will be greeted with a custom MOTD and available commands to assist with further setup.
 
-2. **Download Zip, Extract, chmod**
+2. **Download Zip, Extract, chmod** for Linux, WSL, GitBash, etc.
 
    a. **Download Latest Release**: [buildserver-main.zip](https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip)
-   b. **Extract**: buildserver-main.zip rename to folder **buildserver** Example Path: **$HOME/buildserver**
+   b. **Extract**: Use your extraction app to extract buildserver-main.zip rename to folder **buildserver** Example Path: **$HOME/buildserver**
    c. **Set Permissions and Install**:
     ```bash
    chmod +x ./provision.sh
    ./provision.sh
    ```
-   **Additional Options**: Usage Menu
+   **Usage Menu**: 
    ```bash
    ./provision.sh --help
    ```
