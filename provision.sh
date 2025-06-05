@@ -177,12 +177,6 @@ fi
 #   - Setting up repositories, cloning demo repos, and installing packages
 #   - Modifying bashrc, generating an initial SBOM, and cleaning up
 #
-# ====================== USECASE 2 =============================================
-# If you plan to run the provisioning on your own linux server modify the below 
-# env vars with your env settings. Otherwise leave these unmodified.
-# ==============================================================================
-#
-# project name or folder, should match your project folder, example buildserver
 #
 #==============================================================================
 #
@@ -713,7 +707,7 @@ install_helm() {
 modify_bashrc() {
   log_info "Modifying .bashrc to source .env if not already included..."
 
-  local bashrc_file="$HOME/.bashrc"
+  local bashrc_file="$CALLER_HOME/.bashrc"
   local env_source='[ -f "$CALLER_HOME/.env" ] && source "$CALLER_HOME/.env"'
 
   if grep -Fxq "$env_source" "$bashrc_file"; then
