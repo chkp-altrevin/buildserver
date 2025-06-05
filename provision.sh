@@ -552,7 +552,7 @@ install_packages() {
 #    shellcheck net-tools apt-transport-https unzip gnupg software-properties-common docker-compose-plugin \
 #    terraform google-cloud-cli pass gpg gnupg2 xclip pinentry-tty powershell azure-cli && \
 #    log_success "APT Additional packages installed." || log_error "FATAL: APT Additional packages failed install."
-}
+#}
 
 # ----- Modify bashrc ---------------------------------------------------------
 modify_bashrc() {
