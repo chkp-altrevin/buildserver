@@ -21,8 +21,8 @@ display_menu() {
     echo "p. Kubectl Get All Pods  | k. Kubectl Cluster-Info "
     echo "n. Kubectl Get Nodes     | R. Remove Cluster       "
     echo ""
-    echo "Buildserver Info =================================="
-    echo "Path: $PROJECT_PATH | User: $USER"
+    echo "Buildserver Status ================================"
+    echo "Project Path: $PROJECT_PATH | User: $USER"
 
     if [[ -f "$HOME/.buildserver_meta" ]]; then
         source "$HOME/.buildserver_meta"
@@ -36,12 +36,54 @@ display_menu() {
         Version="Unknown"
     fi
 
-    echo "Provisioned: $Provisioned | Version: $Version | Q. Update $PROJECT_NAME"
-    # echo "Current commit is: $(cd "$PROJECT_PATH" && git rev-parse --short HEAD) | Q. Update Project"
+    echo "Release: $Provisioned | Deployment Version: $Version
+    echo "==================================================="
+    echo "Manage $PROJECT_NAME" 
+    echo "Q. Update  | P. Rollback  | N. Restore  | L. Remove"
+    echo "Provisioned: $Provisioned | Version: $Version
+    # echo "Current commit is: $(cd "$PROJECT_PATH" && git rev-parse --short HEAD)"
     echo "8. INSTALL APPLICATIONS"
     echo "==================================================="
     echo -n "choose an option [1-9,a-z]: (x)  Exit "
 }
+
+# Function to remove repo 
+remove_repo() {
+    local script_path="$PROJECT_PATH/common/scripts/remove_repo.sh"
+    if [ -f "$script_path" ]; then
+        echo "Removing repo using $script_path"
+        bash "$script_path"
+    else
+        echo "Failed removing repo script does not exist at $script_path."
+    fi
+    pause
+}
+
+
+# Function to restore repo from previous versions
+restore_repo() {
+    local script_path="$PROJECT_PATH/common/scripts/restore_repo.sh"
+    if [ -f "$script_path" ]; then
+        echo "restoring repo using $script_path"
+        bash "$script_path"
+    else
+        echo "Failed restoring repo script does not exist at $script_path."
+    fi
+    pause
+}
+
+# Function to rollback repo to previous version
+rollback_repo() {
+    local script_path="$PROJECT_PATH/common/scripts/rollback_repo.sh"
+    if [ -f "$script_path" ]; then
+        echo "rollback repo using $script_path"
+        bash "$script_path"
+    else
+        echo "Failed rollback repo script does not exist at $script_path."
+    fi
+    pause
+}
+
 # Function to refresh repo
 refresh_repo() {
     local script_path="$PROJECT_PATH/common/scripts/refresh_repo3.sh"
@@ -346,9 +388,9 @@ while true; do
         I) deploy_kubernetes_cluster ;;
         J) ;;
         K) ;;
-        L) ;;
-        N) ;;
-        P) ;;
+        L) remove_repo ;;
+        N) restore_repo ;;
+        P) rollback_repo ;;
         Q) refresh_repo ;;
         R) remove_kubernetes_cluster ;;
         S) ;;
