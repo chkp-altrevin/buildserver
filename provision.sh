@@ -161,66 +161,6 @@ fi
 
 # ---------------- VirtualBox + Vagrant Verification ----------------
 
-verify_virtualbox_and_vagrant() {
-  echo "[INFO] Running VirtualBox + Vagrant check..."
-
-  # Detect Windows via WSL or Git Bash
-  if grep -qi microsoft /proc/version 2>/dev/null || [[ "$(uname -o 2>/dev/null)" == "Msys" ]]; then
-    echo "[INFO] Detected Windows-based environment."
-  else
-    echo "[ERROR] This flag is intended for Windows systems only. Exiting."
-    exit 1
-  fi
-
-  # Check for VirtualBox
-  if ! command -v VBoxManage &>/dev/null; then
-    echo "[WARN] VirtualBox not found."
-    VBoxFound=false
-  else
-    VBoxVersion=$(VBoxManage --version | cut -d'r' -f1)
-    echo "[INFO] VirtualBox version detected: $VBoxVersion"
-    VBoxFound=true
-  fi
-
-  # Check for Vagrant
-  if ! command -v vagrant &>/dev/null; then
-    echo "[WARN] Vagrant not found."
-    VagrantFound=false
-  else
-    VagrantVersion=$(vagrant --version | awk '{print $2}')
-    echo "[INFO] Vagrant version detected: $VagrantVersion"
-    VagrantFound=true
-  fi
-
-  # Evaluate next steps
-  if [[ "$VBoxFound" = false || "$VagrantFound" = false ]]; then
-    echo ""
-    echo "Required software is missing:"
-    [[ "$VBoxFound" = false ]] && echo " - VirtualBox"
-    [[ "$VagrantFound" = false ]] && echo " - Vagrant"
-    echo ""
-
-    read -rp "Would you like to attempt installation now? [Y/n]: " response
-    case "$response" in
-      [nN]*) echo "Exiting by user choice."; exit 1 ;;
-    esac
-
-    echo "Please install supported versions:"
-    echo " - VirtualBox: https://www.virtualbox.org/wiki/Downloads"
-    echo " - Vagrant: https://developer.hashicorp.com/vagrant/downloads"
-
-    if command -v xdg-open &>/dev/null; then
-      xdg-open "https://www.virtualbox.org/wiki/Downloads"
-      xdg-open "https://developer.hashicorp.com/vagrant/downloads"
-    elif command -v powershell.exe &>/dev/null; then
-      powershell.exe start https://www.virtualbox.org/wiki/Downloads
-      powershell.exe start https://developer.hashicorp.com/vagrant/downloads
-    fi
-
-    echo "[INFO] Please install manually and re-run the script after installation."
-    exit 1
-  fi
-}
 
 # Run validation if flag passed
 if [[ "$CHECK_VBOX_VAGRANT" == true ]]; then
@@ -471,11 +411,6 @@ add_user_to_docker() {
     log_success "User $ORIGINAL_USER added to Docker group." || log_error "FATAL: Failed to add user $ORIGINAL_USER to Docker group."
 }
 # ----- Install NVM -----------------------------------------------------------
-install_nvm() {
-  log_info "Installing NVM..."
-  sudo -i -u "$USER" "$PROJECT_PATH/common/scripts/deploy_nvm.sh" && \
-    log_success "NVM installed." || log_error "NON-FATAL: NVM installation failed. If this was a --provision you can likely ignore"
-}
 
 # ----- Configure Terraform Repository ----------------------------------------
 configure_terraform_repo() {
@@ -504,17 +439,6 @@ install_k3d() {
 }
 
 # ----- Install Powershell ----------------------------------------------------
-install_powershell() {
-  if command -v pwsh >/dev/null 2>&1; then
-    log_info "Powershell is already installed. Skipping installation."
-  else
-    log_info "Installing Powershell..."
-    source /etc/os-release && \
-    wget -q "https://packages.microsoft.com/config/ubuntu/$VERSION_ID/packages-microsoft-prod.deb" && \
-    run_with_sudo dpkg -i packages-microsoft-prod.deb && \
-      log_success "Powershell Installed." || log_error "FATAL: Powershell Installation failed."
-  fi
-}
 
 # ----- Install AWS CLI -----------------------------------------------------------
 install_awscli() {
@@ -733,3 +657,98 @@ while [[ $# -gt 0 ]]; do
     *) shift ;;
   esac
 done
+# === Injected Updated Functions ===
+
+generate_version_id() {
+  local timestamp="v$(date '+%Y%m%d_%H%M%S')"
+  local git_sha="nogit"
+  if command -v git &>/dev/null && git rev-parse --is-inside-work-tree &>/dev/null; then
+    git_sha=$(git rev-parse --short HEAD 2>/dev/null || echo "nogit")
+  fi
+  echo "${timestamp}_${git_sha}"
+}
+
+
+install_docker() {
+  if command -v docker >/dev/null 2>&1; then
+    log_info "Docker is already installed. Skipping installation."
+    return 0
+  fi
+
+  log_info "Attempting Docker installation with Preflight..."
+
+  if command -v preflight >/dev/null 2>&1; then
+    if ! curl -fsSL https://get.docker.com | preflight run sha256=0158433a384a7ef6d60b6d58e556f4587dc9e1ee9768dae8958266ffb4f84f6f; then
+      log_error "Preflight validation failed. Falling back to direct install."
+      curl -fsSL https://get.docker.com | sh && log_success "Docker installed via fallback." || log_error "FATAL: Docker fallback installation failed."
+    else
+      log_success "Docker installed via Preflight."
+    fi
+  else
+    log_warn "Preflight not found. Falling back to direct install."
+    curl -fsSL https://get.docker.com | sh && log_success "Docker installed via fallback." || log_error "FATAL: Docker fallback installation failed."
+  fi
+}
+
+
+install_helm() {
+  local version="v3.14.0"
+  log_info "Installing Helm version $version..."
+
+  run_with_sudo curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 && \
+  chmod 700 get_helm.sh && \
+  HELM_INSTALL_DIR="/usr/local/bin" DESIRED_VERSION="$version" ./get_helm.sh && \
+    log_success "Helm $version installed." || log_error "FATAL: Helm installation failed. If this was a --provision you can likely ignore"
+}
+
+
+modify_bashrc() {
+  log_info "Modifying .bashrc to source .env if not already included..."
+
+  local bashrc_file="$HOME/.bashrc"
+  local env_source='[ -f "$HOME/.env" ] && source "$HOME/.env"'
+
+  if grep -Fxq "$env_source" "$bashrc_file"; then
+    log_info ".env sourcing already present in .bashrc. Skipping."
+  else
+    echo -e "\n# Auto-injected by buildserver provisioner\n$env_source" >> "$bashrc_file" && \
+      log_success ".bashrc modified to source .env." || \
+      log_error "FATAL: Failed to modify .bashrc."
+  fi
+}
+
+
+generate_initial_sbom() {
+  log_info "Generating initial SBOM..."
+
+  local sbom_file="$PROJECT_PATH/initial_sbom"
+  local package_list=(
+    curl zip unzip apt-utils fakeroot dos2unix software-properties-common jq
+    kubectl build-essential git python3-pip python3 pkg-config shellcheck
+    net-tools apt-transport-https gnupg docker-compose-plugin terraform
+    google-cloud-cli pass gpg gnupg2 xclip pinentry-tty azure-cli
+  )
+
+  {
+    echo "# Initial SBOM - $(date)"
+    for pkg in "${package_list[@]}"; do
+      if dpkg-query -W -f='${binary:Package} ${Version}\n' "$pkg" 2>/dev/null; then
+        :
+      else
+        echo "$pkg [NOT INSTALLED]"
+      fi
+    done
+  } > "$sbom_file" && \
+    log_success "SBOM saved to $sbom_file" || \
+    log_error "NON-FATAL: Failed to generate SBOM."
+}
+
+
+cleanup() {
+  log_info "Performing cleanup..."
+  run_with_sudo rm -f ./get_helm.sh
+  run_with_sudo rm -f awscliv2.zip
+  run_with_sudo rm -rf aws
+  log_success "Installer artifacts removed (Helm, AWS)." || \
+    log_error "NON-FATAL: Some cleanup files may not have existed."
+}
