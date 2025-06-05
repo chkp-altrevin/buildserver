@@ -228,7 +228,7 @@ echo "$VERSION_ID" >> "$PROJECT_PATH/version.txt"
 
 # --------- Function to add optional aliases ---------------------------------
 import_menu_aliases() {
-  local aliases_file="$HOME/.bash_aliases"
+  local aliases_file="$CALLER_HOME/.bash_aliases"
   local -A menu_aliases=(
     ["cls"]="clear"
     ["quick-setup"]="docker ps"
@@ -334,7 +334,7 @@ update_bashrc_path() {
 # ----- Create Kube and Local Bin Directories ----------------------------------
 create_directories() {
   log_info "Creating necessary directories..."
-  run_with_sudo mkdir -p "$HOME/.local/bin" "$HOME/.kube" && \
+  run_with_sudo mkdir -p "$CALLER_HOME/.local/bin" "$CALLER_HOME/.kube" && \
     log_success "Directories created." || log_error "FATAL: Failed to create directories."
 }
 
@@ -342,20 +342,20 @@ create_directories() {
 copy_profile_files() {
   log_info "Copying profile files..."
 
-  local bash_aliases_path="$HOME/.bash_aliases"
-  local env_file_path="$HOME/.env"
+  #local bash_aliases_path="$HOME/.bash_aliases"
+  local env_file_path="$CALLER_HOME/.env"
 
-  cp "$PROJECT_PATH/common/profile/bash_aliases" "$bash_aliases_path" && \
-    log_success "bash_aliases copied." || log_error "FATAL: Failed to copy bash_aliases."
+  #cp "$PROJECT_PATH/common/profile/bash_aliases" "$bash_aliases_path" && \
+  #  log_success "bash_aliases copied." || log_error "FATAL: Failed to copy bash_aliases."
 
   cp "$PROJECT_PATH/common/profile/env.example" "$env_file_path" && \
     log_success "env.example copied." || log_error "FATAL: Failed to copy env.example."
 
-  touch "$HOME/.Xauthority" && \
+  touch "$CALLER_HOME/.Xauthority" && \
     log_success "Xauthority created." || log_error "NON-FATAL: Failed to create Xauthority."
 
   # Apply .bash_aliases if running in an interactive shell
-  if [[ $- == *i* && "$HOME" == "$HOME" ]]; then
+  if [[ $- == *i* && "$CALLER_HOME" == "$CALLER_HOME" ]]; then
     log_info "Sourcing bash_aliases for current session..."
     source "$bash_aliases_path"
   else
@@ -441,40 +441,40 @@ install_k3d() {
 # ----- Install Powershell ----------------------------------------------------
 
 # ----- Install AWS CLI -----------------------------------------------------------
-install_awscli() {
-  if command -v aws >/dev/null 2>&1; then
-    log_info "AWS CLI is already installed. Skipping installation."
-  else
-    log_info "Installing AWS CLI..."
-    curl https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip | bash && unzip awscliv2.zip > /dev/null && \
-    sudo ./aws/install && \
-      log_success "AWS CLI Installed." || log_error "FATAL: AWS CLI Installation failed."
-  fi
-}
+#install_awscli() {
+#  if command -v aws >/dev/null 2>&1; then
+#    log_info "AWS CLI is already installed. Skipping installation."
+#  else
+#    log_info "Installing AWS CLI..."
+#    curl https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip | bash && unzip awscliv2.zip > /dev/null && \
+#    sudo ./aws/install && \
+#      log_success "AWS CLI Installed." || log_error "FATAL: AWS CLI Installation failed."
+#  fi
+#}
 
 # ----- Install Google Cloud Repository ----------------------------------------
-install_gcloudcli() {
-  if command -v gcloud >/dev/null 2>&1; then
-    log_info "Google Cloud Repository is already installed. Skipping installation."
-  else
-    log_info "Installing Google Cloud Repository..."
-    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | run_with_sudo gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
-    echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | run_with_sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
-      log_success "Google Cloud Repository installed." || log_error "FATAL: Google Cloud Repository installation failed."
-  fi
-}
+#install_gcloudcli() {
+#  if command -v gcloud >/dev/null 2>&1; then
+#    log_info "Google Cloud Repository is already installed. Skipping installation."
+#  else
+#    log_info "Installing Google Cloud Repository..."
+#    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | run_with_sudo gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
+#    echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | run_with_sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
+#      log_success "Google Cloud Repository installed." || log_error "FATAL: Google Cloud Repository installation failed."
+#  fi
+#}
 
 # ----- Install Azure CLI Repository ----------------------------------------
-install_azurecli() {
-  if command -v az >/dev/null 2>&1; then
-    log_info "Azure CLI Repository is already installed. Skipping installation."
-  else
-    log_info "Installing Azure CLI..."
-    curl -sL https://packages.microsoft.com/keys/microsoft.asc | run_with_sudo gpg --dearmor -o /usr/share/keyrings/microsoft-archive-keyring.gpg && \
-    echo "deb [signed-by=/usr/share/keyrings/microsoft-archive-keyring.gpg] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" | run_with_sudo tee /etc/apt/sources.list.d/azure-cli.list && \
-      log_success "Azure CLI Repository installed." || log_error "FATAL: Azure CLI Repository installation failed."
-  fi
-}
+#install_azurecli() {
+#  if command -v az >/dev/null 2>&1; then
+#    log_info "Azure CLI Repository is already installed. Skipping installation."
+#  else
+#    log_info "Installing Azure CLI..."
+#    curl -sL https://packages.microsoft.com/keys/microsoft.asc | run_with_sudo gpg --dearmor -o /usr/share/keyrings/microsoft-archive-keyring.gpg && \
+#    echo "deb [signed-by=/usr/share/keyrings/microsoft-archive-keyring.gpg] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" | run_with_sudo tee /etc/apt/sources.list.d/azure-cli.list && \
+#      log_success "Azure CLI Repository installed." || log_error "FATAL: Azure CLI Repository installation failed."
+#  fi
+#}
 
 # ----- Configure kubectl Repository ------------------------------------------
 configure_kubectl_repo() {
@@ -527,12 +527,12 @@ configure_git() {
 # ----- Clone Repositories ----------------------------------------------------
 clone_repositories() {
   log_info "Cloning demo repositories..."
-  mkdir -p "$HOME/repos"
-  git clone https://github.com/chkp-altrevin/datacenter-objects-k8s.git "$HOME/repos/datacenter-objects-k8s" && \
+  mkdir -p "$CALLER_HOME/repos"
+  git clone https://github.com/chkp-altrevin/datacenter-objects-k8s.git "$CALLER_HOME/repos/datacenter-objects-k8s" && \
     log_success "Cloned datacenter-objects-k8s." || log_error "NON-FATAL: Failed to clone datacenter-objects-k8. If this was a --provision you can likely ignore"
-  git clone https://github.com/SpectralOps/spectral-goat.git "$HOME/repos/spectral-goat" && \
+  git clone https://github.com/SpectralOps/spectral-goat.git "$CALLER_HOME/repos/spectral-goat" && \
     log_success "Cloned spectral-goat." || log_error "NON-FATAL: Failed to clone spectral-goat. If this was a --provision you can likely ignore"
-  git clone https://github.com/openappsec/waf-comparison-project.git "$HOME/repos/waf-comparison-project" && \
+  git clone https://github.com/openappsec/waf-comparison-project.git "$CALLER_HOME/repos/waf-comparison-project" && \
     log_success "Cloned waf-comparison-project." || log_error "NON-FATAL: Failed to clone waf-comparison-project. If this was a --provision you can likely ignore"
 }
 
@@ -715,7 +715,7 @@ modify_bashrc() {
   log_info "Modifying .bashrc to source .env if not already included..."
 
   local bashrc_file="$HOME/.bashrc"
-  local env_source='[ -f "$HOME/.env" ] && source "$HOME/.env"'
+  local env_source='[ -f "$CALLER_HOME/.env" ] && source "$CALLER_HOME/.env"'
 
   if grep -Fxq "$env_source" "$bashrc_file"; then
     log_info ".env sourcing already present in .bashrc. Skipping."
