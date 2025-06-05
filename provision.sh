@@ -98,7 +98,7 @@ show_help() {
   echo ""
   echo "Options:"
   echo "  --project-name NAME        Optional: Project name (default: buildserver)"
-  echo "  --project-path PATH        Required*: Path to install (default: $HOME/<project-name> if omitted)"
+  echo "  --project-path PATH        Required*: Path to install (default: $HOME/buildserver)"
   echo "  --virtualbox-vagrant-win   Enable Vagrant/VirtualBox Windows setup flow"
   echo "  -h, --help                 Show this help message"
   exit 0
