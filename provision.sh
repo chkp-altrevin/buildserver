@@ -26,7 +26,7 @@ fix_ownership_in_home() {
 }
 
 : "${PROJECT_NAME:="buildserver"}"
-: "${PROJECT_PATH:="$HOME/$PROJECT_NAME"}"
+: "${PROJECT_PATH:="$CALLER_HOME/$PROJECT_NAME"}"
 : "${TEST_MODE:=false}"
 
 mkdir -p "$PROJECT_PATH"
@@ -98,7 +98,7 @@ show_help() {
   echo ""
   echo "Options:"
   echo "  --project-name NAME        Optional: Project name (default: buildserver)"
-  echo "  --project-path PATH        Required*: Path to install (default: $HOME/buildserver)"
+  echo "  --project-path PATH        Required*: Path to install (default: $CALLER_HOME/buildserver)"
   echo "  --virtualbox-vagrant-win   Enable Vagrant/VirtualBox Windows setup flow"
   echo "  -h, --help                 Show this help message"
   exit 0
@@ -106,7 +106,7 @@ show_help() {
 
 # Defaults
 PROJECT_NAME="${PROJECT_NAME:-buildserver}"
-PROJECT_PATH="${PROJECT_PATH:-$HOME/$PROJECT_NAME}"
+PROJECT_PATH="${PROJECT_PATH:-$CALLER_HOME/$PROJECT_NAME}"
 CHECK_VBOX_VAGRANT=false
 
 # Parse args
@@ -496,8 +496,8 @@ configure_kubectl_repo() {
 # ----- Update Preoject Directory Permissions ---------------------------------
 update_home_permissions() {
   log_info "Updating project directory permissions..."
-  run_with_sudo chgrp -R "$USER" "$PROJECT_PATH" && \
-    run_with_sudo chown -R "$USER" "$PROJECT_PATH" && \
+  run_with_sudo chgrp -R "$ORIGINAL_USER" "$PROJECT_PATH" && \
+    run_with_sudo chown -R "$ORIGINAL_USER" "$PROJECT_PATH" && \
     log_success "Project directory permissions updated." || log_error "FATAL: Failed to update Project directory permissions."
 }
 
@@ -511,9 +511,9 @@ update_system() {
 # ----- Configure Git ---------------------------------------------------------
 configure_git() {
   log_info "Configuring Git global settings..."
-  git config --global user.email "$USER@buildserver.local" && \
-    git config --global --add safe.directory "$HOME/repos" && \
-    git config --global user.name "$USER" && \
+  git config --global user.email "$ORIGINAL_USER@buildserver.local" && \
+    git config --global --add safe.directory "$CALLER_HOME/repos" && \
+    git config --global user.name "$ORIGINAL_USER" && \
     git config --global init.defaultBranch main && \
     log_success "Git configured." || log_error "NON-FATAL: Git configuration failed."
 }
