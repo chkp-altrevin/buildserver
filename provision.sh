@@ -536,13 +536,22 @@ clone_repositories() {
     log_success "Cloned waf-comparison-project." || log_error "NON-FATAL: Failed to clone waf-comparison-project. If this was a --provision you can likely ignore"
 }
 
-# ----- Install Additional Packages -------------------------------------------
+# ----- Install Default Packages ----------------------------------------------
 install_packages() {
   log_info "Installing selected packages..."
   run_with_sudo apt-get -yq install jq kubectl dos2unix build-essential git python3-pip python3 pkg-config \
     shellcheck net-tools apt-transport-https unzip gnupg software-properties-common docker-compose-plugin \
-    terraform google-cloud-cli pass gpg gnupg2 xclip pinentry-tty powershell azure-cli && \
+    terraform gnupg2 xclip && \
     log_success "APT Additional packages installed." || log_error "FATAL: APT Additional packages failed install."
+}
+
+# ----- Install Optional Packages Used for Future Use --------------------------
+#install_optional_packages() {
+#  log_info "Installing selected packages..."
+#  run_with_sudo apt-get -yq install jq kubectl dos2unix build-essential git python3-pip python3 pkg-config \
+#    shellcheck net-tools apt-transport-https unzip gnupg software-properties-common docker-compose-plugin \
+#    terraform google-cloud-cli pass gpg gnupg2 xclip pinentry-tty powershell azure-cli && \
+#    log_success "APT Additional packages installed." || log_error "FATAL: APT Additional packages failed install."
 }
 
 # ----- Modify bashrc ---------------------------------------------------------
@@ -586,7 +595,7 @@ main() {
   install_preflight  # 2 used to precheck our external facing scripts such as docker, remove or not your call used for use case 1
   install_docker  # 2 install script with preflight dont leave to chance used for use case 1
   add_user_to_docker  # 2 add our user to docker group use for use case 1
-  install_nvm  # 2 installs node version mgr, not required but a personal fav
+  # install_nvm  # 2 installs node version mgr, not required but a personal fav
   configure_terraform_repo # 2 install the terraform repository
   install_helm # 2 install the helm repository used for use case 1
   install_k3d # 2 install the k3d repository, responsible for creating k8s nodes on docker used for use case 1
