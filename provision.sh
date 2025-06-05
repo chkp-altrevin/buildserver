@@ -599,7 +599,7 @@ main() {
   configure_terraform_repo # 2 install the terraform repository
   install_helm # 2 install the helm repository used for use case 1
   install_k3d # 2 install the k3d repository, responsible for creating k8s nodes on docker used for use case 1
-  install_powershell # 2 install the powershell repository
+  # install_powershell # 2 install the powershell repository
   install_awscli # install the awscli repository
   install_gcloudcli # 2 install the google cloud repository
   install_azurecli # 2 install the azure cli repository
