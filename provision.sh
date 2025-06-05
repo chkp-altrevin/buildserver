@@ -228,7 +228,7 @@ echo "$VERSION_ID" >> "$PROJECT_PATH/version.txt"
 
 # --------- Function to add optional aliases ---------------------------------
 import_menu_aliases() {
-  run_with_sudo local aliases_file="$HOME/.bash_aliases"
+  local aliases_file="$HOME/.bash_aliases"
   local -A menu_aliases=(
     ["cls"]="clear"
     ["quick-setup"]="docker ps"
