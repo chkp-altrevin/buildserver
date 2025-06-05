@@ -187,11 +187,19 @@ download_repo() {
 }
 
 ensure_project_env_export() {
-  grep -q "export PROJECT_NAME=" "$PROFILE" || echo "export PROJECT_NAME="$PROJECT_NAME"" >> "$PROFILE"
-  grep -q "$PROJECT_PATH/common/scripts" "$PROFILE" || echo "export PATH="$PROJECT_PATH/common/scripts:\$PATH"" >> "$PROFILE"
-  grep -q "cd \$HOME/$PROJECT_NAME" "$PROFILE" || echo "cd "$PROJECT_PATH"" >> "$PROFILE"
+  local current_dir
+  current_dir="$(pwd)"
+
+  [[ -f "$PROFILE" ]] || touch "$PROFILE"
+
+  grep -q "export PROJECT_NAME=" "$PROFILE" || echo "export PROJECT_NAME=\"$PROJECT_NAME\"" >> "$PROFILE"
+  grep -q "export PROJECT_PATH=" "$PROFILE" || echo "export PROJECT_PATH=\"$current_dir\"" >> "$PROFILE"
+  grep -q "$current_dir/common/scripts" "$PROFILE" || echo "export PATH=\"$current_dir/common/scripts:\$PATH\"" >> "$PROFILE"
+  grep -q "cd \"$current_dir\"" "$PROFILE" || echo "cd \"$current_dir\"" >> "$PROFILE"
+
   log_info "Environment variables and project path exported to $PROFILE"
 }
+
 
 run_provision() {
   if [ ! -d "$PROJECT_PATH" ]; then
