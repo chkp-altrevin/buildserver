@@ -67,6 +67,8 @@ log_info()    { echo "[INFO]    $(date '+%F %T') - $*" | tee -a "$LOG"; }
 log_success() { echo "[SUCCESS] $(date '+%F %T') - $*" | tee -a "$LOG"; }
 log_error()   { echo "[ERROR]   $(date '+%F %T') - $*" | tee -a "$LOG" >&2; }
 
+LOG="${LOG:-/tmp/provision.log}"  # fallback if unset
+
 run_with_sudo() {
   if [[ $EUID -ne 0 ]]; then
     sudo "$@"
@@ -264,20 +266,20 @@ touch $PROJECT_PATH/provisioning.log
 #
 # --------- Logging Functions ------------------------------------------------
 
-log_info() {
-  local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
-  echo "[$timestamp] [INFO] $1" >> $PROJECT_PATH/provisioning.log
-}
+#log_info() {
+#  local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
+#  echo "[$timestamp] [INFO] $1" >> $PROJECT_PATH/provisioning.log
+#}
 
-log_success() {
-  local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
-  echo "[$timestamp] [SUCCESS] $1" >> $PROJECT_PATH/provisioning.log
-}
+#log_success() {
+#  local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
+#  echo "[$timestamp] [SUCCESS] $1" >> $PROJECT_PATH/provisioning.log
+#}
 
-log_error() {
-  local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
-  echo "[$timestamp] [ERROR] $1" >> $PROJECT_PATH/provisioning.log
-}
+#log_error() {
+#  local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
+#  echo "[$timestamp] [ERROR] $1" >> $PROJECT_PATH/provisioning.log
+#}
 
 # ------ Helper Function for Sudo ----------------------------------------------
 # run_with_sudo: Executes a command with sudo if not already running as root.
