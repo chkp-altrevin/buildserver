@@ -229,7 +229,7 @@ echo "$VERSION_ID" >> "$PROJECT_PATH/version.txt"
 # --------- Function to add optional aliases ---------------------------------
 import_menu_aliases() {
   run_with_sudo local aliases_file="$HOME/.bash_aliases"
-  run_with_sudo local -A menu_aliases=(
+  local -A menu_aliases=(
     ["cls"]="clear"
     ["quick-setup"]="docker ps"
     ["motd"]="/etc/update-motd.d/99-custom-motd"
