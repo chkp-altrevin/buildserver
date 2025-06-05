@@ -193,7 +193,7 @@ ensure_project_env_export() {
   [[ -f "$PROFILE" ]] || touch "$PROFILE"
 
   grep -q "export PROJECT_NAME=" "$PROFILE" || echo "export PROJECT_NAME=\"$PROJECT_NAME\"" >> "$PROFILE"
-  grep -q "export PROJECT_PATH=" "$PROFILE" || echo "export PROJECT_PATH=\"$current_dir\"" >> "$PROFILE"
+  grep -q "export PROJECT_PATH=" "$PROFILE" || echo "export PROJECT_PATH=\"$current_dir\"$PROJECT_NAME\"" >> "$PROFILE"
   grep -q "$current_dir/common/scripts" "$PROFILE" || echo "export PATH=\"$current_dir/common/scripts:\$PATH\"" >> "$PROFILE"
   grep -q "cd \"$current_dir\"" "$PROFILE" || echo "cd \"$current_dir\"" >> "$PROFILE"
 
