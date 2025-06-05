@@ -192,14 +192,18 @@ ensure_project_env_export() {
 
   [[ -f "$PROFILE" ]] || touch "$PROFILE"
 
-  grep -q "export PROJECT_NAME=" "$PROFILE" || echo "export PROJECT_NAME=\"$PROJECT_NAME\"" >> "$PROFILE"
-  grep -q "export PROJECT_PATH=" "$PROFILE" || echo "export PROJECT_PATH=\"$current_dir\"$PROJECT_NAME\"" >> "$PROFILE"
-  grep -q "$current_dir/common/scripts" "$PROFILE" || echo "export PATH=\"$current_dir/common/scripts:\$PATH\"" >> "$PROFILE"
-  grep -q "cd \"$current_dir\"" "$PROFILE" || echo "cd \"$current_dir\"" >> "$PROFILE"
+  local export_name="export PROJECT_NAME=\"$PROJECT_NAME\""
+  local export_path="export PROJECT_PATH=\"$current_dir/$PROJECT_NAME\""
+  local export_path_entry="export PATH=\"$current_dir/common/scripts:\$PATH\""
+  local cd_path="cd \"$current_dir\""
+
+  grep -Fxq "$export_name" "$PROFILE" || echo "$export_name" >> "$PROFILE"
+  grep -Fxq "$export_path" "$PROFILE" || echo "$export_path" >> "$PROFILE"
+  grep -Fxq "$export_path_entry" "$PROFILE" || echo "$export_path_entry" >> "$PROFILE"
+  grep -Fxq "$cd_path" "$PROFILE" || echo "$cd_path" >> "$PROFILE"
 
   log_info "Environment variables and project path exported to $PROFILE"
 }
-
 
 run_provision() {
   if [ ! -d "$PROJECT_PATH" ]; then
