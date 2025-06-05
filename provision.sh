@@ -241,7 +241,7 @@ import_menu_aliases() {
   )
 
   # Create the file if it doesn't exist
-  run_with_sudo touch "$aliases_file"
+  touch "$aliases_file"
 
   local added_any=false
 
