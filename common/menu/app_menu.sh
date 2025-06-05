@@ -5,7 +5,7 @@ display_menu() {
     clear
     echo "=== Use "x" to go back =========== APPLICATION MENU"
     echo ""
-    echo "d. Running Containers |   k. Cluster Status        "
+    echo "d. Running Containers |   k. K8S Cluster Status    "
     echo "==================================================="
     echo ""
     echo "RANCHER============================================"
@@ -27,6 +27,18 @@ display_menu() {
 # Global variable to store the custom script path
 # CUSTOM_SCRIPT_PATH="$PROJECT_PATH/common/scripts"
 #
+
+# Function to run kubectl cluster-info
+kubectl_clusterinfo() {
+    local script_path="$PROJECT_PATH/common/scripts/kubectl_clusterinfo.sh"
+    if [ -f "$script_path" ]; then
+        echo "kubectl cluster-info using $script_path"
+        bash "$script_path"
+    else
+        echo "Deployment script does not exist at $script_path."
+    fi
+    pause
+}
 
 # Function to install Nginx Proxy Manager
 npm_install() {
@@ -330,7 +342,7 @@ while true; do
         h) ;;
         i) ;;
         j) ;;
-        k) ;;
+        k) kubectl_clusterinfo ;;
         l) ;;
         m) ;;
         n) ;;
