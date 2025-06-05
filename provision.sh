@@ -136,7 +136,7 @@ done
 
 # Set required project path if not provided
 if [[ -z "$PROJECT_PATH" ]]; then
-  PROJECT_PATH="$HOME/$PROJECT_NAME"
+  PROJECT_PATH="$CALLER_HOME/$PROJECT_NAME"
   echo "[INFO] No --project-path provided, defaulting to: $PROJECT_PATH"
 fi
 
@@ -321,7 +321,7 @@ add_custom_motd() {
 # ----- Update .bashrc with PATH ----------------------------------------------
 update_bashrc_path() {
   log_info "Updating .bashrc to include local bin in PATH..."
-  sudo su -l $USER -c 'echo $PATH' echo "export PATH=\$PATH:$HOME/.local/bin" >> "$HOME/.bashrc" && \
+  sudo su -l $USER -c 'echo $PATH' echo "export PATH=\$PATH:$CALLER_HOME/.local/bin" >> "$CALLER_HOME/.bashrc" && \
     log_success ".bashrc updated." || log_error "FATAL: Failed to update .bashrc."
 }
 
@@ -336,11 +336,11 @@ create_directories() {
 copy_profile_files() {
   log_info "Copying profile files..."
 
-  #local bash_aliases_path="$HOME/.bash_aliases"
+  local bash_aliases_path="$CALLER_HOME/.bash_aliases"
   local env_file_path="$CALLER_HOME/.env"
 
-  #cp "$PROJECT_PATH/common/profile/bash_aliases" "$bash_aliases_path" && \
-  #  log_success "bash_aliases copied." || log_error "FATAL: Failed to copy bash_aliases."
+  cp "$PROJECT_PATH/common/profile/bash_aliases" "$bash_aliases_path" && \
+    log_success "bash_aliases copied." || log_error "FATAL: Failed to copy bash_aliases."
 
   cp "$PROJECT_PATH/common/profile/env.example" "$env_file_path" && \
     log_success "env.example copied." || log_error "FATAL: Failed to copy env.example."
