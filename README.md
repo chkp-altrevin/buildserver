@@ -228,14 +228,14 @@ Downloads repo, extract and backup if exists and installs dependencies (all-in-o
 ```bash
 curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh -f && chmod +x install-script.sh && sudo ./install-script.sh --install
 ```
-- Download Only:
-```bash
-curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh -f && chmod +x install-script.sh && sudo ./install-script.sh --repo-download
 ```
-- Displays Help Menu:
-```bash
-curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh -f && chmod +x install-script.sh && sudo ./install-script.sh --help
-```
+
+Download Only:
+`curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh -f && chmod +x install-script.sh && sudo ./install-script.sh --repo-download`
+
+Displays Help Menu:
+`curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh -f && chmod +x install-script.sh && sudo ./install-script.sh --help`
+
 After provisioning is complete logut/login. You will be greeted with a custom MOTD and available commands to assist with further setup.
 
 2. **Download Zip, Extract, chmod** for Linux, WSL, GitBash, etc.
