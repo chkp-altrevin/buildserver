@@ -40,8 +40,7 @@ display_menu() {
     echo "==================================================="
     echo "Manage $PROJECT_NAME" 
     echo "Q. Update  | P. Rollback  | N. Restore  | L. Remove"
-    echo "Provisioned: $Provisioned | Version: $Version
-    # echo "Current commit is: $(cd "$PROJECT_PATH" && git rev-parse --short HEAD)"
+    echo "Current Commit:0000000   Timestamp:12345678"
     echo "8. INSTALL APPLICATIONS"
     echo "==================================================="
     echo -n "choose an option [1-9,a-z]: (x)  Exit "
