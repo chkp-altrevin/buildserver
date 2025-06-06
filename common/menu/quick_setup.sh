@@ -36,7 +36,7 @@ display_menu() {
         Version="Unknown"
     fi
 
-    echo "Release: $Provisioned | Deployment Version: $Version
+    echo "Release: $Provisioned | Deployment Version: $Version"
     echo "==================================================="
     echo "Manage $PROJECT_NAME" 
     echo "Q. Update  | P. Rollback  | N. Restore  | L. Remove"
