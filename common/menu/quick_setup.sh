@@ -38,12 +38,25 @@ display_menu() {
 
     echo "Release: $Provisioned | Deployment Version: $Version"
     echo "==================================================="
-    echo "Manage $PROJECT_NAME" 
+    echo "B. Manage $PROJECT_NAME"
+    echo "==================================================="
     echo "Q. Update  | P. Rollback  | N. Restore  | L. Remove"
     echo "Current Commit:0000000   Timestamp:12345678"
     echo "8. INSTALL APPLICATIONS"
     echo "==================================================="
     echo -n "choose an option [1-9,a-z]: (x)  Exit "
+}
+
+# Function to open provisioning menu
+provisioning_menu() {
+    local script_path="$PROJECT_PATH/common/menu/provisioning_menu.sh"
+    if [ -f "$script_path" ]; then
+        echo "Opening Provisioning Menu using $script_path"
+        bash "$script_path"
+    else
+        echo "Provisioning script does not exist at $script_path."
+    fi
+    pause
 }
 
 # Function to remove repo 
@@ -379,7 +392,7 @@ while true; do
         8) app_menu ;;
         9) demo_menu ;;
         A) ;;
-        B) ;;
+        B) provisioning_menu ;;
         C) ;;
         D) ;;
         E) ;;
