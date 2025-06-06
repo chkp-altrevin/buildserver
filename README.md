@@ -258,22 +258,6 @@ After provisioning is complete logut/login. You will be greeted with a custom MO
 
 ## 🛠️ Clone and Make it Yours!
 
-**Prior to cloning**
-
-**For Windows Vagrant and VirtualBox users**
-- If you use Windows (non-wsl): Set the following: `git config --global core.autocrlf input`
-  This will keep your commits clean with LF only, even if editing on Windows. 
-
-**🚀 Pro Tip!**
-If you see errors similiar to:
-```
-builder: /home/vagrant/.env: line 13: $'\r': command not found
-builder: /home/vagrant/.env: line 17: $'\r': command not found
-builder: /home/vagrant/.env: line 21: $'\r': command not found
- ```
-Above is a good indicator we are seeing crlf, did you set `git config --global core.autocrlf input` mentioned above? If you need to start over see below to reset.
-
-- All others and **WSL/Linux environment** proceed below and clone the repo.
 1. **Clone Repository**:
 
    ```bash
