@@ -240,6 +240,29 @@ check_dependencies() {
   log_success "All dependencies verified."
 }
 
+log_latest_github_commit() {
+  local repo_url="https://api.github.com/repos/chkp-altrevin/buildserver/commits?per_page=1"
+  local log_file="latest_commit.log"
+  local temp_log
+
+  temp_log=$(mktemp) || {
+    echo "[ERROR] Failed to create temporary file for commit log."
+    return 1
+  }
+
+  {
+    echo "== [LOG ENTRY] $(date '+%Y-%m-%d %H:%M:%S') =="
+    curl -s "$repo_url" | jq -r '.[0] | "SHA: \(.sha[0:7])\nDate: \(.commit.committer.date)\nMessage: \(.commit.message)\n"'
+    echo ""
+  } > "$temp_log"
+
+  # Append previous log content below the new entry
+  [ -f "$log_file" ] && cat "$log_file" >> "$temp_log"
+
+  mv "$temp_log" "$log_file"
+  echo "[INFO] Logged latest commit to $log_file"
+}
+
 main() {
   log_info "main() invoked with args: $*"
   parse_args "$@"
@@ -268,6 +291,7 @@ main() {
     download_repo
     run_provision
     ensure_project_env_export
+    log_latest_github_commit
     exit 0
   fi
 
