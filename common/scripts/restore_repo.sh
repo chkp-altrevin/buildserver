@@ -2,7 +2,7 @@
 # scripted install for
 # curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh && chmod +x install-script.sh && sudo ./install-script.sh --restore
 
-BACKUP_DIR="$HOME/buildserver_backups"
+BACKUP_DIR="$HOME/backup"
 INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh"
 INSTALL_SCRIPT="install-script.sh"
 
