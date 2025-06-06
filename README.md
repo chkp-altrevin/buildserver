@@ -236,6 +236,7 @@ Displays Help Menu:
 
 After provisioning is complete logut/login. You will be greeted with a custom MOTD and available commands to assist with further setup.
 
+## Manual Install
 2. **Download Zip, Extract, chmod** for Linux, WSL, GitBash, etc.
 
    a. **Download Latest Release**: [buildserver-main.zip](https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip)
@@ -246,11 +247,11 @@ After provisioning is complete logut/login. You will be greeted with a custom MO
    
     ```bash
    chmod +x ./provision.sh
-   ./provision.sh
+   sudo ./provision.sh
    ```
    **Usage Menu**: 
    ```bash
-   ./provision.sh --help
+   sudo ./provision.sh --help
    ```
 ---
 
