@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-BACKUP_DIR="$HOME/buildserver_backups"
+BACKUP_DIR="$HOME/backup"
 INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh"
 INSTALL_SCRIPT="install-script.sh"
 
