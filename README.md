@@ -177,7 +177,6 @@ An SBOM is generated post-provisioning and located in the root path. Installed p
    - Download using a guided install (good idea to [review](https://raw.githubusercontent.com/chkp-altrevin/buildserver/refs/heads/main/common/deploy/windows/downloader.bat) before running. Right click on the link, save as `downloader.bat`.[downloader.bat](https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/common/deploy/windows/downloader.bat). 
    - Run `downloader.bat` follow the prompts. Pick location, extracts buildserver.  `cd buildserver`, `vagrant up`, `vagrant ssh`.
    - **or** [buildserver-main.zip](https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip). Download the zip to your folder of choice. Extract the contents `buildserver-main`, rename to `buildserver` `cd buildserver` `vagrant up` `vagrant ssh`
-   - **or** copy and paste the one-liner below.
    - **or** use the below snippet which will download the zip to your `Download` folder. It will need to be extracted, renamed to "buildserver" `cd buildserver` `vagrant up` `vagrant ssh`.
 ```powershell
 powershell Invoke-WebRequest -Uri "https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip" -OutFile "$env:USERPROFILE\Downloads\buildserver-main.zip`
