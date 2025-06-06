@@ -38,7 +38,7 @@ display_menu() {
 
     echo "Release: $Provisioned | Deployment Version: $Version"
     echo "==================================================="
-    echo "B. Manage $PROJECT_NAME"
+    echo "B. Manage Provisioning for: $PROJECT_NAME"
     echo "==================================================="
     echo "Q. Update  | P. Rollback  | N. Restore  | L. Remove"
     echo "Current Commit:0000000   Timestamp:12345678"
@@ -48,8 +48,8 @@ display_menu() {
 }
 
 # Function to open provisioning menu
-provisioning_menu() {
-    local script_path="$PROJECT_PATH/common/menu/provisioning_menu.sh"
+provision_menu() {
+    local script_path="$PROJECT_PATH/common/menu/provision_menu.sh"
     if [ -f "$script_path" ]; then
         echo "Opening Provisioning Menu using $script_path"
         bash "$script_path"
@@ -392,7 +392,7 @@ while true; do
         8) app_menu ;;
         9) demo_menu ;;
         A) ;;
-        B) provisioning_menu ;;
+        B) provision_menu ;;
         C) ;;
         D) ;;
         E) ;;
