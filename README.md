@@ -189,14 +189,6 @@ powershell Invoke-WebRequest -Uri "https://github.com/chkp-altrevin/buildserver/
 **Updating the Buildserver repo**
 2 options:
 
-**Quick-Menu**
-- Step 1 login ssh -> quick-setup -> option `Q`
-
-**Manual**
-- Step 1 Download the latest repo, refer to step 4 above
-- Step 2 Extract to the buildserver folder over write all files
-- Step 3 run `sudo ./provision.sh`check for errors and fix
-
 **Access the VM**:
    - **Example:** C:\buildserver\vagrant ssh
 
@@ -204,6 +196,10 @@ powershell Invoke-WebRequest -Uri "https://github.com/chkp-altrevin/buildserver/
    vagrant ssh
    ```
 Upon SSH login, you'll be greeted with a custom MOTD and available commands (quick-setup) to assist with further setups or installs.
+
+
+**Quick-Menu**
+`quick-setup`
 
 ### ⚙️ Customizations
 
