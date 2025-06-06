@@ -260,6 +260,7 @@ log_latest_github_commit() {
   [ -f "$log_file" ] && cat "$log_file" >> "$temp_log"
 
   mv "$temp_log" "$log_file"
+  chown $INVOKING_USER && chgrp $INVOKING_USER
   echo "[INFO] Logged latest commit to $log_file"
 }
 
