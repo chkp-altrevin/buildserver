@@ -224,13 +224,20 @@ Downloads repo, extract and backup if exists and installs dependencies (all-in-o
 curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh -f && chmod +x install-script.sh && sudo ./install-script.sh --install
 ```
 
----
+**Script Usage**
 
+Install:
+```bash
+./install-script.sh --install
+```
 Download Only:
-`curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh -f && chmod +x install-script.sh && sudo ./install-script.sh --repo-download`
-
+```bash
+./install-script.sh --repo-download
+```
 Displays Help Menu:
-`curl -fsSL https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/install-script.sh -o install-script.sh -f && chmod +x install-script.sh && sudo ./install-script.sh --help`
+```bash
+./install-script.sh --help
+```
 
 ---
 
