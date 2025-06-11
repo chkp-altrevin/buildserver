@@ -406,6 +406,7 @@ add_user_to_docker() {
   run_with_sudo usermod -aG docker "$ORIGINAL_USER" && \
     log_success "User $ORIGINAL_USER added to Docker group." || log_error "FATAL: Failed to add user $ORIGINAL_USER to Docker group."
 }
+
 # ----- Install NVM -----------------------------------------------------------
 install_nvm() {
   log_info "Installing NVM..."
@@ -413,6 +414,7 @@ install_nvm() {
   sudo -i -u "$ORIGINAL_USER" "$PROJECT_PATH/common/scripts/deploy_nvm.sh" && \
     log_success "NVM installed." || log_error "NON-FATAL: NVM installation failed. If this was a --provision you can likely ignore"
 }
+
 # ----- Configure Terraform Repository ----------------------------------------
 configure_terraform_repo() {
   log_info "Configuring Terraform repository..."
@@ -500,7 +502,7 @@ configure_kubectl_repo() {
   fi
 }
 
-# ----- Update Preoject Directory Permissions ---------------------------------
+# ----- Update Project Directory Permissions ----------------------------------
 update_home_permissions() {
   log_info "Updating project directory permissions..."
   run_with_sudo chgrp -R "$ORIGINAL_USER" "$PROJECT_PATH" && \
@@ -509,10 +511,39 @@ update_home_permissions() {
 }
 
 # ----- Update and Upgrade System ---------------------------------------------
+#update_system() {
+#  log_info "Updating and upgrading system packages..."
+#  run_with_sudo apt-get update && run_with_sudo apt-get upgrade -y && \
+#    log_success "System updated and upgraded." || log_error "NON-FATAL: System update/upgrade failed."
+#}
+
+# ----- Update and Upgrade System (Fault-Tolerant) ---------------------------------------------
 update_system() {
-  log_info "Updating and upgrading system packages..."
-  run_with_sudo apt-get update && run_with_sudo apt-get upgrade -y && \
-    log_success "System updated and upgraded." || log_error "NON-FATAL: System update/upgrade failed."
+  log_info "🧼 Cleaning APT cache and prepping for update..."
+  run_with_sudo rm -rf /var/lib/apt/lists/*
+  run_with_sudo apt-get clean
+
+  # Optional: Force known mirror to avoid mirror desync (can be toggled)
+  # run_with_sudo sed -i 's|http://[^ ]*ubuntu.com|http://archive.ubuntu.com|g' /etc/apt/sources.list
+
+  log_info "📦 Updating and upgrading system packages with retry logic..."
+  local success=false
+  for i in {1..5}; do
+    if run_with_sudo apt-get update -o Acquire::http::No-Cache=true -o Acquire::Retries=3 -o Acquire::ForceIPv4=true && \
+       run_with_sudo apt-get upgrade -y; then
+      success=true
+      break
+    else
+      log_warn "Attempt $i failed. Retrying in $((i * 5)) seconds..."
+      sleep $((i * 5))
+    fi
+  done
+
+  if [ "$success" = true ]; then
+    log_success "✅ System updated and upgraded."
+  else
+    log_error "⚠️ NON-FATAL: System update/upgrade failed after retries."
+  fi
 }
 
 # ----- Configure Git ---------------------------------------------------------
@@ -600,46 +631,48 @@ main() {
   configure_terraform_repo # 2 install the terraform repository
   install_helm # 2 install the helm repository used for use case 1
   install_k3d # 2 install the k3d repository, responsible for creating k8s nodes on docker used for use case 1
-  # install_powershell # 2 install the powershell repository
+  #install_powershell # 2 install the powershell repository
   #install_awscli # install the awscli repository
   #install_gcloudcli # 2 install the google cloud repository
   #install_azurecli # 2 install the azure cli repository
   configure_kubectl_repo # 2 install the kubectl repository used for use case 1
   update_home_permissions # 2 updates anything copied over to the vagrant and $HOME paths used for use case 1 and 2
-  update_system # 2 apt update upgrade used for use case 1
+  #update_system # 2 apt update upgrade used for use case 1
   configure_git # 2 configures git common configurations feel free to modify but used for use case 1
   clone_repositories # 2 install a few repos modify any as needed or remove your call
   install_packages # 2 install the packages we setup distro for required for use case 1
   modify_bashrc # 2 modify bashrc to include a new path used for use case 1
   update_home_permissions  # 2 apply permissions used for use case 1
+  update_system
   generate_initial_sbom # 2 generate the package list we installed used for use case 1 and 1
   cleanup # 2 cleanup install and temp content used for usecase 1 and 2
   fix_ownership_in_home
+
 # Final messaging based on user type
 if [[ "${SUDO_USER:-$USER}" == "vagrant" ]]; then
-  echo "If errors, fix and reprovision using, vagrant up --provision. If this is a"
-  echo "custom install using provision.sh, you can likely ignore NON-FATAL errors."
-  echo "=========================================================================="
-  echo "SSH with vagrant ssh or your terminal of choice                           "
-  echo "Login: vagrant:privatekey port:2222"
+  echo "=================== Vagrant-VirtualBox Deployment ========================"
+  echo "| Standby rebooting, this will take only a moment...                     |"
   echo "=========================================================================="
 else
-  echo "Looks like you ran the installer script - Logout and log back in to see changes  "
+  echo "===================== Linux WSL All others ==============================="
+  echo "| Logout and log back in to see changes. :)                              |"
+  echo "=========================================================================="
 fi
   log_info "⚠️  Please log out and log back in to apply Docker group membership changes."
 }
 main
 
-sleep 6
+# sleeping to ensure apt updates are completed
+sleep 10
 echo "=========================================================================="
 # Print version ID
 echo ""
 echo "Script Version: $VERSION_ID (Saved to ${PROJECT_PATH}/version.txt)"
 echo ""
 echo "=========================================================================="
-echo "========================================================================= "
-echo "| Provisioning Log     | saved to ${PROJECT_PATH}/provisioning.log        "
-echo "| Software Packages    | exported to $PROJECT_PATH/initial_sbom           "
+echo "=========================================================================="
+echo "| Provisioning Log     | saved to ${PROJECT_PATH}/provisioning.log       |"
+echo "| Software Packages    | exported to $PROJECT_PATH/initial_sbom          |"
 echo "=========================================================================="
 sleep 6
 echo -e "\\n\033[1;31m[✖] Errors Detected:\033[0m"
@@ -649,13 +682,17 @@ echo -e "\\n\033[1;32m[✔] Successful Tasks:\033[0m"
 grep --color=always SUCCESS "$PROJECT_PATH/provisioning.log"
 
 echo ""
-echo "If errors, fix and reprovision using, vagrant up --provision. If this is a"
-echo "custom install using provision.sh, you can likely ignore NON-FATAL errors."
+echo "=================== Vagrant-VirtualBox Deployment ========================"
+echo "| If errors, fix and reprovision, vagrant up --provision. If this is a   |"
+echo "| You can likely ignore NON-FATAL errors if reprovisioning.              |"
+echo "|                                                                        |"
+echo "| SSH with vagrant ssh or your terminal of choice.                       |"
+echo "| Login: vagrant:privatekey port:2222                                    |"
 echo "=========================================================================="
-echo "SSH with vagrant ssh or your terminal of choice                           "
-echo "Login: vagrant:privatekey port:2222"
+echo ""
+echo "===================== Linux WSL All others ==============================="
+echo "| Logout and log back in to see changes.                                 |"
 echo "=========================================================================="
-echo "If you manually ran provision.sh - Logout and log back in to see changes  "
 
 # Safe argument parsing (override project vars)
 while [[ $# -gt 0 ]]; do
@@ -733,7 +770,7 @@ generate_initial_sbom() {
   local sbom_file="$PROJECT_PATH/initial_sbom"
   local package_list=(
     curl zip unzip apt-utils fakeroot dos2unix software-properties-common jq
-    kubectl build-essential git python3-pip python3 pkg-config shellcheck
+    kubectl build-essential git nvm python3-pip python3 pkg-config shellcheck
     net-tools apt-transport-https gnupg docker-compose-plugin terraform
     google-cloud-cli pass gpg gnupg2 xclip pinentry-tty azure-cli
   )
