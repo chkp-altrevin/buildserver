@@ -88,6 +88,7 @@ set BUILD_DIR=%USERPROFILE%\buildserver
 set BACKUP_DIR=%USERPROFILE%\buildserver_backups
 set ZIP_FILE=%TEMP%\buildserver-main.zip
 set DOT_VAGRANT=%USERPROFILE%\buildserver\.vagrant
+set VAGRANTFILE=%USERPROFILE%\buildserver\Vagrantfile
 
 #if exist "%DOT_VAGRANT%" (
 #    echo [INFO] Destroy Buildserver...
