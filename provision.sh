@@ -409,8 +409,8 @@ add_user_to_docker() {
 # ----- Install NVM -----------------------------------------------------------
 install_nvm() {
   log_info "Installing NVM..."
-  run_with_sudo "$PROJECT_PATH/common/scripts/deploy_nvm.sh" && \
-  #sudo -i -u "$VAGRANT_USER" "$PROJECT_PATH/scripts/deploy_nvm.sh" && \
+  #run_with_sudo "$PROJECT_PATH/common/scripts/deploy_nvm.sh" && \
+  sudo -i -u "$ORIGINAL_USER" "$PROJECT_PATH/common/scripts/deploy_nvm.sh" && \
     log_success "NVM installed." || log_error "NON-FATAL: NVM installation failed. If this was a --provision you can likely ignore"
 }
 # ----- Configure Terraform Repository ----------------------------------------
