@@ -107,7 +107,7 @@ if exist "%DOT_VAGRANT%" (
     choice /c YN /n /m "Confirm (Y/N): "
     if errorlevel 2 (
         echo [INFO] User declined destruction. >> "%LOG_FILE%"
-        echo Aborting based on user input.
+        echo Aborting...Use --refresh to update the project without starting from scratch
         echo User aborted provisioning - chose not to destroy existing Vagrant VM >> "%LOG_FILE%"
         exit /b 1
     ) else (
@@ -123,18 +123,18 @@ if exist "%DOT_VAGRANT%" (
             vagrant destroy -f
             if errorlevel 1 (
                 echo [ERROR] Vagrant destroy failed. Manual cleanup may be needed. >> "%LOG_FILE%"
-                call :log_info "Vagrant destroy command failed"
+                echo Vagrant destroy command failed
                 exit /b 1
             ) else (
                 echo [INFO] VM destroyed successfully. >> "%LOG_FILE%"
-                call :log_info "Vagrant destroy succeeded"
+                echo Vagrant destroy succeeded"
             )
         )
     )
 ) else (
     echo [INFO] No usable buildserver found at %BUILD_DIR%. >> "%LOG_FILE%"
-    echo 💡 Manually remove via VirtualBox UI or delete folder at: %USERPROFILE%\VirtualBox VMs
-    call :log_info "No Vagrant VM found. Skipping destroy."
+    echo Manually remove via VirtualBox UI or delete folder at: %USERPROFILE%\VirtualBox VMs
+    echo No Vagrant VM found. Skipping destroy."
 )
 
 echo Cleanup complete.
