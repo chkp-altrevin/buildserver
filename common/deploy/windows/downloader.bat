@@ -46,7 +46,7 @@ if exist "%DEST_DIR%\%FINAL_FOLDER%" (
 )
 
 :: Extract ZIP
-echo [INFO] Extracting ZIP to: %DEST_DIR%
+echo [INFO] Extracting ZIP to: %DEST_DIR% >> "%LOG_FILE%"
 powershell -Command "Expand-Archive -Path '%ZIP_FILE%' -DestinationPath '%DEST_DIR%' -Force"
 
 :: Rename extracted folder
@@ -55,7 +55,7 @@ if exist "%DEST_DIR%\%EXTRACT_FOLDER%" (
 )
 
 :: Completion message
-echo ╬▒ Installation complete. Project folder: %DEST_DIR%\%FINAL_FOLDER%
+echo Installation complete. Project folder: %DEST_DIR%\%FINAL_FOLDER%
 echo [INFO] Installation complete at %DEST_DIR%\%FINAL_FOLDER% >> "%LOG_FILE%"
 exit /b
 
@@ -93,53 +93,50 @@ set VAGRANTFILE=%USERPROFILE%\buildserver\Vagrantfile
 :: Example path - replace with actual build dir if not already set
 
 :: if exist "%DOT_VAGRANT%" (
-::     echo [INFO] Destroy Buildserver...
+::     echo [INFO] Destroy Buildserver... >> "%LOG_FILE%"
 ::     vagrant destroy -f
 :: ) else (
-::     echo [INFO] No usable buildserver found at %BUILD_DIR%. Manually remove by UI or CD to %USERPROFILE%\"VirtualBox VMs" and delete the folder.
+::     echo [INFO] No usable buildserver found at %BUILD_DIR%. Manually remove by UI or CD to %USERPROFILE%\"VirtualBox VMs" and delete the folder. >> "%LOG_FILE%"
 :: )
-
-setlocal enabledelayedexpansion
 
 :: Check if .vagrant directory exists
 if exist "%DOT_VAGRANT%" (
-    echo [INFO] Existing Vagrant VM detected at %DOT_VAGRANT%
+    echo [INFO] Existing Vagrant VM detected at %DOT_VAGRANT% >> "%LOG_FILE%"
     echo.
-    echo ⚠️ Do you want to destroy the existing VM? (Y/N)
+    echo ⚠ Do you want to destroy the existing VM? (Y/N)
     choice /c YN /n /m "Confirm (Y/N): "
     if errorlevel 2 (
-        echo [INFO] User declined destruction.
-        echo ❌ Aborting based on user input.
-        call :log_info "User aborted provisioning - chose not to destroy existing Vagrant VM"
+        echo [INFO] User declined destruction. >> "%LOG_FILE%"
+        echo Aborting based on user input.
+        echo User aborted provisioning - chose not to destroy existing Vagrant VM >> "%LOG_FILE%"
         exit /b 1
     ) else (
-        echo [INFO] Destroying existing Vagrant VM...
-        call :log_info "Destroying VM at %DOT_VAGRANT%"
+        echo [INFO] Destroying existing Vagrant VM... >> "%LOG_FILE%"
+        echo Destroying VM at %DOT_VAGRANT%
 
         where vagrant >nul 2>&1
         if errorlevel 1 (
-            echo [ERROR] Vagrant not found. Please install Vagrant or destroy manually.
-            call :log_info "Failed: Vagrant not found in PATH"
+            echo [ERROR] Vagrant not found. Please install Vagrant or destroy manually. >> "%LOG_FILE%"
+            echo Failed: Vagrant not found in PATH 
             exit /b 1
         ) else (
             vagrant destroy -f
             if errorlevel 1 (
-                echo [ERROR] Vagrant destroy failed. Manual cleanup may be needed.
+                echo [ERROR] Vagrant destroy failed. Manual cleanup may be needed. >> "%LOG_FILE%"
                 call :log_info "Vagrant destroy command failed"
                 exit /b 1
             ) else (
-                echo [INFO] VM destroyed successfully.
+                echo [INFO] VM destroyed successfully. >> "%LOG_FILE%"
                 call :log_info "Vagrant destroy succeeded"
             )
         )
     )
 ) else (
-    echo [INFO] No usable buildserver found at %BUILD_DIR%.
+    echo [INFO] No usable buildserver found at %BUILD_DIR%. >> "%LOG_FILE%"
     echo 💡 Manually remove via VirtualBox UI or delete folder at: %USERPROFILE%\VirtualBox VMs
     call :log_info "No Vagrant VM found. Skipping destroy."
 )
-goto :eof
 
-echo ╬ Cleanup complete.
+echo Cleanup complete.
 echo [INFO] Cleanup complete. >> "%LOG_FILE%"
 exit /b
