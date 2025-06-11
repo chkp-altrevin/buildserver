@@ -89,10 +89,6 @@ install_required_dependencies() {
   run_with_sudo apt-get update -y
   run_with_sudo apt-get install -y "${packages[@]}" &&     log_success "Dependencies installed." ||     log_error "FATAL: Failed to install required dependencies."
 }
-
-
-# 
-
 # ---------------- Flag Handling and Validation ----------------
 
 show_help() {
@@ -323,7 +319,8 @@ add_custom_motd() {
 # ----- Update .bashrc with PATH ----------------------------------------------
 update_bashrc_path() {
   log_info "Updating .bashrc to include local bin in PATH..."
-  sudo su -l $USER -c 'echo $PATH' echo "export PATH=\$PATH:$CALLER_HOME/.local/bin" >> "$CALLER_HOME/.bashrc" && \
+  #sudo su -l $USER -c 'echo $PATH' echo "export PATH=\$PATH:$CALLER_HOME/.local/bin" >> "$CALLER_HOME/.bashrc" && \
+  run_with_sudo $ORIGINAL_USER -c 'echo $PATH' echo "export PATH=\$PATH:$CALLER_HOME/.local/bin" >> "$CALLER_HOME/.bashrc" && \
     log_success ".bashrc updated." || log_error "FATAL: Failed to update .bashrc."
 }
 
@@ -442,6 +439,17 @@ install_k3d() {
 }
 
 # ----- Install Powershell ----------------------------------------------------
+#install_powershell() {
+#  if command -v pwsh >/dev/null 2>&1; then
+#    log_info "Powershell is already installed. Skipping installation."
+#  else
+#    log_info "Installing Powershell..."
+#    source /etc/os-release && \
+#    wget -q "https://packages.microsoft.com/config/ubuntu/$VERSION_ID/packages-microsoft-prod.deb" && \
+#    run_with_sudo dpkg -i packages-microsoft-prod.deb && \
+#      log_success "Powershell Installed." || log_error "FATAL: Powershell Installation failed."
+#  fi
+#}
 
 # ----- Install AWS CLI -----------------------------------------------------------
 #install_awscli() {
