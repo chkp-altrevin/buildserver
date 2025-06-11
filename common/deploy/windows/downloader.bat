@@ -87,6 +87,46 @@ echo [INFO] Running cleanup...
 set BUILD_DIR=%USERPROFILE%\buildserver
 set BACKUP_DIR=%USERPROFILE%\buildserver_backups
 set ZIP_FILE=%TEMP%\buildserver-main.zip
+set DOT_VAGRANT=%USERPROFILE%\buildserver\.vagrant
+
+#if exist "%DOT_VAGRANT%" (
+#    echo [INFO] Destroy Buildserver...
+#    vagrant destroy -f
+#) else (
+#    echo [INFO] No usable buildserver found at %BUILD_DIR%. Manually remove by UI or CD to %USERPROFILE%\"VirtualBox VMs" and delete the folder.
+#)
+:: Check if .vagrant folder exists
+if exist "%DOT_VAGRANT%" (
+    echo [INFO] Existing Vagrant VM detected at %DOT_VAGRANT%
+    echo.
+    echo ⚠️  Do you want to destroy the existing VM? (Y/N)
+    choice /c YN /n /m "Confirm (Y/N): "
+    if errorlevel 2 (
+        echo [INFO] Skipping destruction. Continuing with setup...
+        call :log_info "User chose not to destroy existing Vagrant VM"
+    ) else (
+        echo [INFO] Destroying existing Vagrant VM...
+        call :log_info "Destroying VM at %DOT_VAGRANT%"
+        where vagrant >nul 2>&1
+        if %errorlevel% neq 0 (
+            echo [ERROR] Vagrant not found. Please install Vagrant or destroy manually.
+            call :log_info "Failed: Vagrant not found in PATH"
+        ) else (
+            vagrant destroy -f
+            if %errorlevel% neq 0 (
+                echo [ERROR] Vagrant destroy failed. Manual cleanup may be needed.
+                call :log_info "Vagrant destroy command failed"
+            ) else (
+                echo [INFO] VM destroyed successfully.
+                call :log_info "Vagrant destroy succeeded"
+            )
+        )
+    )
+) else (
+    echo [INFO] No usable buildserver found at %BUILD_DIR%.
+    echo 💡 Manually remove via VirtualBox UI or delete folder at: %USERPROFILE%\VirtualBox VMs
+    call :log_info "No Vagrant VM found. Skipping destroy."
+)
 
 if exist "%BUILD_DIR%" (
     echo [INFO] Deleting %BUILD_DIR%...
