@@ -648,10 +648,11 @@ main() {
   #update_system # 2 apt update upgrade used for use case 1
   configure_git # 2 configures git common configurations feel free to modify but used for use case 1
   clone_repositories # 2 install a few repos modify any as needed or remove your call
-  install_packages # 2 install the packages we setup distro for required for use case 1
+  #install_packages # 2 install the packages we setup distro for required for use case 1
   modify_bashrc # 2 modify bashrc to include a new path used for use case 1
   update_home_permissions  # 2 apply permissions used for use case 1
   update_system
+  install_packages
   generate_initial_sbom # 2 generate the package list we installed used for use case 1 and 1
   cleanup # 2 cleanup install and temp content used for usecase 1 and 2
   fix_ownership_in_home
