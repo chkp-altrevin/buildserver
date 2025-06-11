@@ -407,7 +407,12 @@ add_user_to_docker() {
     log_success "User $ORIGINAL_USER added to Docker group." || log_error "FATAL: Failed to add user $ORIGINAL_USER to Docker group."
 }
 # ----- Install NVM -----------------------------------------------------------
-
+install_nvm() {
+  log_info "Installing NVM..."
+  run_with_sudo "$PROJECT_PATH/common/scripts/deploy_nvm.sh" && \
+  #sudo -i -u "$VAGRANT_USER" "$PROJECT_PATH/scripts/deploy_nvm.sh" && \
+    log_success "NVM installed." || log_error "NON-FATAL: NVM installation failed. If this was a --provision you can likely ignore"
+}
 # ----- Configure Terraform Repository ----------------------------------------
 configure_terraform_repo() {
   log_info "Configuring Terraform repository..."
@@ -591,7 +596,7 @@ main() {
   install_preflight  # 2 used to precheck our external facing scripts such as docker, remove or not your call used for use case 1
   install_docker  # 2 install script with preflight dont leave to chance used for use case 1
   add_user_to_docker  # 2 add our user to docker group use for use case 1
-  # install_nvm  # 2 installs node version mgr, not required but a personal fav
+  install_nvm  # 2 installs node version mgr, not required but a personal fav
   configure_terraform_repo # 2 install the terraform repository
   install_helm # 2 install the helm repository used for use case 1
   install_k3d # 2 install the k3d repository, responsible for creating k8s nodes on docker used for use case 1
