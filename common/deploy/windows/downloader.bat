@@ -90,15 +90,15 @@ set ZIP_FILE=%TEMP%\buildserver-main.zip
 set DOT_VAGRANT=%USERPROFILE%\buildserver\.vagrant
 set VAGRANTFILE=%USERPROFILE%\buildserver\Vagrantfile
 
-#if exist "%DOT_VAGRANT%" (
-#    echo [INFO] Destroy Buildserver...
-#    vagrant destroy -f
-#) else (
-#    echo [INFO] No usable buildserver found at %BUILD_DIR%. Manually remove by UI or CD to %USERPROFILE%\"VirtualBox VMs" and delete the folder.
-#)
+:: if exist "%DOT_VAGRANT%" (
+::     echo [INFO] Destroy Buildserver...
+::     vagrant destroy -f
+:: ) else (
+::     echo [INFO] No usable buildserver found at %BUILD_DIR%. Manually remove by UI or CD to %USERPROFILE%\"VirtualBox VMs" and delete the folder.
+:: )
 :: Check if .vagrant folder exists
 if exist "%DOT_VAGRANT%" (
-    echo [INFO] Existing Vagrant VM detected at %DOT_VAGRANT%
+    echo [INFO] Existing Vagrant VM profile detected at %DOT_VAGRANT%
     echo.
     echo ⚠️  Do you want to destroy the existing VM? (Y/N)
     choice /c YN /n /m "Confirm (Y/N): "
@@ -150,6 +150,6 @@ if exist "%ZIP_FILE%" (
     echo [INFO] No ZIP archive found at %ZIP_FILE%.
 )
 
-echo ╬▒ Cleanup complete.
+echo ╬ Cleanup complete.
 echo [INFO] Cleanup complete. >> "%LOG_FILE%"
 exit /b
