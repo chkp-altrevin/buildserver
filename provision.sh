@@ -18,6 +18,7 @@ set -euo pipefail
 SUDO_USER="${SUDO_USER:-}"
 ORIGINAL_USER="${SUDO_USER:-$USER}"
 CALLER_HOME="${HOME}"
+DOT_BUILDSERVER="${DOT_BUILDSERVER:-.buildserver}"
 
 if [[ -n "$SUDO_USER" ]]; then
   CALLER_HOME="$(getent passwd "$SUDO_USER" | cut -d: -f6)"
@@ -42,8 +43,8 @@ fix_ownership_in_home() {
 : "${PROJECT_NAME:="buildserver"}"
 : "${PROJECT_PATH:="$CALLER_HOME/$PROJECT_NAME"}"
 : "${TEST_MODE:=false}"
+: "${DOT_BUILDSERVER:=.buildserver}"
 
-DOT_BUILDSERVER="${DOT_BUILDSERVER:-.buildserver}"
 
 # fallback mkdir paths needed or not
 mkdir -p "$PROJECT_PATH"
@@ -165,7 +166,6 @@ fi
 
 export PROJECT_NAME
 export PROJECT_PATH
-export DOT_BUILDSERVER
 
 # -----  Run as root check ----------------------------------------------------
 if [[ $EUID -ne 0 ]]; then
