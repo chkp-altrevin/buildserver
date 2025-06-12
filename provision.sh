@@ -18,7 +18,6 @@ set -euo pipefail
 SUDO_USER="${SUDO_USER:-}"
 ORIGINAL_USER="${SUDO_USER:-$USER}"
 CALLER_HOME="${HOME}"
-DOT_BUILDSERVER="$CALLER_HOME/.buildserver"
 
 if [[ -n "$SUDO_USER" ]]; then
   CALLER_HOME="$(getent passwd "$SUDO_USER" | cut -d: -f6)"
@@ -81,6 +80,7 @@ if ! cd "$PWD" 2>/dev/null; then
   log_info "Current working directory is invalid. Changing to PROJECT_PATH: $PROJECT_PATH"
   cd "$PROJECT_PATH" || { log_error "Failed to change to PROJECT_PATH: $PROJECT_PATH"; exit 1; }
 fi
+
 # ---------------------- log files --------------------------------------
 log_info()    { echo "[INFO]    $(date '+%F %T') - $*" | tee -a "$LOG"; }
 log_success() { echo "[SUCCESS] $(date '+%F %T') - $*" | tee -a "$LOG"; }
@@ -123,6 +123,7 @@ show_help() {
 PROJECT_NAME="${PROJECT_NAME:-buildserver}"
 PROJECT_PATH="${PROJECT_PATH:-$CALLER_HOME/$PROJECT_NAME}"
 CHECK_VBOX_VAGRANT=false
+DOT_BUILDSERVER="$CALLER_HOME/.buildserver"
 
 # Parse args
 while [[ $# -gt 0 ]]; do
@@ -163,6 +164,7 @@ fi
 
 export PROJECT_NAME
 export PROJECT_PATH
+export DOT_BUILDSERVER
 
 # -----  Run as root check ----------------------------------------------------
 if [[ $EUID -ne 0 ]]; then
@@ -183,7 +185,6 @@ fi
 #fi
 #
 # ------- Function to check for existing vagrant deployment -------------------
-#
 check_vagrant_user() {
   if id "vagrant" &>/dev/null; then
     echo "Detected Vagrant/VirtualBox deployment. You should cancel and use (quick-setup), continue to update? [Y/n]"
@@ -209,7 +210,7 @@ VERSION_ID=$(generate_version_id)
 # Ensure the file exists
 [ -f "$PROJECT_PATH/$DOT_BUILDSERVER/version.txt" ] || touch "$PROJECT_PATH/$DOT_BUILDSERVER/version.txt"
 # Append the version
-echo "$VERSION_ID" >> "$PROJECT_PATH/version.txt"
+echo "$VERSION_ID" >> "$PROJECT_PATH/$DOT_BUILDSERVER/version.txt"
 
 # --------- Function to add optional aliases ---------------------------------
 import_menu_aliases() {
@@ -296,7 +297,7 @@ add_custom_motd() {
 update_bashrc_path() {
   log_info "Updating .bashrc to include local bin in PATH..."
   #sudo su -l $USER -c 'echo $PATH' echo "export PATH=\$PATH:$CALLER_HOME/.local/bin" >> "$CALLER_HOME/.bashrc" && \
-  run_with_sudo $ORIGINAL_USER -c 'echo $PATH' echo "export PATH=\$PATH:$CALLER_HOME/.local/bin" >> "$CALLER_HOME/.bashrc" && \
+  sudo -i -u "$ORIGINAL_USER" -c 'echo $PATH' echo "export PATH=\$PATH:$CALLER_HOME/.local/bin" >> "$CALLER_HOME/.bashrc" && \
     log_success ".bashrc updated." || log_error "FATAL: Failed to update .bashrc."
 }
 
