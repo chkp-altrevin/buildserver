@@ -42,11 +42,12 @@ fix_ownership_in_home() {
 : "${PROJECT_NAME:="buildserver"}"
 : "${PROJECT_PATH:="$CALLER_HOME/$PROJECT_NAME"}"
 : "${TEST_MODE:=false}"
+: "$PROJECT_PATH/${DOT_BUILDSERVER:-.buildserver}"
 
 # fallback mkdir paths needed or not
 mkdir -p "$PROJECT_PATH"
 # lifecycle directory for the buildserver versions commit etc
-mkdir -p "$CALLER_HOME/$DOT_BUILDSERVER"
+mkdir -p "$PROJECT_PATH/$DOT_BUILDSERVER"
 # log directory
 mkdir -p "$PROJECT_PATH/logs"
 
