@@ -1,15 +1,28 @@
 #!/usr/bin/env bash
 set -euo pipefail
-
+#
+# ==============================================================================
+# DIY Buildserver Lab Environment Setup Script
+#
+# This script sets up your environment by:
+#   - Displaying a banner and updating .bashrc
+#   - Creating necessary directories and copying profile files
+#   - Configuring hostname and hosts file entries
+#   - Installing preflight, spectral, docker, helm, k3d, and more
+#   - Setting up repositories, cloning demo repos, and installing packages
+#   - Modifying bashrc, generating an initial SBOM, and cleaning up
+#
+#==============================================================================
+#
 # === SUDO-SAFE ENV SETUP ===
 SUDO_USER="${SUDO_USER:-}"
 ORIGINAL_USER="${SUDO_USER:-$USER}"
 CALLER_HOME="${HOME}"
+DOT_BUILDSERVER="$CALLER_HOME/.buildserver"
 
 if [[ -n "$SUDO_USER" ]]; then
   CALLER_HOME="$(getent passwd "$SUDO_USER" | cut -d: -f6)"
 fi
-
 
 # Auto-recover if shell-init fails due to invalid working directory
 if ! cd "$PWD" 2>/dev/null; then
@@ -17,11 +30,13 @@ if ! cd "$PWD" 2>/dev/null; then
   cd "$PROJECT_PATH" || { log_error "Failed to change to fallback PROJECT_PATH: $PROJECT_PATH"; exit 1; }
 fi
 
-# Ensure all files under CALLER_HOME are owned by the original user
+#------- Ensure files under CALLER_HOME are owned by the original user ---------
 fix_ownership_in_home() {
   log_info "Ensuring proper ownership for all files in $CALLER_HOME"
   find "$CALLER_HOME" -user root -exec chown "$ORIGINAL_USER" {} +
   find "$CALLER_HOME" -group root -exec chgrp "$ORIGINAL_USER" {} +
+  find "$DOT_BUILDSERVER" -user root -exec chown "$ORIGINAL_USER" {} +
+  find "$DOT_BUILDSERVER" -group root -exec chgrp "$ORIGINAL_USER" {} +
   log_success "Ownership corrected for user: $ORIGINAL_USER"
 }
 
@@ -29,8 +44,14 @@ fix_ownership_in_home() {
 : "${PROJECT_PATH:="$CALLER_HOME/$PROJECT_NAME"}"
 : "${TEST_MODE:=false}"
 
+# fallback mkdir paths needed or not
 mkdir -p "$PROJECT_PATH"
-LOG="${PROJECT_PATH}/provisioning.log"
+# lifecycle directory for the buildserver versions commit etc
+mkdir -p "$CALLER_HOME/$DOT_BUILDSERVER"
+# log directory
+mkdir -p "$PROJECT_PATH/logs"
+
+LOG="${PROJECT_PATH}/logs/provisioning.log"
 touch "$LOG"
 # --- Log Rotation ---
 MAX_LOG_SIZE=1048576  # 1MB
@@ -41,28 +62,26 @@ if [ -f "$LOG" ] && [ "$(stat -c%s "$LOG")" -ge "$MAX_LOG_SIZE" ]; then
 fi
 
 # --- Trap Cleanup and Rollback ---
-rollback_on_failure() {
-  log_error "Provisioning failed. Initiating rollback..."
-  # Example: remove partial installs or restore backups
-  # rm -rf "$PROJECT_PATH/some_temp_dir"
-  # [ -f "$PROJECT_PATH/.backup_config" ] && mv "$PROJECT_PATH/.backup_config" "$PROJECT_PATH/config"
-  log_info "Rollback completed (placeholder)."
-}
-
+#rollback_on_failure() {
+#  log_error "Provisioning failed. Initiating rollback..."
+#  # Example: remove partial installs or restore backups
+#  # rm -rf "$PROJECT_PATH/some_temp_dir"
+#  # [ -f "$PROJECT_PATH/.backup_config" ] && mv "$PROJECT_PATH/.backup_config" "$PROJECT_PATH/config"
+#  log_info "Rollback completed (placeholder)."
+#}
 cleanup_on_exit() {
   log_info "Cleaning up temporary files and exiting."
 }
 
-trap 'rollback_on_failure' ERR
-trap 'cleanup_on_exit' EXIT
+# trap 'rollback_on_failure' ERR
+# trap 'cleanup_on_exit' EXIT
 
 # Auto-recover if shell-init fails due to invalid working directory
 if ! cd "$PWD" 2>/dev/null; then
   log_info "Current working directory is invalid. Changing to PROJECT_PATH: $PROJECT_PATH"
   cd "$PROJECT_PATH" || { log_error "Failed to change to PROJECT_PATH: $PROJECT_PATH"; exit 1; }
 fi
-
-
+# ---------------------- log files --------------------------------------
 log_info()    { echo "[INFO]    $(date '+%F %T') - $*" | tee -a "$LOG"; }
 log_success() { echo "[SUCCESS] $(date '+%F %T') - $*" | tee -a "$LOG"; }
 log_error()   { echo "[ERROR]   $(date '+%F %T') - $*" | tee -a "$LOG" >&2; }
@@ -77,11 +96,10 @@ run_with_sudo() {
   fi
 }
 
-# === Injected Original Functions ===
-
+# ----------- Install Dependencies ----------------------------
 install_required_dependencies() {
   log_info "Installing required dependencies..."
-  local packages=(curl zip unzip apt-utils fakeroot dos2unix software-properties-common)
+  local packages=(curl zip unzip apt-utils fakeroot dos2unix shellcheck software-properties-common)
   if [[ "$TEST_MODE" == "true" ]]; then
     log_info "[TEST MODE] Would run: apt-get install -y ${packages[*]}"
     return 0
@@ -89,15 +107,14 @@ install_required_dependencies() {
   run_with_sudo apt-get update -y
   run_with_sudo apt-get install -y "${packages[@]}" &&     log_success "Dependencies installed." ||     log_error "FATAL: Failed to install required dependencies."
 }
-# ---------------- Flag Handling and Validation ----------------
 
+# ---------------- Flag Handling and Validation ----------------
 show_help() {
   echo "Usage: $0 [OPTIONS]"
   echo ""
   echo "Options:"
   echo "  --project-name NAME        Optional: Project name (default: buildserver)"
-  echo "  --project-path PATH        Required*: Path to install (default: $CALLER_HOME/buildserver)"
-  echo "  --virtualbox-vagrant-win   Enable Vagrant/VirtualBox Windows setup flow"
+  echo "  --project-path PATH        Path to install (default: $PROJECT_PATH)"
   echo "  -h, --help                 Show this help message"
   exit 0
 }
@@ -117,10 +134,6 @@ while [[ $# -gt 0 ]]; do
     --project-path)
       PROJECT_PATH="$2"
       shift 2
-      ;;
-    --virtualbox-vagrant-win)
-      CHECK_VBOX_VAGRANT=true
-      shift
       ;;
     -h|--help)
       show_help
@@ -158,38 +171,22 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 # ---------------- VirtualBox + Vagrant Verification ----------------
-
-
 # Run validation if flag passed
 if [[ "$CHECK_VBOX_VAGRANT" == true ]]; then
   verify_virtualbox_and_vagrant
 fi
-# ==============================================================================
-# DIY Buildserver Lab Environment Setup Script
-#
-# This script sets up your environment by:
-#   - Displaying a banner and updating .bashrc
-#   - Creating necessary directories and copying profile files
-#   - Configuring hostname and hosts file entries
-#   - Installing preflight, spectral, docker, helm, k3d, and more
-#   - Setting up repositories, cloning demo repos, and installing packages
-#   - Modifying bashrc, generating an initial SBOM, and cleaning up
-#
-#
-#==============================================================================
-#
 # -----  Run as root check ----------------------------------------------------
 #
-if [[ $EUID -ne 0 ]]; then
-  echo "This script must be run as root."
-  exit 1
-fi
+#if [[ $EUID -ne 0 ]]; then
+#  echo "This script must be run as root."
+#  exit 1
+#fi
 #
 # ------- Function to check for existing vagrant deployment -------------------
 #
 check_vagrant_user() {
   if id "vagrant" &>/dev/null; then
-    echo "Manual provisioning, continue to update? [Y/n]"
+    echo "Detected Vagrant/VirtualBox deployment. You should cancel and use (quick-setup), continue to update? [Y/n]"
     read -r response
     case "$response" in
       [nN][oO]|[nN])
@@ -203,18 +200,14 @@ check_vagrant_user() {
   fi
 }
 
-# ----------Function to generate a version ID with date and time -------------
-#
+# -------- Function to generate a version ID to support lifecycle ------------
 generate_version_id() {
     echo "v$(date '+%Y%m%d_%H%M%S')"
 }
 # Store the generated version ID
 VERSION_ID=$(generate_version_id)
-# Save to a file (overwrite each run)
-#
 # Ensure the file exists
-[ -f "$PROJECT_PATH/version.txt" ] || touch "$PROJECT_PATH/version.txt"
-
+[ -f "$PROJECT_PATH/$DOT_BUILDSERVER/version.txt" ] || touch "$PROJECT_PATH/$DOT_BUILDSERVER/version.txt"
 # Append the version
 echo "$VERSION_ID" >> "$PROJECT_PATH/version.txt"
 
@@ -258,24 +251,7 @@ import_menu_aliases() {
   fi
 }
 #
-touch $PROJECT_PATH/provisioning.log
-#
-# --------- Logging Functions ------------------------------------------------
-
-#log_info() {
-#  local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
-#  echo "[$timestamp] [INFO] $1" >> $PROJECT_PATH/provisioning.log
-#}
-
-#log_success() {
-#  local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
-#  echo "[$timestamp] [SUCCESS] $1" >> $PROJECT_PATH/provisioning.log
-#}
-
-#log_error() {
-#  local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
-#  echo "[$timestamp] [ERROR] $1" >> $PROJECT_PATH/provisioning.log
-#}
+touch $PROJECT_PATH/logs/provisioning.log
 
 # ------ Helper Function for Sudo ----------------------------------------------
 # run_with_sudo: Executes a command with sudo if not already running as root.
@@ -295,12 +271,12 @@ make_scripts_executable() {
 }
 
 # ----- Install Dependancies ----------------------------------------------------
-install_dependancies() {
-  log_info "Installing dependancies..."
-  run_with_sudo apt-get -yq install curl unzip apt-utils fakeroot && \
-    log_success "APT Dependancies installed." || log_error "FATAL: Installing dependancies failed."
-}
-
+#install_dependancies() {
+#  log_info "Installing dependancies..."
+#  run_with_sudo apt-get -yq install curl unzip apt-utils fakeroot && \
+#    log_success "APT Dependancies installed." || log_error "FATAL: Installing dependancies failed."
+#}
+#
 # ----- Banner Display --------------------------------------------------------
 display_banner() {
   echo '01100010 01110101 01101001 01101100 01100100 01110011 01100101 01110010 01110110 01100101 01110010'
@@ -580,7 +556,7 @@ clone_repositories() {
 install_packages() {
   log_info "Installing selected packages..."
   run_with_sudo apt-get -yq install jq kubectl dos2unix build-essential git python3-pip python3 pkg-config \
-    shellcheck net-tools apt-transport-https unzip gnupg software-properties-common docker-compose-plugin \
+    net-tools apt-transport-https unzip gnupg software-properties-common docker-compose-plugin \
     terraform gnupg2 xclip && \
     log_success "APT Additional packages installed." || log_error "FATAL: APT Additional packages failed install."
 }
@@ -619,42 +595,40 @@ cleanup() {
 }
 
 # ----- Main Execution ----------------------------------------------------------
-# Info below is referenced in the README.md file for review if you plan to modify and make your own, review comments below for more info
-# Use Case 1  = All functions below are required for Use Case 1 Vagrant and VirtualBox automated full deployment
-# Use Case 2  = Comments that start with a 2, are optional review comments below for more info
+
 main() {
   install_required_dependencies
   check_vagrant_user
   make_scripts_executable
-  display_banner # fun stuff
-  add_custom_motd # the motd
-  import_menu_aliases # if you plan to use cli menu and automation these are required
-  create_directories # 2 create custom directories needed for use case 1
-  copy_profile_files # 2 alias and bash stuff needed for use case 1
-  configure_hostname_hosts # 2 create hostname and records needed for use case 1
-  install_preflight  # 2 used to precheck our external facing scripts such as docker, remove or not your call used for use case 1
-  install_docker  # 2 install script with preflight dont leave to chance used for use case 1
-  add_user_to_docker  # 2 add our user to docker group use for use case 1
-  install_nvm  # 2 installs node version mgr, not required but a personal fav
-  configure_terraform_repo # 2 install the terraform repository
-  install_helm # 2 install the helm repository used for use case 1
-  install_k3d # 2 install the k3d repository, responsible for creating k8s nodes on docker used for use case 1
-  #install_powershell # 2 install the powershell repository
-  #install_awscli # install the awscli repository
-  #install_gcloudcli # 2 install the google cloud repository
-  #install_azurecli # 2 install the azure cli repository
-  configure_kubectl_repo # 2 install the kubectl repository used for use case 1
-  update_home_permissions # 2 updates anything copied over to the vagrant and $HOME paths used for use case 1 and 2
-  #update_system # 2 apt update upgrade used for use case 1
-  configure_git # 2 configures git common configurations feel free to modify but used for use case 1
-  clone_repositories # 2 install a few repos modify any as needed or remove your call
-  #install_packages # 2 install the packages we setup distro for required for use case 1
-  modify_bashrc # 2 modify bashrc to include a new path used for use case 1
-  update_home_permissions  # 2 apply permissions used for use case 1
+  display_banner
+  add_custom_motd
+  import_menu_aliases
+  create_directories
+  copy_profile_files
+  configure_hostname_hosts
+  install_preflight
+  install_docker
+  add_user_to_docker
+  install_nvm 
+  configure_terraform_repo
+  install_helm
+  install_k3d
+  #install_powershell
+  #install_awscli
+  #install_gcloudcli
+  #install_azurecli
+  configure_kubectl_repo
+  update_home_permissions
+  #update_system
+  configure_git
+  clone_repositories
+  #install_packages
+  modify_bashrc
+  update_home_permissions
   update_system
   install_packages
-  generate_initial_sbom # 2 generate the package list we installed used for use case 1 and 1
-  cleanup # 2 cleanup install and temp content used for usecase 1 and 2
+  generate_initial_sbom
+  cleanup
   fix_ownership_in_home
 
 # Final messaging based on user type
@@ -683,7 +657,6 @@ echo "==========================================================================
 echo "| Provisioning Log     | saved to ${PROJECT_PATH}/provisioning.log       |"
 echo "| Software Packages    | exported to $PROJECT_PATH/initial_sbom          |"
 echo "=========================================================================="
-sleep 6
 echo -e "\\n\033[1;31m[✖] Errors Detected:\033[0m"
 grep --color=always ERROR "$PROJECT_PATH/provisioning.log"
 echo "=========================================================================="
@@ -712,8 +685,8 @@ while [[ $# -gt 0 ]]; do
     *) shift ;;
   esac
 done
-# === Injected Updated Functions ===
 
+# ---------------------- generate commit version ---------------------------
 generate_version_id() {
   local timestamp="v$(date '+%Y%m%d_%H%M%S')"
   local git_sha="nogit"
@@ -723,7 +696,7 @@ generate_version_id() {
   echo "${timestamp}_${git_sha}"
 }
 
-
+# ---------------------- install docker -----------------------------
 install_docker() {
   if command -v docker >/dev/null 2>&1; then
     log_info "Docker is already installed. Skipping installation."
@@ -744,8 +717,7 @@ install_docker() {
     curl -fsSL https://get.docker.com | sh && log_success "Docker installed via fallback." || log_error "FATAL: Docker fallback installation failed."
   fi
 }
-
-
+# ------------------------ install helm --------------------------------
 install_helm() {
   local version="v3.14.0"
   log_info "Installing Helm version $version..."
@@ -756,7 +728,7 @@ install_helm() {
     log_success "Helm $version installed." || log_error "FATAL: Helm installation failed. If this was a --provision you can likely ignore"
 }
 
-
+# ---------------------- modify bashrc source ---------------------------
 modify_bashrc() {
   log_info "Modifying .bashrc to source .env if not already included..."
 
@@ -771,8 +743,7 @@ modify_bashrc() {
       log_error "FATAL: Failed to modify .bashrc."
   fi
 }
-
-
+# ---------------------- generate sbom ---------------------------
 generate_initial_sbom() {
   log_info "Generating initial SBOM..."
 
@@ -797,8 +768,7 @@ generate_initial_sbom() {
     log_success "SBOM saved to $sbom_file" || \
     log_error "NON-FATAL: Failed to generate SBOM."
 }
-
-
+# -------------------- final cleanup ----------------------------
 cleanup() {
   log_info "Performing cleanup..."
   run_with_sudo rm -f ./get_helm.sh
