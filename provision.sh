@@ -42,7 +42,8 @@ fix_ownership_in_home() {
 : "${PROJECT_NAME:="buildserver"}"
 : "${PROJECT_PATH:="$CALLER_HOME/$PROJECT_NAME"}"
 : "${TEST_MODE:=false}"
-: "$PROJECT_PATH/${DOT_BUILDSERVER:-.buildserver}"
+
+DOT_BUILDSERVER="${DOT_BUILDSERVER:-.buildserver}"
 
 # fallback mkdir paths needed or not
 mkdir -p "$PROJECT_PATH"
@@ -124,7 +125,6 @@ show_help() {
 PROJECT_NAME="${PROJECT_NAME:-buildserver}"
 PROJECT_PATH="${PROJECT_PATH:-$CALLER_HOME/$PROJECT_NAME}"
 CHECK_VBOX_VAGRANT=false
-DOT_BUILDSERVER="$CALLER_HOME/.buildserver"
 
 # Parse args
 while [[ $# -gt 0 ]]; do
