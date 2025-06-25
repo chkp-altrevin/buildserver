@@ -13,13 +13,26 @@ set FINAL_FOLDER=buildserver
 set BACKUP_DIR=%USERPROFILE%\buildserver_backups
 
 :: Handle command-line flags
+if "%~1"=="" goto :missing_flag
 if "%~1"=="--help" goto :help
 if "%~1"=="--cleanup" goto :cleanup
 if "%~1"=="--refresh" (
-    call "%~f0"
+    call "%~f0" --install
     exit /b
 )
+if "%~1"=="--install" goto :install
 
+goto :unknown_flag
+
+:missing_flag
+echo [ERROR] No flag provided. Use --install to run the installer.
+goto :help
+
+:unknown_flag
+echo [ERROR] Unknown flag: %~1
+goto :help
+
+:install
 :: Prompt user for extraction path
 set /p DEST_DIR=Enter extract destination path (default is %USERPROFILE%): 
 if "%DEST_DIR%"=="" set DEST_DIR=%USERPROFILE%
@@ -62,22 +75,25 @@ echo Once complete run: vagrant ssh
 echo [INFO] Installation complete at %DEST_DIR%\%FINAL_FOLDER% >> "%LOG_FILE%"
 exit /b
 
-:: HELP SECTION
+
 :help
 echo --------------------------------------------------
 echo               BuildServer Installer
 echo --------------------------------------------------
-echo Usage:
-echo    downloader.bat  (Installs, Backups, Verifies)
-echo    downloader.bat  [--help] [--refresh] [--cleanup]
+echo Assumes First Time Install:
+echo    downloader.bat --install *Warning: Replaces any existing files and removes .vagrant file if exists
+echo.
+echo Safe Upgrade:
+echo    downloader.bat --refresh *Info: Pulls down the latest buildserver and does a copy .vagrant intact
 echo.
 echo Flags:
-echo    --help      Show this help message
-echo    --refresh   Re-fresh the project folder
-echo    --cleanup   Remove buildserver, backups, and zip
+echo    --install    Run initial full installation process
+echo    --refresh    Re-run the script and re-install
+echo    --cleanup    Remove buildserver, backups, and zip
+echo    --help       Show this help message
 echo.
 echo Examples:
-echo    downloader.bat
+echo    downloader.bat --install
 echo    downloader.bat --cleanup
 echo.
 echo Logs stored at: %LOG_FILE%
