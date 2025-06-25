@@ -21,7 +21,7 @@ if "%~1"=="--refresh" (
 )
 
 :: Prompt user for extraction path
-set /p DEST_DIR=Enter extract destination path (default is %USERPROFILE%)\buildserver: 
+set /p DEST_DIR=Enter extract destination path (default is %USERPROFILE%): 
 if "%DEST_DIR%"=="" set DEST_DIR=%USERPROFILE%
 
 :: Ensure backup directory exists
@@ -58,8 +58,7 @@ if exist "%DEST_DIR%\%EXTRACT_FOLDER%" (
 echo Installation complete. Project folder: %DEST_DIR%\%FINAL_FOLDER%
 echo NEW INSTALL: CD %FINAL_FOLDER% run: vagrant up *install can take up to 10 min
 echo UPGRADE: CD %FINAL_FOLDER% run: vagrant up --provision
-echo Once completed run: vagrant ssh
-echo To destroy and start over: vagrant destroy -f repeat above
+echo Once complete run: vagrant ssh
 echo [INFO] Installation complete at %DEST_DIR%\%FINAL_FOLDER% >> "%LOG_FILE%"
 exit /b
 
