@@ -56,6 +56,9 @@ if exist "%DEST_DIR%\%EXTRACT_FOLDER%" (
 
 :: Completion message
 echo Installation complete. Project folder: %DEST_DIR%\%FINAL_FOLDER%
+echo CD %FINAL_FOLDER% run: vagrant up *first time install can take up to 15 min
+echo Once completed run: vagrant ssh
+echo To destroy and start over: vagrant destroy -f repeat above
 echo [INFO] Installation complete at %DEST_DIR%\%FINAL_FOLDER% >> "%LOG_FILE%"
 exit /b
 
