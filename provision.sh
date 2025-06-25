@@ -643,18 +643,30 @@ install_packages() {
 
 # ----- Modify bashrc ---------------------------------------------------------
 modify_bashrc() {
-  log_info "Modifying .bashrc to source .env if not already included..."
+  log_info "Modifying .bashrc to source .env and export PROJECT_PATH..."
 
   local bashrc_file="$CALLER_HOME/.bashrc"
   local env_source="[ -f \"$CALLER_HOME/.env\" ] && source \"$CALLER_HOME/.env\""
+  local project_path_export="export PROJECT_PATH=\"$PROJECT_PATH\""
 
+  # Add .env sourcing if not already present
   if grep -Fxq "$env_source" "$bashrc_file"; then
     log_info ".env sourcing already present in .bashrc. Skipping."
   else
-    echo -e "\n# Auto-injected by buildserver provisioner\n$env_source" >> "$bashrc_file" && \
-      log_success ".bashrc modified to source .env." || \
-      log_error "FATAL: Failed to modify .bashrc."
+    echo -e "\n# Auto-injected by buildserver provisioner" >> "$bashrc_file"
+    echo "$env_source" >> "$bashrc_file"
+    log_success ".bashrc modified to source .env."
   fi
+
+  # Add PROJECT_PATH export if not already present
+  if grep -q "^export PROJECT_PATH=" "$bashrc_file"; then
+    log_info "PROJECT_PATH export already present in .bashrc. Updating..."
+    sed -i "s|^export PROJECT_PATH=.*|$project_path_export|" "$bashrc_file"
+  else
+    echo "$project_path_export" >> "$bashrc_file"
+  fi
+  
+  log_success "PROJECT_PATH exported in .bashrc: $PROJECT_PATH"
 }
 
 # ----- Generate Initial SBOM -------------------------------------------------
