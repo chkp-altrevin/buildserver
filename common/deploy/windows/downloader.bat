@@ -16,10 +16,7 @@ set BACKUP_DIR=%USERPROFILE%\buildserver_backups
 if "%~1"=="" goto :missing_flag
 if "%~1"=="--help" goto :help
 if "%~1"=="--cleanup" goto :cleanup
-if "%~1"=="--refresh" (
-    call "%~f0" --install
-    exit /b
-)
+if "%~1"=="--refresh" goto :refresh
 if "%~1"=="--install" goto :install
 
 goto :unknown_flag
