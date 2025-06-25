@@ -21,7 +21,7 @@ if "%~1"=="--refresh" (
 )
 
 :: Prompt user for extraction path
-set /p DEST_DIR=Enter extract destination path (default is %USERPROFILE%): 
+set /p DEST_DIR=Enter extract destination path (default is %USERPROFILE%)\buildserver: 
 if "%DEST_DIR%"=="" set DEST_DIR=%USERPROFILE%
 
 :: Ensure backup directory exists
