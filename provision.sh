@@ -140,6 +140,127 @@ cleanup_on_exit() {
 
 trap 'cleanup_on_exit' EXIT
 
+# ----- Enhanced APT Functions with Error Handling -------------------------
+
+# Function to clean and reset APT state
+clean_apt_state() {
+  log_info "🧹 Cleaning APT state..."
+  run_with_sudo rm -rf /var/lib/apt/lists/* 2>/dev/null || true
+  run_with_sudo apt-get clean 2>/dev/null || true
+  run_with_sudo dpkg --configure -a 2>/dev/null || true
+  log_success "APT state cleaned"
+}
+
+# Function to update APT with retries and error handling
+robust_apt_update() {
+  log_info "📦 Updating APT package lists with retry logic..."
+  local max_attempts=5
+  local attempt=1
+  
+  while [ $attempt -le $max_attempts ]; do
+    log_info "APT update attempt $attempt of $max_attempts..."
+    
+    if run_with_sudo apt-get update \
+        -o Acquire::http::No-Cache=true \
+        -o Acquire::Retries=3 \
+        -o Acquire::ForceIPv4=true \
+        -o APT::Get::Fix-Missing=true \
+        -o APT::Get::Fix-Broken=true; then
+      log_success "✅ APT update successful on attempt $attempt"
+      return 0
+    else
+      log_warn "⚠️ APT update attempt $attempt failed"
+      
+      if [ $attempt -lt $max_attempts ]; then
+        log_info "💤 Waiting $((attempt * 10)) seconds before retry..."
+        sleep $((attempt * 10))
+        
+        # Clean state before retry
+        clean_apt_state
+        
+        # Try changing to a different mirror on later attempts
+        if [ $attempt -ge 3 ]; then
+          log_info "🔄 Attempting to use different mirror..."
+          run_with_sudo sed -i 's|http://archive.ubuntu.com|http://us.archive.ubuntu.com|g' /etc/apt/sources.list 2>/dev/null || true
+        fi
+      fi
+      
+      ((attempt++))
+    fi
+  done
+  
+  log_error "❌ APT update failed after $max_attempts attempts"
+  return 1
+}
+
+# Function to install packages with robust error handling
+robust_apt_install() {
+  local packages=("$@")
+  log_info "🔧 Installing packages with robust error handling: ${packages[*]}"
+  
+  # First ensure we have clean, updated package lists
+  if ! robust_apt_update; then
+    log_error "Cannot proceed with package installation - APT update failed"
+    return 1
+  fi
+  
+  local max_attempts=3
+  local attempt=1
+  
+  while [ $attempt -le $max_attempts ]; do
+    log_info "Package installation attempt $attempt of $max_attempts..."
+    
+    if run_with_sudo apt-get install -y \
+        -o APT::Get::Fix-Missing=true \
+        -o APT::Get::Fix-Broken=true \
+        -o Dpkg::Options::="--force-confdef" \
+        -o Dpkg::Options::="--force-confold" \
+        "${packages[@]}"; then
+      log_success "✅ Package installation successful on attempt $attempt"
+      return 0
+    else
+      log_warn "⚠️ Package installation attempt $attempt failed"
+      
+      if [ $attempt -lt $max_attempts ]; then
+        log_info "🔧 Attempting to fix broken packages..."
+        run_with_sudo apt-get -f install -y 2>/dev/null || true
+        run_with_sudo dpkg --configure -a 2>/dev/null || true
+        
+        log_info "💤 Waiting $((attempt * 5)) seconds before retry..."
+        sleep $((attempt * 5))
+        
+        # Try installing packages individually if this is the last attempt
+        if [ $attempt -eq $((max_attempts - 1)) ]; then
+          log_info "🔄 Trying individual package installation..."
+          local failed_packages=()
+          for pkg in "${packages[@]}"; do
+            if ! run_with_sudo apt-get install -y "$pkg" \
+                -o APT::Get::Fix-Missing=true \
+                -o APT::Get::Fix-Broken=true; then
+              failed_packages+=("$pkg")
+              log_warn "Failed to install individual package: $pkg"
+            else
+              log_success "Successfully installed: $pkg"
+            fi
+          done
+          
+          if [ ${#failed_packages[@]} -eq 0 ]; then
+            log_success "✅ All packages installed individually"
+            return 0
+          else
+            log_warn "⚠️ Failed packages: ${failed_packages[*]}"
+          fi
+        fi
+      fi
+      
+      ((attempt++))
+    fi
+  done
+  
+  log_error "❌ Package installation failed after $max_attempts attempts"
+  return 1
+}
+
 run_with_sudo() {
   if [[ $EUID -ne 0 ]]; then
     sudo "$@"
@@ -152,12 +273,18 @@ run_with_sudo() {
 install_required_dependencies() {
   log_info "Installing required dependencies..."
   local packages=(curl zip unzip apt-utils fakeroot dos2unix shellcheck software-properties-common)
+  
   if [[ "${TEST_MODE:-false}" == "true" ]]; then
-    log_info "[TEST MODE] Would run: apt-get install -y ${packages[*]}"
+    log_info "[TEST MODE] Would install: ${packages[*]}"
     return 0
   fi
-  run_with_sudo apt-get update -y
-  run_with_sudo apt-get install -y "${packages[@]}" && log_success "Dependencies installed." || log_error "FATAL: Failed to install required dependencies."
+  
+  if robust_apt_install "${packages[@]}"; then
+    log_success "✅ Required dependencies installed successfully"
+  else
+    log_error "❌ FATAL: Failed to install required dependencies"
+    return 1
+  fi
 }
 
 # ---------------- Flag Handling and Validation ----------------
@@ -454,29 +581,24 @@ update_home_permissions() {
     log_success "Project directory permissions updated." || log_error "FATAL: Failed to update Project directory permissions."
 }
 
-# ----- Update and Upgrade System (Fault-Tolerant) ---------------------------------------------
+# ----- Update and Upgrade System (Fault-Tolerant) -------------------------
 update_system() {
-  log_info "🧼 Cleaning APT cache and prepping for update..."
-  run_with_sudo rm -rf /var/lib/apt/lists/*
-  run_with_sudo apt-get clean
-
-  log_info "📦 Updating and upgrading system packages with retry logic..."
-  local success=false
-  for i in {1..5}; do
-    if run_with_sudo apt-get update -o Acquire::http::No-Cache=true -o Acquire::Retries=3 -o Acquire::ForceIPv4=true && \
-       run_with_sudo apt-get upgrade -y; then
-      success=true
-      break
+  log_info "🧼 Preparing system for updates..."
+  clean_apt_state
+  
+  if robust_apt_update; then
+    log_info "🚀 Upgrading system packages..."
+    if run_with_sudo apt-get upgrade -y \
+        -o APT::Get::Fix-Missing=true \
+        -o APT::Get::Fix-Broken=true \
+        -o Dpkg::Options::="--force-confdef" \
+        -o Dpkg::Options::="--force-confold"; then
+      log_success "✅ System updated and upgraded successfully"
     else
-      log_warn "Attempt $i failed. Retrying in $((i * 5)) seconds..."
-      sleep $((i * 5))
+      log_error "⚠️ NON-FATAL: System upgrade encountered issues but continuing..."
     fi
-  done
-
-  if [ "$success" = true ]; then
-    log_success "✅ System updated and upgraded."
   else
-    log_error "⚠️ NON-FATAL: System update/upgrade failed after retries."
+    log_error "⚠️ NON-FATAL: System update failed but continuing with installation..."
   fi
 }
 
@@ -505,10 +627,18 @@ clone_repositories() {
 # ----- Install Default Packages ----------------------------------------------
 install_packages() {
   log_info "Installing selected packages..."
-  run_with_sudo apt-get -yq install jq kubectl dos2unix build-essential git python3-pip python3 pkg-config \
-    net-tools apt-transport-https unzip gnupg software-properties-common docker-compose-plugin \
-    terraform gnupg2 xclip && \
-    log_success "APT Additional packages installed." || log_error "FATAL: APT Additional packages failed install."
+  local essential_packages=(
+    jq kubectl dos2unix build-essential git python3-pip python3 pkg-config
+    net-tools apt-transport-https unzip gnupg software-properties-common 
+    docker-compose-plugin terraform gnupg2 xclip
+  )
+  
+  if robust_apt_install "${essential_packages[@]}"; then
+    log_success "✅ Essential packages installed successfully"
+  else
+    log_error "❌ FATAL: Essential packages installation failed"
+    return 1
+  fi
 }
 
 # ----- Modify bashrc ---------------------------------------------------------
