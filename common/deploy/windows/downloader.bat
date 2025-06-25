@@ -38,6 +38,37 @@ if "%DEST_DIR%"=="" set DEST_DIR=%USERPROFILE%
 if not exist "%BACKUP_DIR%" (
     mkdir "%BACKUP_DIR%"
 )
+:refresh
+:: Prompt user for destination path
+set /p DEST_DIR=Enter extract destination path (default is %USERPROFILE%): 
+if "%DEST_DIR%"=="" set DEST_DIR=%USERPROFILE%
+
+:: Ensure target exists
+if not exist "%DEST_DIR%\%FINAL_FOLDER%" (
+    echo [ERROR] Cannot refresh: %DEST_DIR%\%FINAL_FOLDER% does not exist.
+    exit /b 1
+)
+
+:: Download latest ZIP
+echo [INFO] Downloading latest buildserver ZIP for refresh...
+powershell -Command "Invoke-WebRequest -Uri '%ZIP_URL%' -OutFile '%ZIP_FILE%' -UseBasicParsing"
+
+:: Extract to TEMP folder
+set TEMP_EXTRACT=%TEMP%\refresh_buildserver
+if exist "%TEMP_EXTRACT%" rd /s /q "%TEMP_EXTRACT%"
+powershell -Command "Expand-Archive -Path '%ZIP_FILE%' -DestinationPath '%TEMP_EXTRACT%' -Force"
+
+:: Copy updated files (excluding .vagrant and customizations)
+echo [INFO] Copying updated files...
+xcopy "%TEMP_EXTRACT%\%EXTRACT_FOLDER%\*" "%DEST_DIR%\%FINAL_FOLDER%\" /E /H /Y /C /Q >nul
+
+:: Cleanup temp extract
+rd /s /q "%TEMP_EXTRACT%"
+
+:: Completion
+echo [INFO] Refresh complete. Updated files in: %DEST_DIR%\%FINAL_FOLDER%
+echo [INFO] Refresh complete. >> "%LOG_FILE%"
+exit /b
 
 :: Download the ZIP
 echo [INFO] Downloading latest buildserver ZIP...
