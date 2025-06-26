@@ -16,7 +16,7 @@ set BACKUP_DIR=%USERPROFILE%\buildserver_backups
 if "%~1"=="" goto :missing_flag
 if "%~1"=="--help" goto :help
 if "%~1"=="--cleanup" goto :cleanup
-if "%~1"=="--refresh" goto :do_refresh
+if "%~1"=="--refresh" goto :refresh
 if "%~1"=="--install" goto :install
 
 goto :unknown_flag
@@ -37,16 +37,6 @@ if "%DEST_DIR%"=="" set DEST_DIR=%USERPROFILE%
 :: Ensure backup directory exists
 if not exist "%BACKUP_DIR%" (
     mkdir "%BACKUP_DIR%"
-)
-:do_refresh
-:: Prompt user for destination path
-set /p DEST_DIR=Enter extract destination path (default is %USERPROFILE%): 
-if "%DEST_DIR%"=="" set DEST_DIR=%USERPROFILE%
-
-:: Ensure target exists
-if not exist "%DEST_DIR%\%FINAL_FOLDER%" (
-    echo [ERROR] Cannot refresh: %DEST_DIR%\%FINAL_FOLDER% does not exist.
-    exit /b 1
 )
 
 :: Download latest ZIP
@@ -102,6 +92,17 @@ echo UPGRADE: CD %FINAL_FOLDER% run: vagrant up --provision
 echo Once complete run: vagrant ssh
 echo [INFO] Installation complete at %DEST_DIR%\%FINAL_FOLDER% >> "%LOG_FILE%"
 exit /b
+
+:refresh
+:: Prompt user for destination path
+set /p DEST_DIR=Enter extract destination path (default is %USERPROFILE%): 
+if "%DEST_DIR%"=="" set DEST_DIR=%USERPROFILE%
+
+:: Ensure target exists
+if not exist "%DEST_DIR%\%FINAL_FOLDER%" (
+    echo [ERROR] Cannot refresh: %DEST_DIR%\%FINAL_FOLDER% does not exist.
+    exit /b 1
+)
 
 
 :help
