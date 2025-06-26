@@ -40,7 +40,7 @@ display_menu() {
     echo "==================================================="
     echo "B. Manage Provisioning for: $PROJECT_NAME"
     echo "==================================================="
-    echo "x. Update  | x. Rollback  | x. Restore  | x. Remove"
+    echo "Q. Update  | x. Rollback  | x. Restore  | x. Remove"
     # echo "Q. Update  | P. Rollback  | N. Restore  | L. Remove" removing for now, works on linux not vagrant-vb
     echo "Current Commit:0000000   Timestamp:12345678"
     echo "8. INSTALL APPLICATIONS"
