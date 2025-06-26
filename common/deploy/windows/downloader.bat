@@ -108,13 +108,15 @@ exit /b
 echo --------------------------------------------------
 echo               BuildServer Installer
 echo --------------------------------------------------
-echo Assumes First Time Install:
-echo    downloader.bat --install *Warning: Replaces any existing files and removes .vagrant file if exists
+echo First Time Install:
 echo.
-echo Safe Upgrade:
+echo    downloader.bat --install *Warning: DO NOT use for upgrading instead use --refresh
+echo.
+echo Upgrade Existing Install:
+echo.
 echo    downloader.bat --refresh *Info: Pulls down the latest buildserver and does a copy .vagrant intact
 echo.
-echo Flags:
+echo Usage Flags:
 echo    --install    Run initial full installation process
 echo    --refresh    Re-run the script and re-install
 echo    --cleanup    Remove buildserver, backups, and zip
