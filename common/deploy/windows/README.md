@@ -1,5 +1,4 @@
 ## Buildserver Installers for Windows
-=================================
 I don't know exactly why I created so many options but there you go :)
 **Using downloader.bat**
 
