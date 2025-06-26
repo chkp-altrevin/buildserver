@@ -174,8 +174,8 @@ An SBOM is generated post-provisioning and located in the root path. Installed p
 2. **Install Vagrant**: [Download Vagrant](https://developer.hashicorp.com/vagrant/install?product_intent=vagrant)
 3. **Install VirtualBox**: [Download VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 4. **Download Latest Release**:
-   - Download using a guided install (good idea to [review](https://raw.githubusercontent.com/chkp-altrevin/buildserver/refs/heads/main/common/deploy/windows/downloader.bat) before running. Right click on the link, save as `downloader.bat`.[downloader.bat](https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/common/deploy/windows/downloader.bat). 
-   - Run `downloader.bat` follow the prompts. Pick location, extracts buildserver.  `cd buildserver`, `vagrant up`, `vagrant ssh`.
+   - Download using a guided install (good idea to review before running, if satisfied right click on the link, save as `downloader.bat`.[downloader.bat](https://raw.githubusercontent.com/chkp-altrevin/buildserver/main/common/deploy/windows/downloader.bat). 
+   - Run `downloader.bat` follow the prompts. extracts buildserver.  `cd buildserver`, `vagrant up`, `vagrant ssh`.
    - **or** [buildserver-main.zip](https://github.com/chkp-altrevin/buildserver/archive/refs/heads/main.zip). Download the zip to your folder of choice. Extract the contents `buildserver-main`, rename to `buildserver` `cd buildserver` `vagrant up` `vagrant ssh`
 
 **or** use the below powershell snippet which will download the zip to your `Download` folder. It will need to be extracted, renamed to "buildserver" `cd buildserver` `vagrant up` `vagrant ssh`.
