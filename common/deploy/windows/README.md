@@ -1,14 +1,14 @@
 ## Buildserver Installers for Windows
 =================================
-
+I don't know exactly why I created so many options but there you go :)
 **Using downloader.bat**
 
 Usage:
 -------
 Run from cmd window:
 
-    downloader.bat              # Default fresh install
-    downloader.bat --refresh    # Updates your existing install
+    downloader.bat --install    # Default fresh install, if existing will backup, wipe, install (dont use if you need to upgrade use next one)
+    downloader.bat --refresh    # Updates your existing install safely, will backup, install over, preserves all vagrant virtualbox pieces
     downloader.bat --cleanup    # Removes your project
     downloader.bat --help       # this menu
 
