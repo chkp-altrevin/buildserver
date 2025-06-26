@@ -38,7 +38,7 @@ if "%DEST_DIR%"=="" set DEST_DIR=%USERPROFILE%
 if not exist "%BACKUP_DIR%" (
     mkdir "%BACKUP_DIR%"
 )
-:refresh
+:do_refresh
 :: Prompt user for destination path
 set /p DEST_DIR=Enter extract destination path (default is %USERPROFILE%): 
 if "%DEST_DIR%"=="" set DEST_DIR=%USERPROFILE%
