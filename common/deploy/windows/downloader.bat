@@ -16,7 +16,7 @@ set BACKUP_DIR=%USERPROFILE%\buildserver_backups
 if "%~1"=="" goto :missing_flag
 if "%~1"=="--help" goto :help
 if "%~1"=="--cleanup" goto :cleanup
-if "%~1"=="--refresh" goto :refresh
+if "%~1"=="--refresh" goto :do_refresh
 if "%~1"=="--install" goto :install
 
 goto :unknown_flag
@@ -38,7 +38,16 @@ if "%DEST_DIR%"=="" set DEST_DIR=%USERPROFILE%
 if not exist "%BACKUP_DIR%" (
     mkdir "%BACKUP_DIR%"
 )
+:refresh
+:: Prompt user for destination path
+set /p DEST_DIR=Enter extract destination path (default is %USERPROFILE%): 
+if "%DEST_DIR%"=="" set DEST_DIR=%USERPROFILE%
 
+:: Ensure target exists
+if not exist "%DEST_DIR%\%FINAL_FOLDER%" (
+    echo [ERROR] Cannot refresh: %DEST_DIR%\%FINAL_FOLDER% does not exist. Why not use --install?
+    exit /b 1
+)
 :: Download latest ZIP
 echo [INFO] Downloading latest buildserver ZIP for refresh...
 powershell -Command "Invoke-WebRequest -Uri '%ZIP_URL%' -OutFile '%ZIP_FILE%' -UseBasicParsing"
@@ -93,25 +102,13 @@ echo Once complete run: vagrant ssh
 echo [INFO] Installation complete at %DEST_DIR%\%FINAL_FOLDER% >> "%LOG_FILE%"
 exit /b
 
-:refresh
-:: Prompt user for destination path
-set /p DEST_DIR=Enter extract destination path (default is %USERPROFILE%): 
-if "%DEST_DIR%"=="" set DEST_DIR=%USERPROFILE%
-
-:: Ensure target exists
-if not exist "%DEST_DIR%\%FINAL_FOLDER%" (
-    echo [ERROR] Cannot refresh: %DEST_DIR%\%FINAL_FOLDER% does not exist.
-    exit /b 1
-)
-
-
 :help
 echo --------------------------------------------------
 echo               BuildServer Installer
 echo --------------------------------------------------
 echo First Time Install:
 echo.
-echo    downloader.bat --install *Warning: DO NOT use for upgrading instead use --refresh
+echo    downloader.bat --install *DO NOT use for upgrading instead use --refresh
 echo.
 echo Upgrade Existing Install:
 echo.
